@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
     "@remotion/media-utils",
     "@remotion/web-renderer",
   ],
+  // Allow cloud / forwarded-port preview hosts to load Next assets in dev.
+  allowedDevOrigins: [
+    "127.0.0.1",
+    "localhost",
+    "*.cursor.sh",
+    "*.cursorapi.com",
+  ],
   // Prototype keeps media in the browser; increase body size for future upload APIs.
   experimental: {
     serverActions: {

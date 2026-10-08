@@ -13,6 +13,8 @@ npm run dev
 
 Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
+`npm run dev` uses webpack (more reliable than Turbopack in some preview environments). For a production-style local run: `npm run build && npm start`.
+
 ## Employee flow
 
 1. **Add Your Video** — upload MP4/MOV, trim with timeline handles, scrub/play

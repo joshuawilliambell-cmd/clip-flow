@@ -31,10 +31,19 @@ export function VideoUploadStep() {
     setLoadingSample(true);
     setError(null);
     try {
-      const res = await fetch("/samples/sample-intro.mp4");
+      // Prefer WebM for broad browser support in automation / locked-down Chromium;
+      // fall back to MP4 for environments that only have that file.
+      let res = await fetch("/samples/sample-intro.webm");
+      let fileName = "sample-intro.webm";
+      let mime = "video/webm";
+      if (!res.ok) {
+        res = await fetch("/samples/sample-intro.mp4");
+        fileName = "sample-intro.mp4";
+        mime = "video/mp4";
+      }
       if (!res.ok) throw new Error("Sample video is missing.");
       const blob = await res.blob();
-      const file = new File([blob], "sample-intro.mp4", { type: "video/mp4" });
+      const file = new File([blob], fileName, { type: mime });
       await setVideoFromFile(file);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load the sample.");

@@ -70,14 +70,24 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const el = document.createElement("video");
-    el.preload = "metadata";
-    el.onloadedmetadata = () => {
-      // Some WebM recordings report Infinity until enough data is available.
+    el.preload = "auto";
+    let settled = false;
+
+    const finish = () => {
+      if (settled) return;
       const raw = el.duration;
       const durationSeconds =
         Number.isFinite(raw) && raw > 0
           ? raw
           : VIDEO_TEMPLATE.targetDurationSeconds;
+      // Reject clearly broken files with no dimensions and no duration.
+      if (
+        (!el.videoWidth || !el.videoHeight) &&
+        !(Number.isFinite(raw) && raw > 0)
+      ) {
+        return;
+      }
+      settled = true;
       resolve({
         url,
         fileName: file.name,
@@ -86,12 +96,47 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
         height: el.videoHeight || VIDEO_TEMPLATE.height,
       });
     };
+
+    el.onloadedmetadata = () => {
+      // WebM/Chrome sometimes needs a tiny seek before duration is finite.
+      if (!Number.isFinite(el.duration) || el.duration === Infinity) {
+        try {
+          el.currentTime = Number.MAX_SAFE_INTEGER;
+        } catch {
+          /* ignore */
+        }
+      } else {
+        finish();
+      }
+    };
+    el.ondurationchange = finish;
+    el.onloadeddata = finish;
+    el.onseeked = finish;
     el.onerror = () => {
+      if (settled) return;
+      settled = true;
       URL.revokeObjectURL(url);
       reject(
-        new Error("Could not read that video. Try an MP4, MOV, or WebM file."),
+        new Error(
+          "Could not read that video in this browser. Try another MP4 (H.264) or record with the webcam option.",
+        ),
       );
     };
+    window.setTimeout(() => {
+      if (!settled) {
+        if (el.videoWidth || (Number.isFinite(el.duration) && el.duration > 0)) {
+          finish();
+        } else {
+          settled = true;
+          URL.revokeObjectURL(url);
+          reject(
+            new Error(
+              "Timed out reading that video. Try an H.264 MP4 file or the webcam recorder.",
+            ),
+          );
+        }
+      }
+    }, 8000);
     el.src = url;
   });
 }
