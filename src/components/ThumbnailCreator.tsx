@@ -2,8 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ChevronDown,
+  ChevronUp,
   Clapperboard,
   Download,
+  GripVertical,
   ImagePlus,
   Trash2,
   Wand2,
@@ -22,6 +25,8 @@ import {
   defaultPhotoFit,
   type ThumbnailMember,
 } from "@/lib/thumbnail-template";
+
+const SLOT_DRAG_TYPE = "application/x-loves-thumb-slot";
 
 function emptyMembers(count: number): ThumbnailMember[] {
   return Array.from({ length: count }, () => ({
@@ -61,6 +66,8 @@ export function ThumbnailCreator({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
   const fileRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   // Keep thumbnail cards in sync with the shared 1–4 team size.
@@ -108,6 +115,29 @@ export function ThumbnailCreator({
 
   const updateMember = (id: string, patch: Partial<ThumbnailMember>) => {
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+  };
+
+  const clearSlotDrag = () => {
+    setDragFromIndex(null);
+    setDropTargetIndex(null);
+  };
+
+  const reorderMembers = (fromIndex: number, toIndex: number) => {
+    if (
+      fromIndex === toIndex ||
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= members.length ||
+      toIndex >= members.length
+    ) {
+      return;
+    }
+    setMembers((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
   };
 
   const onPickPhoto = async (id: string, file: File | undefined) => {
@@ -313,6 +343,10 @@ export function ThumbnailCreator({
             Tap <strong>Add headshot</strong> on each teammate card (1–4 people).
           </li>
           <li>
+            <strong>Drag</strong> the grip (or use ↑ ↓) to set left-to-right
+            order on the thumbnail.
+          </li>
+          <li>
             <strong>Drag</strong> the photo to center the face. Use the{" "}
             <strong>Size</strong> slider if the face is too small or too large.
           </li>
@@ -331,8 +365,9 @@ export function ThumbnailCreator({
       </section>
 
       <div className="how-banner">
-        Tip: Use clear, well-lit head-and-shoulders photos. Drag and zoom until
-        faces sit nicely in the tall portrait frames.
+        Tip: Use clear, well-lit head-and-shoulders photos. Drag the grip to
+        reorder people, then drag and zoom until faces sit nicely in the tall
+        portrait frames.
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -363,17 +398,89 @@ export function ThumbnailCreator({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {members.map((member, index) => (
+        {members.map((member, index) => {
+          const isDragging = dragFromIndex === index;
+          const isDropTarget =
+            dropTargetIndex === index &&
+            dragFromIndex !== null &&
+            dragFromIndex !== index;
+          return (
           <article
             key={member.id}
-            className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4"
+            onDragOver={(e) => {
+              if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              setDropTargetIndex(index);
+            }}
+            onDragLeave={(e) => {
+              if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+              setDropTargetIndex((current) =>
+                current === index ? null : current,
+              );
+            }}
+            onDrop={(e) => {
+              if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
+              e.preventDefault();
+              const raw = e.dataTransfer.getData(SLOT_DRAG_TYPE);
+              const from = Number.parseInt(raw, 10);
+              if (!Number.isNaN(from)) {
+                reorderMembers(from, index);
+              }
+              clearSlotDrag();
+            }}
+            className={`rounded-2xl border-2 bg-white p-4 transition ${
+              isDragging
+                ? "border-[var(--primary)] opacity-60"
+                : isDropTarget
+                  ? "border-[var(--primary)] bg-[var(--yellow)]/30 ring-2 ring-[var(--primary)]"
+                  : "border-[var(--ink)]"
+            }`}
           >
             <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="text-lg font-bold text-[var(--ink)]">
-                Teammate {index + 1}
-              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  draggable
+                  aria-label={`Drag to reorder teammate ${index + 1}`}
+                  title="Drag to reorder"
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData(SLOT_DRAG_TYPE, String(index));
+                    e.dataTransfer.effectAllowed = "move";
+                    setDragFromIndex(index);
+                  }}
+                  onDragEnd={clearSlotDrag}
+                  className="flex h-10 w-10 cursor-grab items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-[var(--panel-soft)] text-[var(--ink)] active:cursor-grabbing"
+                >
+                  <GripVertical className="h-5 w-5" />
+                </button>
+                <div className="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    aria-label={`Move teammate ${index + 1} up`}
+                    disabled={index === 0}
+                    onClick={() => reorderMembers(index, index - 1)}
+                    className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Move teammate ${index + 1} down`}
+                    disabled={index >= members.length - 1}
+                    onClick={() => reorderMembers(index, index + 1)}
+                    className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </div>
+                <p className="text-lg font-bold text-[var(--ink)]">
+                  Teammate {index + 1}
+                </p>
+              </div>
               <HelpTip title={`Teammate ${index + 1}`}>
                 <p>Upload a headshot, then drag and zoom so the face fills the tall frame.</p>
+                <p>Drag the grip or use ↑ ↓ to change left-to-right order.</p>
                 <p>Leave a card empty if you have fewer than four people.</p>
               </HelpTip>
             </div>
@@ -453,7 +560,8 @@ export function ThumbnailCreator({
               </div>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
 
       <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">

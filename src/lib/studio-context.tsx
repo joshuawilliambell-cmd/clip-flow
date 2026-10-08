@@ -74,6 +74,8 @@ type StudioContextValue = {
   movePhoto: (id: string, start: number) => void;
   resizePhoto: (id: string, edge: "start" | "end", value: number) => void;
   reorderPhoto: (fromId: string, toId: string) => void;
+  /** Reorder teammate slots (photo cards + timeline intro order). */
+  reorderTeamSlots: (fromIndex: number, toIndex: number) => void;
   autoArrange: () => void;
   resetTimeline: () => void;
   setMusicEnabled: (enabled: boolean) => void;
@@ -529,6 +531,29 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [outputDuration],
   );
 
+  const reorderTeamSlots = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      setPhotos((prev) => {
+        if (
+          fromIndex === toIndex ||
+          fromIndex < 0 ||
+          toIndex < 0 ||
+          fromIndex >= prev.length ||
+          toIndex >= prev.length
+        ) {
+          return prev;
+        }
+        const next = [...prev];
+        const [moved] = next.splice(fromIndex, 1);
+        next.splice(toIndex, 0, moved);
+        const arranged = autoArrangePhotos(next, outputDuration);
+        baselineRef.current = arranged.map((p) => ({ ...p }));
+        return arranged;
+      });
+    },
+    [outputDuration],
+  );
+
   const autoArrange = useCallback(() => {
     setPhotos((prev) => {
       const arranged = autoArrangePhotos(prev, outputDuration);
@@ -618,6 +643,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       movePhoto,
       resizePhoto,
       reorderPhoto,
+      reorderTeamSlots,
       autoArrange,
       resetTimeline,
       setMusicEnabled,
@@ -662,6 +688,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       movePhoto,
       resizePhoto,
       reorderPhoto,
+      reorderTeamSlots,
       autoArrange,
       resetTimeline,
     ],

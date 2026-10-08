@@ -1,7 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Trash2, Wand2, RotateCcw } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  ImagePlus,
+  Trash2,
+  Wand2,
+  RotateCcw,
+} from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { VIDEO_TEMPLATE } from "@/lib/template";
 import { VideoPreview } from "@/components/VideoPreview";
@@ -10,6 +18,8 @@ import { HelpTip } from "@/components/HelpTip";
 import { PipSidePicker } from "@/components/PipSidePicker";
 import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { filledTeamPhotos } from "@/lib/team-slots";
+
+const SLOT_DRAG_TYPE = "application/x-loves-team-slot";
 
 export function TeamPhotosStep() {
   const {
@@ -21,6 +31,7 @@ export function TeamPhotosStep() {
     replaceTeamPhotosFromFiles,
     updatePhotoMeta,
     clearPhotoSlot,
+    reorderTeamSlots,
     autoArrange,
     resetTimeline,
     setStep,
@@ -30,6 +41,8 @@ export function TeamPhotosStep() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [loadingSample, setLoadingSample] = useState(false);
+  const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
 
   const filledCount = filledTeamPhotos(photos).length;
 
@@ -51,6 +64,16 @@ export function TeamPhotosStep() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
     }
+  };
+
+  const clearSlotDrag = () => {
+    setDragFromIndex(null);
+    setDropTargetIndex(null);
+  };
+
+  const moveSlot = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    reorderTeamSlots(fromIndex, toIndex);
   };
 
   const loadSampleTeam = async () => {
@@ -119,7 +142,7 @@ export function TeamPhotosStep() {
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
             {teamMemberCount === 0
               ? "You chose Just me — no teammate photos needed. Continue to Finish when your video looks good."
-              : `You chose ${teamMemberCount} teammate${teamMemberCount === 1 ? "" : "s"}. Add a photo and name in each slot (${filledCount} of ${teamMemberCount} filled).`}
+              : `You chose ${teamMemberCount} teammate${teamMemberCount === 1 ? "" : "s"}. Add a photo and name in each slot (${filledCount} of ${teamMemberCount} filled). Drag the grip to change who appears first.`}
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
@@ -134,7 +157,11 @@ export function TeamPhotosStep() {
             <strong>3.</strong> Type Name and Job title for each person.
           </p>
           <p>
-            <strong>4.</strong> Each photo starts at{" "}
+            <strong>4.</strong> Drag the grip (or use ↑ ↓) to set the order they
+            appear in the video.
+          </p>
+          <p>
+            <strong>5.</strong> Each photo starts at{" "}
             {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds on the
             timeline — drag the ends to change length.
           </p>
@@ -152,8 +179,8 @@ export function TeamPhotosStep() {
       ) : (
         <div className="how-banner">
           Each team photo starts at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}{" "}
-          seconds. Drag the ends of a colored bar on the timeline to make it
-          shorter or longer.
+          seconds. Drag the grip on a card to reorder who shows first. Drag the
+          ends of a colored bar on the timeline to change length.
         </div>
       )}
 
@@ -219,15 +246,18 @@ export function TeamPhotosStep() {
 
           <div
             onDragEnter={(e) => {
+              if (e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
               e.preventDefault();
               setDragging(true);
             }}
             onDragOver={(e) => {
+              if (e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
               e.preventDefault();
               setDragging(true);
             }}
             onDragLeave={() => setDragging(false)}
             onDrop={(e) => {
+              if (e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
               e.preventDefault();
               setDragging(false);
               void handleFiles(e.dataTransfer.files);
@@ -239,6 +269,7 @@ export function TeamPhotosStep() {
             }`}
           >
             Tip: drag several photos onto this page to fill empty slots in order.
+            Drag the grip on a teammate card to change who appears first.
           </div>
         </>
       ) : null}
@@ -251,81 +282,152 @@ export function TeamPhotosStep() {
 
       {teamMemberCount > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {photos.map((photo, index) => (
-            <article
-              key={photo.id}
-              className="flex gap-3 rounded-2xl border-2 border-[var(--ink)] bg-white p-4"
-            >
-              <button
-                type="button"
-                onClick={() => fileRefs.current[index]?.click()}
-                className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#eef1f6]"
+          {photos.map((photo, index) => {
+            const isDragging = dragFromIndex === index;
+            const isDropTarget =
+              dropTargetIndex === index &&
+              dragFromIndex !== null &&
+              dragFromIndex !== index;
+            return (
+              <article
+                key={photo.id}
+                onDragOver={(e) => {
+                  if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  setDropTargetIndex(index);
+                }}
+                onDragLeave={(e) => {
+                  if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                  setDropTargetIndex((current) =>
+                    current === index ? null : current,
+                  );
+                }}
+                onDrop={(e) => {
+                  if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
+                  e.preventDefault();
+                  const raw = e.dataTransfer.getData(SLOT_DRAG_TYPE);
+                  const from = Number.parseInt(raw, 10);
+                  if (!Number.isNaN(from)) {
+                    moveSlot(from, index);
+                  }
+                  clearSlotDrag();
+                }}
+                className={`flex gap-3 rounded-2xl border-2 bg-white p-4 transition ${
+                  isDragging
+                    ? "border-[var(--primary)] opacity-60"
+                    : isDropTarget
+                      ? "border-[var(--primary)] bg-[var(--yellow)]/30 ring-2 ring-[var(--primary)]"
+                      : "border-[var(--ink)]"
+                }`}
               >
-                {photo.url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photo.url}
-                    alt={photo.name || `Teammate ${index + 1}`}
-                    className="h-full w-full object-cover object-[center_28%]"
-                  />
-                ) : (
-                  <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center text-xs font-semibold text-[var(--ink)]">
-                    <ImagePlus className="h-5 w-5 text-[var(--primary)]" />
-                    Add photo
-                  </span>
-                )}
-              </button>
-              <input
-                ref={(el) => {
-                  fileRefs.current[index] = el;
-                }}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                className="hidden"
-                onChange={(e) => {
-                  void handleSlotFile(photo.id, e.target.files?.[0]);
-                  e.currentTarget.value = "";
-                }}
-              />
-
-              <div className="min-w-0 flex-1 space-y-3">
-                <p className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">
-                  Teammate {index + 1} of {teamMemberCount}
-                </p>
-                <label className="block">
-                  <span className="field-label">Name</span>
-                  <input
-                    value={photo.name}
-                    onChange={(e) =>
-                      updatePhotoMeta(photo.id, { name: e.target.value })
-                    }
-                    className="field-input"
-                    placeholder="Example: Jared"
-                  />
-                </label>
-                <label className="block">
-                  <span className="field-label">Job title</span>
-                  <input
-                    value={photo.title}
-                    onChange={(e) =>
-                      updatePhotoMeta(photo.id, { title: e.target.value })
-                    }
-                    className="field-input"
-                    placeholder="Example: Total Truck Care"
-                  />
-                </label>
-                {photo.url ? (
+                <div className="flex shrink-0 flex-col items-center gap-1">
                   <button
                     type="button"
-                    onClick={() => clearPhotoSlot(photo.id)}
-                    className="inline-flex items-center gap-2 text-base font-semibold text-[var(--primary)]"
+                    draggable
+                    aria-label={`Drag to reorder teammate ${index + 1}`}
+                    title="Drag to reorder"
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData(SLOT_DRAG_TYPE, String(index));
+                      e.dataTransfer.effectAllowed = "move";
+                      setDragFromIndex(index);
+                    }}
+                    onDragEnd={clearSlotDrag}
+                    className="flex h-10 w-10 cursor-grab items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-[var(--panel-soft)] text-[var(--ink)] active:cursor-grabbing"
                   >
-                    <Trash2 className="h-4 w-4" /> Clear photo
+                    <GripVertical className="h-5 w-5" />
                   </button>
-                ) : null}
-              </div>
-            </article>
-          ))}
+                  <button
+                    type="button"
+                    aria-label={`Move teammate ${index + 1} up`}
+                    disabled={index === 0}
+                    onClick={() => moveSlot(index, index - 1)}
+                    className="flex h-9 w-10 items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    <ChevronUp className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Move teammate ${index + 1} down`}
+                    disabled={index >= photos.length - 1}
+                    onClick={() => moveSlot(index, index + 1)}
+                    className="flex h-9 w-10 items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    <ChevronDown className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => fileRefs.current[index]?.click()}
+                  className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#eef1f6]"
+                >
+                  {photo.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={photo.url}
+                      alt={photo.name || `Teammate ${index + 1}`}
+                      className="h-full w-full object-cover object-[center_28%]"
+                    />
+                  ) : (
+                    <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center text-xs font-semibold text-[var(--ink)]">
+                      <ImagePlus className="h-5 w-5 text-[var(--primary)]" />
+                      Add photo
+                    </span>
+                  )}
+                </button>
+                <input
+                  ref={(el) => {
+                    fileRefs.current[index] = el;
+                  }}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    void handleSlotFile(photo.id, e.target.files?.[0]);
+                    e.currentTarget.value = "";
+                  }}
+                />
+
+                <div className="min-w-0 flex-1 space-y-3">
+                  <p className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">
+                    Teammate {index + 1} of {teamMemberCount}
+                  </p>
+                  <label className="block">
+                    <span className="field-label">Name</span>
+                    <input
+                      value={photo.name}
+                      onChange={(e) =>
+                        updatePhotoMeta(photo.id, { name: e.target.value })
+                      }
+                      className="field-input"
+                      placeholder="Example: Jared"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="field-label">Job title</span>
+                    <input
+                      value={photo.title}
+                      onChange={(e) =>
+                        updatePhotoMeta(photo.id, { title: e.target.value })
+                      }
+                      className="field-input"
+                      placeholder="Example: Total Truck Care"
+                    />
+                  </label>
+                  {photo.url ? (
+                    <button
+                      type="button"
+                      onClick={() => clearPhotoSlot(photo.id)}
+                      className="inline-flex items-center gap-2 text-base font-semibold text-[var(--primary)]"
+                    >
+                      <Trash2 className="h-4 w-4" /> Clear photo
+                    </button>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })}
         </div>
       ) : null}
 

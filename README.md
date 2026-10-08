@@ -19,12 +19,12 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 ### Team intro video
 1. **Add Your Video** — pick how many teammates (1–4), then upload or record, trim, play
-2. **Add Your Team** — fill that many photo slots; each PIP still defaults to 10s (drag ends to change)
+2. **Add Your Team** — fill that many photo slots; drag the grip (or ↑ ↓) to reorder who appears first; each PIP still defaults to 10s (drag ends to change)
 3. **Finish & Download** — choose music, set volumes, **Export to MP4**
 
 ### Team thumbnail
 1. Choose **Team thumbnail** at the top of the app
-2. Upload up to four headshots; drag/zoom each face in the portrait frame
+2. Upload up to four headshots; drag the grip (or ↑ ↓) to set left-to-right order; drag/zoom each face in the portrait frame
 3. Enter names/titles and check the live preview
 4. **Add to start of video** (optional 1-second opener) and/or **Download PNG**
 5. In the video tool Step 3, turn the opening thumbnail on or off anytime
