@@ -6,7 +6,6 @@ import { VIDEO_TEMPLATE } from "@/lib/template";
 import { formatClock, formatTime, sortPhotosByStart } from "@/lib/timeline";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
-import { VIDEO_TEMPLATE } from "@/lib/template";
 
 function useTimelineMetrics(duration: number, width: number) {
   const pxPerSecond = Math.max(
@@ -80,8 +79,8 @@ export function Timeline() {
           <div>
             <h3 className="text-2xl font-bold text-[var(--ink)]">Timeline</h3>
             <p className="mt-1 text-lg text-[var(--muted)]">
-              Drag the red ends to shorten your video. Drag photo bars to change
-              when each teammate appears.
+              Team photos start at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s
+              each. Drag a bar to move it; drag the ends to shorten or lengthen.
             </p>
           </div>
           <HelpTip title="How to use the timeline" size="lg">
@@ -90,9 +89,10 @@ export function Timeline() {
               red left or right ends to cut time off the start or end.
             </p>
             <p>
-              <strong>Track 2 (colored bars)</strong> are team photos. Drag a
-              whole bar to move it. Drag a bar’s ends to make it shorter or
-              longer.
+              <strong>Track 2 (colored bars)</strong> are team photos. Each one
+              starts at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds so
+              short videos are easy. Drag a whole bar to move it. Drag a
+              bar&apos;s ends to make it shorter or longer.
             </p>
             <p>
               Tap empty space on a track to jump the red play line to that time.
