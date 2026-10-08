@@ -11,6 +11,7 @@ export function VideoUploadStep() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [loadingSample, setLoadingSample] = useState(false);
 
   const handleFiles = async (files: FileList | null) => {
     const file = files?.[0];
@@ -20,6 +21,22 @@ export function VideoUploadStep() {
       await setVideoFromFile(file);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
+    }
+  };
+
+  const loadSample = async () => {
+    setLoadingSample(true);
+    setError(null);
+    try {
+      const res = await fetch("/samples/sample-intro.mp4");
+      if (!res.ok) throw new Error("Sample video missing.");
+      const blob = await res.blob();
+      const file = new File([blob], "sample-intro.mp4", { type: "video/mp4" });
+      await setVideoFromFile(file);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load sample.");
+    } finally {
+      setLoadingSample(false);
     }
   };
 
@@ -36,9 +53,7 @@ export function VideoUploadStep() {
       </div>
 
       {!video ? (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
+        <div
           onDragEnter={(e) => {
             e.preventDefault();
             setDragging(true);
@@ -56,19 +71,32 @@ export function VideoUploadStep() {
           className={`flex min-h-[240px] w-full flex-col items-center justify-center rounded-3xl border-2 border-dashed px-6 py-12 transition ${
             dragging
               ? "border-[var(--primary)] bg-[var(--primary)]/5"
-              : "border-[var(--border-strong)] bg-white/70 hover:border-[var(--primary)]"
+              : "border-[var(--border-strong)] bg-white/70"
           }`}
         >
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)] text-white shadow-lg">
-            <Upload className="h-7 w-7" />
-          </div>
-          <p className="font-display text-2xl tracking-wide text-[var(--ink)]">
-            Drag & drop your video here
-          </p>
-          <p className="mt-2 text-sm text-[var(--muted)]">
-            MP4 or MOV · up to 500 MB · longer clips are OK (you can trim)
-          </p>
-        </button>
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="flex flex-col items-center"
+          >
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)] text-white shadow-lg">
+              <Upload className="h-7 w-7" />
+            </div>
+            <p className="font-display text-2xl tracking-wide text-[var(--ink)]">
+              Drag & drop your video here
+            </p>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              MP4 or MOV · up to 500 MB · longer clips are OK (you can trim)
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => void loadSample()}
+            className="mt-5 rounded-xl bg-[var(--ink)] px-4 py-2 text-sm font-semibold text-white"
+          >
+            {loadingSample ? "Loading sample…" : "Try sample introduction video"}
+          </button>
+        </div>
       ) : (
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
           <Film className="h-5 w-5 text-[var(--primary)]" />

@@ -46,7 +46,7 @@ type StudioContextValue = {
   setVideoFromFile: (file: File) => Promise<void>;
   clearVideo: () => void;
   setTrim: (edge: "start" | "end", value: number) => void;
-  addPhotosFromFiles: (files: FileList | File[]) => Promise<void>;
+  addPhotosFromFiles: (files: FileList | File[]) => Promise<TeamPhoto[]>;
   updatePhotoMeta: (
     id: string,
     patch: Partial<Pick<TeamPhoto, "name" | "title" | "department">>,
@@ -225,12 +225,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         throw new Error("Please upload JPG, PNG, or WebP images.");
       }
 
+      let arrangedResult: TeamPhoto[] = [];
       setPhotos((prev) => {
         const merged = [...prev, ...created];
-        const arranged = autoArrangePhotos(merged, outputDuration);
-        baselineRef.current = arranged.map((p) => ({ ...p }));
-        return arranged;
+        arrangedResult = autoArrangePhotos(merged, outputDuration);
+        baselineRef.current = arrangedResult.map((p) => ({ ...p }));
+        return arrangedResult;
       });
+      return arrangedResult;
     },
     [photos.length, outputDuration],
   );

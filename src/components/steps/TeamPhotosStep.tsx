@@ -21,6 +21,7 @@ export function TeamPhotosStep() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [loadingSample, setLoadingSample] = useState(false);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -29,6 +30,57 @@ export function TeamPhotosStep() {
       await addPhotosFromFiles(files);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed.");
+    }
+  };
+
+  const loadSampleTeam = async () => {
+    setLoadingSample(true);
+    setError(null);
+    try {
+      const samples = [
+        {
+          path: "/samples/team-jared.jpg",
+          name: "Jared",
+          title: "Total Truck Care",
+        },
+        {
+          path: "/samples/team-bailey.jpg",
+          name: "Bailey",
+          title: "Area Account Manager",
+        },
+        {
+          path: "/samples/team-teresa.jpg",
+          name: "Teresa",
+          title: "Fleet Account Specialist",
+        },
+      ];
+      const files: File[] = [];
+      for (const sample of samples) {
+        const res = await fetch(sample.path);
+        if (!res.ok) throw new Error("Sample photos missing.");
+        const blob = await res.blob();
+        files.push(
+          new File([blob], `${sample.name.toLowerCase()}.jpg`, {
+            type: "image/jpeg",
+          }),
+        );
+      }
+      const arranged = await addPhotosFromFiles(files);
+      for (const sample of samples) {
+        const match = arranged.find(
+          (p) => p.name.toLowerCase() === sample.name.toLowerCase(),
+        );
+        if (match) {
+          updatePhotoMeta(match.id, {
+            name: sample.name,
+            title: sample.title,
+          });
+        }
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load samples.");
+    } finally {
+      setLoadingSample(false);
     }
   };
 
@@ -70,9 +122,7 @@ export function TeamPhotosStep() {
         </p>
       ) : null}
 
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
+      <div
         onDragEnter={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -87,23 +137,36 @@ export function TeamPhotosStep() {
           setDragging(false);
           void handleFiles(e.dataTransfer.files);
         }}
-        className={`flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-4 py-8 transition ${
+        className={`flex w-full flex-wrap items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-4 py-8 transition ${
           dragging
             ? "border-[var(--primary)] bg-[var(--primary)]/5"
             : "border-[var(--border-strong)] bg-white/70"
         }`}
       >
-        <ImagePlus className="h-6 w-6 text-[var(--primary)]" />
-        <div className="text-left">
-          <p className="font-semibold text-[var(--ink)]">
-            Drop team photos here
-          </p>
-          <p className="text-xs text-[var(--muted)]">
-            JPG, PNG, or WebP · up to {VIDEO_TEMPLATE.maxPhotos} photos ·{" "}
-            {photos.length} added
-          </p>
-        </div>
-      </button>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex items-center gap-3"
+        >
+          <ImagePlus className="h-6 w-6 text-[var(--primary)]" />
+          <div className="text-left">
+            <p className="font-semibold text-[var(--ink)]">
+              Drop team photos here
+            </p>
+            <p className="text-xs text-[var(--muted)]">
+              JPG, PNG, or WebP · up to {VIDEO_TEMPLATE.maxPhotos} photos ·{" "}
+              {photos.length} added
+            </p>
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => void loadSampleTeam()}
+          className="rounded-xl bg-[var(--ink)] px-3 py-2 text-sm font-semibold text-white"
+        >
+          {loadingSample ? "Loading…" : "Load sample team"}
+        </button>
+      </div>
       <input
         ref={inputRef}
         type="file"
