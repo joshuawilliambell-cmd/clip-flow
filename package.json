@@ -1,0 +1,41 @@
+{
+  "name": "loves-video-studio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 43123",
+    "build": "next build",
+    "start": "next start --port 43123",
+    "lint": "next lint",
+    "remotion:studio": "remotion studio src/remotion/index.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.534",
+    "@remotion/cli": "^4.0.534",
+    "@remotion/media": "^4.0.534",
+    "@remotion/media-utils": "^4.0.534",
+    "@remotion/player": "^4.0.534",
+    "@remotion/renderer": "^4.0.534",
+    "@remotion/web-renderer": "^4.0.534",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.53.0",
+    "next": "^16.4.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.534",
+    "uuid": "^14.0.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "^15.2.4",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

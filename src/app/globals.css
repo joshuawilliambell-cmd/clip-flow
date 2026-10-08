@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #efe7dc;
+  --foreground: #1a1a1a;
+  --ink: #1a1a1a;
+  --muted: #6b6560;
+  --primary: #c8102e;
+  --primary-dark: #8b0a1e;
+  --accent: #f5b700;
+  --panel: #ffffff;
+  --panel-soft: #faf7f2;
+  --border: #e6ddd2;
+  --border-strong: #d2c6b6;
+  --track-video: #2f3a4a;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans), "Source Sans 3", Helvetica, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), "Barlow Condensed", "Arial Narrow",
+    sans-serif;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s ease-out both;
+}
+
+.animate-fade-up-delay {
+  animation: fade-up 0.65s ease-out 0.08s both;
+}
+
+.animate-rise {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-up-delay,
+  .animate-rise {
+    animation: none;
+  }
+}

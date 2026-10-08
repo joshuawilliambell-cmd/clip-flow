@@ -1,0 +1,115 @@
+import {
+  AbsoluteFill,
+  Audio,
+  Sequence,
+  OffthreadVideo,
+  useVideoConfig,
+} from "remotion";
+import { PhotoOverlay } from "@/remotion/components/PhotoOverlay";
+import { VIDEO_TEMPLATE } from "@/lib/template";
+import type { CompositionProps } from "@/lib/types";
+
+export const defaultCompositionProps: CompositionProps = {
+  videoSrc: "",
+  trimStartSeconds: 0,
+  durationInSeconds: VIDEO_TEMPLATE.targetDurationSeconds,
+  photos: [],
+  musicSrc: null,
+  musicVolume: VIDEO_TEMPLATE.defaultMusicVolume,
+  musicEnabled: false,
+};
+
+export function IntroductionVideo(props: CompositionProps) {
+  const { fps } = useVideoConfig();
+  const {
+    videoSrc,
+    trimStartSeconds,
+    durationInSeconds,
+    photos,
+    musicSrc,
+    musicVolume,
+    musicEnabled,
+  } = props;
+
+  const durationFrames = Math.max(1, Math.round(durationInSeconds * fps));
+  const musicFadeFrames = Math.round(VIDEO_TEMPLATE.musicFadeSeconds * fps);
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#0b0b0b" }}>
+      {videoSrc ? (
+        <AbsoluteFill>
+          <OffthreadVideo
+            src={videoSrc}
+            trimBefore={Math.round(trimStartSeconds * fps)}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            volume={1}
+          />
+        </AbsoluteFill>
+      ) : (
+        <AbsoluteFill
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            fontFamily: "Source Sans 3, sans-serif",
+            fontSize: 48,
+          }}
+        >
+          Upload your introduction video to begin
+        </AbsoluteFill>
+      )}
+
+      {photos.map((photo) => {
+        const startFrame = Math.round(photo.startSeconds * fps);
+        const durationFramesPhoto = Math.max(
+          1,
+          Math.round(photo.durationSeconds * fps),
+        );
+        return (
+          <Sequence
+            key={photo.id}
+            from={startFrame}
+            durationInFrames={durationFramesPhoto}
+            layout="none"
+          >
+            <PhotoOverlay
+              src={photo.src}
+              name={photo.name}
+              title={photo.title}
+              department={photo.department}
+              startFrame={0}
+              durationFrames={durationFramesPhoto}
+            />
+          </Sequence>
+        );
+      })}
+
+      {musicEnabled && musicSrc ? (
+        <Audio
+          src={musicSrc}
+          volume={(f) => {
+            const fadeIn = Math.min(1, f / Math.max(1, musicFadeFrames));
+            const fadeOut = Math.min(
+              1,
+              (durationFrames - f) / Math.max(1, musicFadeFrames),
+            );
+            return musicVolume * Math.min(fadeIn, fadeOut);
+          }}
+          loop
+        />
+      ) : null}
+
+      {/* Subtle brand footer bar — unobtrusive */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 8,
+          background: `linear-gradient(90deg, ${VIDEO_TEMPLATE.branding.primary}, ${VIDEO_TEMPLATE.branding.primaryDark})`,
+        }}
+      />
+    </AbsoluteFill>
+  );
+}
