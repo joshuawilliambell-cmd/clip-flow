@@ -33,9 +33,9 @@ function ModeSwitcher({
             with your talking clip and teammate photo overlays.
           </p>
           <p>
-            <strong>Team thumbnail</strong> builds a Love&apos;s Team image with
-            up to four headshots. You can download a PNG or add it as a 1-second
-            opening card on your intro video.
+            <strong>Team thumbnail</strong> builds a red, yellow, and orange
+            Love&apos;s Team image with up to four headshots. Download a PNG or
+            add it as a 1-second opening card on your intro video.
           </p>
         </HelpTip>
       </div>
@@ -142,8 +142,8 @@ function StudioShell() {
                 video with timed teammate photos.
               </p>
               <p>
-                Use <strong>Team thumbnail</strong> for a navy-and-gold Love&apos;s
-                Team image with headshots, names, and titles.
+                Use <strong>Team thumbnail</strong> for a Love&apos;s red,
+                yellow, and orange Team image with headshots, names, and titles.
               </p>
               <p>Tap any yellow ? button anytime for help.</p>
             </HelpTip>

@@ -1,30 +1,38 @@
 /**
  * Fixed "Love's Team" thumbnail template.
- * Employees supply headshots (with pan/zoom), names, and titles.
+ * Colors follow the Love's heart logo: red, yellow, and orange.
  */
 
 export const THUMBNAIL_TEMPLATE = {
-  id: "loves-team-thumbnail-v1",
+  id: "loves-team-thumbnail-v2",
   width: 1920,
   height: 1080,
   maxMembers: 4,
   /** How long the optional intro thumbnail covers the video (seconds). */
   introDurationSeconds: 1,
   colors: {
-    navy: "#0B2C5C",
-    gold: "#F5C518",
-    goldDark: "#D4A017",
-    background: "#F4F5F7",
+    /** Primary Love's heart red */
+    red: "#ED2024",
+    redDark: "#C41418",
+    /** Heart stripe yellow */
+    yellow: "#FFD400",
+    yellowBright: "#FFE34A",
+    /** Heart stripe orange */
+    orange: "#F15A22",
+    orangeDeep: "#E87722",
+    background: "#FFF8E8",
+    backgroundDeep: "#FFE9A8",
     card: "#FFFFFF",
-    text: "#0B2C5C",
-    mutedPhoto: "#D9DEE7",
+    text: "#1A1A1A",
+    mutedPhoto: "#F3E2B8",
+    ink: "#1A1A1A",
   },
   header: {
     title: "Love's Team",
     y: 118,
     fontSize: 92,
     fontFamily: "Arial, Helvetica, sans-serif",
-    fontWeight: "700",
+    fontWeight: "800",
     lineWidth: 160,
     lineGap: 36,
   },

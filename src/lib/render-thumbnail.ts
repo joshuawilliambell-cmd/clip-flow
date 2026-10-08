@@ -61,87 +61,163 @@ function drawCoverImage(
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
+/** Corner bands echoing the Love's heart stripes: red → yellow → orange. */
 function drawCornerAccents(ctx: CanvasRenderingContext2D) {
   const { width, height, colors } = THUMBNAIL_TEMPLATE;
 
-  // Top-left navy + gold bands
-  ctx.fillStyle = colors.navy;
+  // Top-left: red base, yellow, orange (like heart motion stripes)
+  ctx.fillStyle = colors.red;
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(520, 0);
-  ctx.lineTo(0, 340);
+  ctx.lineTo(540, 0);
+  ctx.lineTo(0, 360);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = colors.gold;
+  ctx.fillStyle = colors.yellow;
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(280, 0);
-  ctx.lineTo(0, 180);
+  ctx.lineTo(300, 0);
+  ctx.lineTo(0, 200);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = colors.navy;
+  ctx.fillStyle = colors.orange;
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(140, 0);
-  ctx.lineTo(0, 95);
+  ctx.lineTo(160, 0);
+  ctx.lineTo(0, 110);
   ctx.closePath();
   ctx.fill();
+
+  // Thin ink edges for logo-like definition
+  ctx.strokeStyle = colors.ink;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(540, 0);
+  ctx.lineTo(0, 360);
+  ctx.stroke();
 
   // Bottom-right mirror
-  ctx.fillStyle = colors.navy;
+  ctx.fillStyle = colors.red;
   ctx.beginPath();
   ctx.moveTo(width, height);
-  ctx.lineTo(width - 520, height);
-  ctx.lineTo(width, height - 340);
+  ctx.lineTo(width - 540, height);
+  ctx.lineTo(width, height - 360);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = colors.gold;
+  ctx.fillStyle = colors.yellow;
   ctx.beginPath();
   ctx.moveTo(width, height);
-  ctx.lineTo(width - 280, height);
-  ctx.lineTo(width, height - 180);
+  ctx.lineTo(width - 300, height);
+  ctx.lineTo(width, height - 200);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = colors.navy;
+  ctx.fillStyle = colors.orange;
   ctx.beginPath();
   ctx.moveTo(width, height);
-  ctx.lineTo(width - 140, height);
-  ctx.lineTo(width, height - 95);
+  ctx.lineTo(width - 160, height);
+  ctx.lineTo(width, height - 110);
   ctx.closePath();
   ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(width - 540, height);
+  ctx.lineTo(width, height - 360);
+  ctx.stroke();
 }
 
 function drawHeader(ctx: CanvasRenderingContext2D) {
   const { width, colors, header } = THUMBNAIL_TEMPLATE;
-  ctx.fillStyle = colors.navy;
+  ctx.fillStyle = colors.ink;
   ctx.font = `${header.fontWeight} ${header.fontSize}px ${header.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(header.title, width / 2, header.y);
 
+  // Small Love's heart accent over the word
   const metrics = ctx.measureText(header.title);
   const textWidth = metrics.width;
+  const heartX = width / 2 + textWidth / 2 - 18;
+  const heartY = header.y - header.fontSize * 0.42;
+  drawMiniHeart(ctx, heartX, heartY, 22);
+
   const lineY = header.y;
   const leftEnd = width / 2 - textWidth / 2 - header.lineGap;
   const rightStart = width / 2 + textWidth / 2 + header.lineGap;
 
-  ctx.strokeStyle = colors.gold;
-  ctx.lineWidth = 5;
+  // Stripe lines: yellow then orange then red segments
+  drawStripeLine(ctx, leftEnd - header.lineWidth, leftEnd, lineY);
+  drawStripeLine(ctx, rightStart, rightStart + header.lineWidth, lineY);
+}
+
+function drawStripeLine(
+  ctx: CanvasRenderingContext2D,
+  x1: number,
+  x2: number,
+  y: number,
+) {
+  const { colors } = THUMBNAIL_TEMPLATE;
+  const mid1 = x1 + (x2 - x1) * 0.33;
+  const mid2 = x1 + (x2 - x1) * 0.66;
+  ctx.lineWidth = 6;
   ctx.lineCap = "round";
 
+  ctx.strokeStyle = colors.yellow;
   ctx.beginPath();
-  ctx.moveTo(leftEnd - header.lineWidth, lineY);
-  ctx.lineTo(leftEnd, lineY);
+  ctx.moveTo(x1, y);
+  ctx.lineTo(mid1, y);
   ctx.stroke();
 
+  ctx.strokeStyle = colors.orange;
   ctx.beginPath();
-  ctx.moveTo(rightStart, lineY);
-  ctx.lineTo(rightStart + header.lineWidth, lineY);
+  ctx.moveTo(mid1, y);
+  ctx.lineTo(mid2, y);
   ctx.stroke();
+
+  ctx.strokeStyle = colors.red;
+  ctx.beginPath();
+  ctx.moveTo(mid2, y);
+  ctx.lineTo(x2, y);
+  ctx.stroke();
+}
+
+function drawMiniHeart(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  size: number,
+) {
+  const { colors } = THUMBNAIL_TEMPLATE;
+  ctx.save();
+  ctx.fillStyle = colors.red;
+  ctx.beginPath();
+  const topY = cy - size * 0.25;
+  ctx.moveTo(cx, cy + size * 0.35);
+  ctx.bezierCurveTo(
+    cx - size * 0.7,
+    cy + size * 0.05,
+    cx - size * 0.55,
+    topY - size * 0.35,
+    cx,
+    topY,
+  );
+  ctx.bezierCurveTo(
+    cx + size * 0.55,
+    topY - size * 0.35,
+    cx + size * 0.7,
+    cy + size * 0.05,
+    cx,
+    cy + size * 0.35,
+  );
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = colors.ink;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
 }
 
 async function drawMemberCard(
@@ -155,7 +231,7 @@ async function drawMemberCard(
 
   // Card shadow
   ctx.save();
-  ctx.shadowColor = "rgba(11, 44, 92, 0.18)";
+  ctx.shadowColor = "rgba(237, 32, 36, 0.18)";
   ctx.shadowBlur = 24;
   ctx.shadowOffsetY = 10;
   ctx.fillStyle = colors.card;
@@ -167,7 +243,6 @@ async function drawMemberCard(
   ctx.save();
   drawRoundedRect(ctx, x, y, card.width, card.photoHeight, card.radius);
   ctx.clip();
-  // Square bottom of photo clip by filling rect after rounded top only:
   ctx.beginPath();
   ctx.rect(x, y + card.radius, card.width, card.photoHeight - card.radius);
   ctx.clip();
@@ -183,33 +258,39 @@ async function drawMemberCard(
   } else {
     ctx.fillStyle = colors.mutedPhoto;
     ctx.fillRect(x, y, card.width, card.photoHeight);
-    ctx.fillStyle = colors.navy;
-    ctx.font = `600 28px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
+    ctx.fillStyle = colors.red;
+    ctx.font = `700 28px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("Add photo", x + card.width / 2, y + card.photoHeight / 2);
   }
   ctx.restore();
 
-  // Re-draw top rounded photo corners over image edge
+  // Card border in Love's red
   ctx.save();
   drawRoundedRect(ctx, x, y, card.width, totalHeight, card.radius);
-  ctx.strokeStyle = "rgba(11,44,92,0.08)";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = colors.red;
+  ctx.lineWidth = 3;
   ctx.stroke();
   ctx.restore();
+
+  // Thin yellow/orange accent under photo
+  ctx.fillStyle = colors.yellow;
+  ctx.fillRect(x + 2, y + card.photoHeight - 6, card.width - 4, 3);
+  ctx.fillStyle = colors.orange;
+  ctx.fillRect(x + 2, y + card.photoHeight - 3, card.width - 4, 3);
 
   const bodyTop = y + card.photoHeight;
   const centerX = x + card.width / 2;
 
   ctx.fillStyle = colors.text;
-  ctx.font = `700 ${card.nameSize}px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
+  ctx.font = `800 ${card.nameSize}px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const name = member.name.trim() || "Name";
   ctx.fillText(name, centerX, bodyTop + card.nameYOffset, card.width - 28);
 
-  ctx.strokeStyle = colors.gold;
+  ctx.strokeStyle = colors.red;
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(centerX - 34, bodyTop + card.dividerYOffset);
@@ -217,7 +298,7 @@ async function drawMemberCard(
   ctx.stroke();
 
   ctx.fillStyle = colors.text;
-  ctx.font = `500 ${card.titleSize}px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
+  ctx.font = `600 ${card.titleSize}px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
   const title = member.title.trim() || "Job title";
   ctx.fillText(title, centerX, bodyTop + card.titleYOffset, card.width - 28);
 }
@@ -232,18 +313,25 @@ export async function renderTeamThumbnail(
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not create thumbnail canvas.");
 
-  // Background
-  const gradient = ctx.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, "#F7F8FA");
-  gradient.addColorStop(0.5, colors.background);
-  gradient.addColorStop(1, "#EEF1F6");
+  // Warm Love's yellow field
+  const gradient = ctx.createRadialGradient(
+    width * 0.5,
+    height * 0.4,
+    80,
+    width * 0.5,
+    height * 0.5,
+    width * 0.75,
+  );
+  gradient.addColorStop(0, colors.yellowBright);
+  gradient.addColorStop(0.55, colors.background);
+  gradient.addColorStop(1, colors.backgroundDeep);
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
 
-  // Soft architectural-ish pattern
+  // Soft diagonal texture
   ctx.save();
-  ctx.globalAlpha = 0.04;
-  ctx.strokeStyle = colors.navy;
+  ctx.globalAlpha = 0.05;
+  ctx.strokeStyle = colors.red;
   ctx.lineWidth = 2;
   for (let i = -height; i < width + height; i += 48) {
     ctx.beginPath();

@@ -251,9 +251,9 @@ export function ThumbnailCreator({
             Create a Love&apos;s Team thumbnail
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Build a navy-and-gold team image for {slotCount} people, then
-            optionally place it at the very start of your intro video for one
-            quick second.
+            Build a Love&apos;s red, yellow, and orange team image for{" "}
+            {slotCount} people, then optionally place it at the very start of
+            your intro video for one quick second.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
@@ -463,7 +463,7 @@ export function ThumbnailCreator({
               Live thumbnail preview
             </h3>
             <p className="text-base text-[var(--muted)]">
-              Stock Love&apos;s Team frame · {filledCount || 0} of{" "}
+              Love&apos;s red / yellow / orange frame · {filledCount || 0} of{" "}
               {slotCount} people · {THUMBNAIL_TEMPLATE.width}×
               {THUMBNAIL_TEMPLATE.height}
             </p>
