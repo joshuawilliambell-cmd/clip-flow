@@ -17,22 +17,27 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 ## Deploy to Vercel
 
-This repo includes `vercel.json` for Next.js.
+This repo is configured for Vercel (`vercel.json` + Next.js).
 
-**Option A — claim a temporary deploy (no login required first):**
+### First-time setup (claim into your account)
+
+1. Deploy a temporary preview:
 
 ```bash
-npx vercel deploy --temporary --yes
+npm run deploy:vercel
 ```
 
-Open the printed URL to try the app, then use the **claim** link from the CLI output to attach the deployment to your Vercel account so it does not expire.
-
-**Option B — link a permanent project (after `npx vercel login`):**
+2. Open the printed **Temporary** URL to confirm the app works.
+3. Open the printed **claim** URL (or run the claim link from the CLI JSON) and sign in to Vercel — that moves the project into your account so it stops expiring.
+4. After claiming, future deploys from your machine:
 
 ```bash
+npx vercel login
 npx vercel link
 npx vercel --prod
 ```
+
+You can also import the Git repo in the [Vercel dashboard](https://vercel.com/new) (Framework Preset: Next.js, Root Directory: `.`, Build Command: `npm run build`).
 
 ## Employee flow
 
