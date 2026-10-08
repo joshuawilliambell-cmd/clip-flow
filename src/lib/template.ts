@@ -4,6 +4,8 @@
  * the employee UI does not control positioning or scaling.
  */
 
+export type PipSide = "left" | "right";
+
 export const VIDEO_TEMPLATE = {
   id: "loves-team-intro-v1",
   name: "Love's Team Introduction",
@@ -42,28 +44,35 @@ export const VIDEO_TEMPLATE = {
       "#44403C",
     ],
   },
-  /** Fixed picture-in-picture region (percent of frame). */
+  /**
+   * Fixed picture-in-picture region on a 16:9 canvas.
+   * Photos are always portrait (taller than wide) with safe-zone padding.
+   * Users may choose left or right; they cannot drag/scale the frame.
+   */
   pip: {
-    xPercent: 68.5,
-    yPercent: 18,
-    widthPercent: 26,
-    heightPercent: 46,
-    borderRadiusPx: 10,
+    /** Top inset from frame edge (~matches Allego-style screenshot). */
+    paddingTopPercent: 6,
+    /** Outer side inset (left edge when side=left, right edge when side=right). */
+    paddingSidePercent: 5,
+    /** Portrait box: ~3:4 on 1920×1080 (width ≈ 15.2%, height 36%). */
+    widthPercent: 15.2,
+    heightPercent: 36,
+    defaultSide: "left" as PipSide,
+    borderRadiusPx: 8,
     borderWidthPx: 3,
-    borderColor: "rgba(255,255,255,0.92)",
-    shadow: "0 18px 40px rgba(0,0,0,0.45)",
+    borderColor: "rgba(255,255,255,0.95)",
+    shadow: "0 14px 36px rgba(0,0,0,0.42)",
     label: {
-      belowGapPx: 14,
-      maxWidthPercent: 26,
-      nameSizePx: 34,
-      titleSizePx: 24,
-      departmentSizePx: 20,
+      belowGapPx: 12,
+      nameSizePx: 30,
+      titleSizePx: 22,
+      departmentSizePx: 18,
       textColor: "#FFFFFF",
       nameWeight: 700,
       titleWeight: 500,
       background: "rgba(16, 16, 16, 0.72)",
-      paddingX: 16,
-      paddingY: 12,
+      paddingX: 14,
+      paddingY: 10,
       borderRadiusPx: 8,
     },
   },
@@ -78,6 +87,23 @@ export const VIDEO_TEMPLATE = {
     photoAccept: ["image/jpeg", "image/png", "image/webp"] as string[],
   },
 };
+
+/** Resolve absolute PIP box for a chosen side on the 16:9 canvas. */
+export function getPipLayout(side: PipSide = VIDEO_TEMPLATE.pip.defaultSide) {
+  const { paddingTopPercent, paddingSidePercent, widthPercent, heightPercent } =
+    VIDEO_TEMPLATE.pip;
+  const xPercent =
+    side === "left"
+      ? paddingSidePercent
+      : 100 - paddingSidePercent - widthPercent;
+  return {
+    side,
+    xPercent,
+    yPercent: paddingTopPercent,
+    widthPercent,
+    heightPercent,
+  };
+}
 
 export const MUSIC_TRACKS = [
   {

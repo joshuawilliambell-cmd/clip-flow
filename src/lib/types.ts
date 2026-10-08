@@ -25,6 +25,8 @@ export type MusicTrack = {
 
 export type StudioStep = 1 | 2 | 3;
 
+import type { PipSide } from "@/lib/template";
+
 export type CompositionProps = {
   videoSrc: string;
   trimStartSeconds: number;
@@ -38,6 +40,7 @@ export type CompositionProps = {
     startSeconds: number;
     durationSeconds: number;
   }>;
+  pipSide: PipSide;
   videoVolume: number;
   musicSrc: string | null;
   musicVolume: number;

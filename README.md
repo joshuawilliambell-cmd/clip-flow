@@ -2,7 +2,7 @@
 
 Browser-based, template-driven introduction video creator for Love's employees. The goal is a concise ~60s video where one employee introduces themselves and teammates (via timed still photos with names/titles). Employees then upload the MP4 to Allego and place it in a shareable digital sales room for customers.
 
-This is a **Phase 1 working prototype** — not a full video editor. Presentation (PIP size, position, fades, export settings) comes from a central template; employees only control content and timing.
+This is a **Phase 1 working prototype** — not a full video editor. Presentation (portrait PIP size, corner padding, fades, export settings) comes from a central template; employees choose left or right corner, content, and timing. The canvas is always 16:9 (1920×1080).
 
 ## Quick start
 

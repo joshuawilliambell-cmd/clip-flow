@@ -7,6 +7,7 @@ import { VIDEO_TEMPLATE } from "@/lib/template";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
+import { PipSidePicker } from "@/components/PipSidePicker";
 
 export function TeamPhotosStep() {
   const {
@@ -99,26 +100,31 @@ export function TeamPhotosStep() {
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
           <p>
-            <strong>1.</strong> Tap Choose photos and pick team pictures (JPG,
-            PNG, or WebP).
+            <strong>1.</strong> Tap Choose photos and pick upright (portrait)
+            headshots — JPG, PNG, or WebP.
           </p>
           <p>
             <strong>2.</strong> Fill in Name and Job title for each person.
           </p>
           <p>
-            <strong>3.</strong> On Track 2 of the timeline, drag a photo bar left
-            or right to change when it shows.
+            <strong>3.</strong> Choose Left side or Right side for where photos
+            appear (with padding, like the example).
           </p>
           <p>
-            You do <strong>not</strong> need to resize or move photos on the
-            video — that is done for you.
+            <strong>4.</strong> On Track 2 of the timeline, drag a photo bar to
+            change when it shows.
+          </p>
+          <p>
+            Photos stay portrait on a 16:9 video. You do <strong>not</strong>{" "}
+            resize or drag them on the picture — that is done for you.
           </p>
         </HelpTip>
       </div>
 
       <div className="how-banner">
-        Photos always appear in the same spot on the right side of the video.
-        You only choose the timing on the timeline below.
+        Team photos are always portrait and placed in a padded top corner on the
+        16:9 video. Choose left or right below — you only set the timing on the
+        timeline.
       </div>
 
       {!video ? (
@@ -303,6 +309,7 @@ export function TeamPhotosStep() {
         </div>
       ) : null}
 
+      <PipSidePicker />
       <VideoPreview compact />
       <Timeline />
 

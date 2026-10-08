@@ -14,6 +14,7 @@ export const defaultCompositionProps: CompositionProps = {
   trimStartSeconds: 0,
   durationInSeconds: VIDEO_TEMPLATE.targetDurationSeconds,
   photos: [],
+  pipSide: VIDEO_TEMPLATE.pip.defaultSide,
   videoVolume: VIDEO_TEMPLATE.defaultVideoVolume,
   musicSrc: null,
   musicVolume: VIDEO_TEMPLATE.defaultMusicVolume,
@@ -27,6 +28,7 @@ export function IntroductionVideo(props: CompositionProps) {
     trimStartSeconds,
     durationInSeconds,
     photos,
+    pipSide,
     videoVolume,
     musicSrc,
     musicVolume,
@@ -81,6 +83,7 @@ export function IntroductionVideo(props: CompositionProps) {
               department={photo.department}
               startFrame={0}
               durationFrames={durationFramesPhoto}
+              pipSide={pipSide}
             />
           </Sequence>
         );

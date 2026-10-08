@@ -38,7 +38,7 @@ const DEVICES: DeviceGuide[] = [
       "Sit so the camera is at eye level (stack books under a laptop if needed).",
       "Frame yourself from about mid-chest up. Leave a little space above your head.",
       "Look into the camera lens when you speak, not at your own face on screen.",
-      "Sit a little off-center to the left if you can — team photos appear on the right side of the finished video.",
+      "Leave a little empty space on one side of the frame — teammate photos will appear in a top corner (you choose left or right in the tool).",
       "Close extra apps so your computer runs smoothly while recording.",
     ],
     lighting: [
@@ -79,7 +79,7 @@ const DEVICES: DeviceGuide[] = [
       "Prop the phone on a stack of books, a mug, or a small tripod at eye level.",
       "Clean the lens with a soft cloth.",
       "Stand or sit so you fill the frame from mid-chest up, with a little space above your head.",
-      "Leave empty space on the right side of the frame when you can — that is where teammate photos will appear.",
+      "Leave empty space on one side of the frame when you can — teammate photos will sit in a top corner (left or right).",
     ],
     lighting: [
       "Face a window or bright indoor light.",
@@ -155,7 +155,7 @@ const DEVICES: DeviceGuide[] = [
       "Record in landscape 16:9 if your camera has that option (1080p is ideal).",
       "Focus on your face. Use autofocus if you are unsure.",
       "Frame mid-chest up with a little space above your head.",
-      "Leave room on the right side of the frame for teammate photos later.",
+      "Leave room on one side of the frame for teammate photos later (you pick left or right in the tool).",
     ],
     lighting: [
       "Face soft light (window or lamp).",

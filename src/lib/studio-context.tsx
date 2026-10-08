@@ -10,7 +10,11 @@ import {
   type ReactNode,
 } from "react";
 import { v4 as uuid } from "uuid";
-import { MUSIC_TRACKS, VIDEO_TEMPLATE } from "@/lib/template";
+import {
+  MUSIC_TRACKS,
+  VIDEO_TEMPLATE,
+  type PipSide,
+} from "@/lib/template";
 import {
   autoArrangePhotos,
   getOutputDuration,
@@ -38,6 +42,7 @@ type StudioContextValue = {
   musicVolume: number;
   videoVolume: number;
   musicTrackId: string;
+  pipSide: PipSide;
   currentTime: number;
   isPlaying: boolean;
   outputDuration: number;
@@ -62,6 +67,7 @@ type StudioContextValue = {
   setMusicVolume: (volume: number) => void;
   setVideoVolume: (volume: number) => void;
   setMusicTrackId: (id: string) => void;
+  setPipSide: (side: PipSide) => void;
 };
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -171,6 +177,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     VIDEO_TEMPLATE.defaultVideoVolume,
   );
   const [musicTrackId, setMusicTrackId] = useState<string>(MUSIC_TRACKS[0].id);
+  const [pipSide, setPipSide] = useState<PipSide>(
+    VIDEO_TEMPLATE.pip.defaultSide,
+  );
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -377,6 +386,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         startSeconds: p.startSeconds,
         durationSeconds: p.durationSeconds,
       })),
+      pipSide,
       videoVolume,
       musicSrc: musicEnabled ? track.src : null,
       musicVolume,
@@ -391,6 +401,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     musicVolume,
     videoVolume,
     musicTrackId,
+    pipSide,
   ]);
 
   const value = useMemo<StudioContextValue>(
@@ -405,6 +416,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       musicVolume,
       videoVolume,
       musicTrackId,
+      pipSide,
       currentTime,
       isPlaying,
       outputDuration,
@@ -426,6 +438,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setMusicVolume,
       setVideoVolume,
       setMusicTrackId,
+      setPipSide,
     }),
     [
       step,
@@ -437,6 +450,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       musicVolume,
       videoVolume,
       musicTrackId,
+      pipSide,
       currentTime,
       isPlaying,
       outputDuration,

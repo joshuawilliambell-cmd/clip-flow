@@ -1,5 +1,5 @@
 import { AbsoluteFill, Img, interpolate, useCurrentFrame } from "remotion";
-import { VIDEO_TEMPLATE } from "@/lib/template";
+import { getPipLayout, VIDEO_TEMPLATE, type PipSide } from "@/lib/template";
 
 type PhotoOverlayProps = {
   src: string;
@@ -8,6 +8,7 @@ type PhotoOverlayProps = {
   department: string;
   startFrame: number;
   durationFrames: number;
+  pipSide?: PipSide;
 };
 
 export function PhotoOverlay({
@@ -17,9 +18,11 @@ export function PhotoOverlay({
   department,
   startFrame,
   durationFrames,
+  pipSide = VIDEO_TEMPLATE.pip.defaultSide,
 }: PhotoOverlayProps) {
   const frame = useCurrentFrame();
   const { fps, fadeInSeconds, fadeOutSeconds, pip } = VIDEO_TEMPLATE;
+  const layout = getPipLayout(pipSide);
   const fadeIn = Math.max(1, Math.round(fadeInSeconds * fps));
   const fadeOut = Math.max(1, Math.round(fadeOutSeconds * fps));
   const local = frame - startFrame;
@@ -38,10 +41,10 @@ export function PhotoOverlay({
       <div
         style={{
           position: "absolute",
-          left: `${pip.xPercent}%`,
-          top: `${pip.yPercent}%`,
-          width: `${pip.widthPercent}%`,
-          height: `${pip.heightPercent}%`,
+          left: `${layout.xPercent}%`,
+          top: `${layout.yPercent}%`,
+          width: `${layout.widthPercent}%`,
+          height: `${layout.heightPercent}%`,
           borderRadius: pip.borderRadiusPx,
           overflow: "hidden",
           border: `${pip.borderWidthPx}px solid ${pip.borderColor}`,
@@ -55,8 +58,8 @@ export function PhotoOverlay({
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            // Slight upward bias approximates face-aware framing for portraits
-            objectPosition: "center 28%",
+            // Portrait headshot framing — keep faces near upper-center
+            objectPosition: "center 22%",
           }}
         />
       </div>
@@ -65,9 +68,9 @@ export function PhotoOverlay({
         <div
           style={{
             position: "absolute",
-            left: `${pip.xPercent}%`,
-            top: `calc(${pip.yPercent}% + ${pip.heightPercent}% + ${pip.label.belowGapPx}px)`,
-            width: `${pip.label.maxWidthPercent}%`,
+            left: `${layout.xPercent}%`,
+            top: `calc(${layout.yPercent}% + ${layout.heightPercent}% + ${pip.label.belowGapPx}px)`,
+            width: `${layout.widthPercent}%`,
             background: pip.label.background,
             color: pip.label.textColor,
             padding: `${pip.label.paddingY}px ${pip.label.paddingX}px`,
