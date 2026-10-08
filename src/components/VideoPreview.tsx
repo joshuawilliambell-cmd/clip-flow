@@ -46,6 +46,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         trimStartSeconds: 0,
         durationInSeconds: VIDEO_TEMPLATE.targetDurationSeconds,
         photos: [],
+        videoVolume: VIDEO_TEMPLATE.defaultVideoVolume,
         musicSrc: null,
         musicVolume: VIDEO_TEMPLATE.defaultMusicVolume,
         musicEnabled: false,

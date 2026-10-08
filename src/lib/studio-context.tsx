@@ -36,6 +36,7 @@ type StudioContextValue = {
   photos: TeamPhoto[];
   musicEnabled: boolean;
   musicVolume: number;
+  videoVolume: number;
   musicTrackId: string;
   currentTime: number;
   isPlaying: boolean;
@@ -59,6 +60,7 @@ type StudioContextValue = {
   resetTimeline: () => void;
   setMusicEnabled: (enabled: boolean) => void;
   setMusicVolume: (volume: number) => void;
+  setVideoVolume: (volume: number) => void;
   setMusicTrackId: (id: string) => void;
 };
 
@@ -111,6 +113,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState<number>(
     VIDEO_TEMPLATE.defaultMusicVolume,
+  );
+  const [videoVolume, setVideoVolume] = useState<number>(
+    VIDEO_TEMPLATE.defaultVideoVolume,
   );
   const [musicTrackId, setMusicTrackId] = useState<string>(MUSIC_TRACKS[0].id);
   const [currentTime, setCurrentTime] = useState(0);
@@ -318,6 +323,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         startSeconds: p.startSeconds,
         durationSeconds: p.durationSeconds,
       })),
+      videoVolume,
       musicSrc: musicEnabled ? track.src : null,
       musicVolume,
       musicEnabled,
@@ -329,6 +335,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     photos,
     musicEnabled,
     musicVolume,
+    videoVolume,
     musicTrackId,
   ]);
 
@@ -342,6 +349,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       photos,
       musicEnabled,
       musicVolume,
+      videoVolume,
       musicTrackId,
       currentTime,
       isPlaying,
@@ -362,6 +370,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       resetTimeline,
       setMusicEnabled,
       setMusicVolume,
+      setVideoVolume,
       setMusicTrackId,
     }),
     [
@@ -372,6 +381,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       photos,
       musicEnabled,
       musicVolume,
+      videoVolume,
       musicTrackId,
       currentTime,
       isPlaying,

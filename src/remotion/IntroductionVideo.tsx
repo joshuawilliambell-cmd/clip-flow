@@ -14,6 +14,7 @@ export const defaultCompositionProps: CompositionProps = {
   trimStartSeconds: 0,
   durationInSeconds: VIDEO_TEMPLATE.targetDurationSeconds,
   photos: [],
+  videoVolume: VIDEO_TEMPLATE.defaultVideoVolume,
   musicSrc: null,
   musicVolume: VIDEO_TEMPLATE.defaultMusicVolume,
   musicEnabled: false,
@@ -26,6 +27,7 @@ export function IntroductionVideo(props: CompositionProps) {
     trimStartSeconds,
     durationInSeconds,
     photos,
+    videoVolume,
     musicSrc,
     musicVolume,
     musicEnabled,
@@ -42,7 +44,7 @@ export function IntroductionVideo(props: CompositionProps) {
             src={videoSrc}
             trimBefore={Math.round(trimStartSeconds * fps)}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            volume={1}
+            volume={videoVolume}
           />
         </AbsoluteFill>
       ) : (

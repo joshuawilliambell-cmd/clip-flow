@@ -17,7 +17,7 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 1. **Add Your Video** — upload MP4/MOV, trim with timeline handles, scrub/play
 2. **Add Your Team** — upload photos, enter name/title, drag photo blocks on the timeline
-3. **Preview & Download** — optional background music, **Generate My Video**, download MP4
+3. **Preview & Download** — choose 1 of 3 music tracks, adjust video + music volume, **Export to MP4**
 
 ## Stack
 

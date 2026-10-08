@@ -38,6 +38,7 @@ export type CompositionProps = {
     startSeconds: number;
     durationSeconds: number;
   }>;
+  videoVolume: number;
   musicSrc: string | null;
   musicVolume: number;
   musicEnabled: boolean;

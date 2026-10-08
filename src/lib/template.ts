@@ -19,6 +19,7 @@ export const VIDEO_TEMPLATE = {
   fadeOutSeconds: 0.35,
   musicFadeSeconds: 1.2,
   defaultMusicVolume: 0.3,
+  defaultVideoVolume: 1,
   branding: {
     brandName: "Love's",
     productName: "Video Studio",
@@ -78,11 +79,19 @@ export const MUSIC_TRACKS = [
   {
     id: "corporate-ambient",
     label: "Corporate Ambient",
+    description: "Light, professional bed for customer intros",
     src: "/music/corporate-ambient.mp3",
   },
   {
     id: "soft-corporate",
     label: "Soft Corporate",
+    description: "Quieter tone that stays under narration",
     src: "/music/soft-corporate.mp3",
+  },
+  {
+    id: "steady-focus",
+    label: "Steady Focus",
+    description: "Calm pulse for longer team walkthroughs",
+    src: "/music/steady-focus.mp3",
   },
 ] as const;
