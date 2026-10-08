@@ -24,7 +24,8 @@ export const VIDEO_TEMPLATE = {
   introThumbnailSeconds: 1,
   musicFadeSeconds: 1.2,
   defaultMusicVolume: 0.3,
-  defaultVideoVolume: 1,
+  /** Start quieter so playback is comfortable; users can raise it. */
+  defaultVideoVolume: 0.5,
   branding: {
     brandName: "Love's",
     productName: "Video Studio",

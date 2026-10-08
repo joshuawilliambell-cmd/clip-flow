@@ -119,8 +119,8 @@ export function PreviewExportStep({
       </div>
 
       <div className="how-banner">
-        Keep your voice louder than the music. Start with narration near 100%
-        and music near 30%, then adjust.
+        Keep your voice louder than the music. Voice starts at 50% (raise it if
+        you need to) and music near 30%, then adjust.
       </div>
 
       <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-5">
