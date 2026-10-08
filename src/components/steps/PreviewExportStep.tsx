@@ -258,8 +258,9 @@ export function PreviewExportStep() {
             <p>Tap Export to MP4 and wait. A progress bar shows the work.</p>
             <p>When it finishes, tap Download MP4 to save the file.</p>
             <p>
-              Then open Allego and upload that MP4 file there. This tool does
-              not upload to Allego by itself yet.
+              Next, upload that MP4 in Allego and add it to a digital sales room
+              you can share with customers. This tool does not upload to Allego
+              by itself yet.
             </p>
             <p>Chrome or Edge works best for exporting.</p>
           </HelpTip>
@@ -305,6 +306,15 @@ export function PreviewExportStep() {
             {error}
           </p>
         ) : null}
+
+        <div className="mt-5 rounded-2xl border-2 border-[var(--ink)] bg-white px-4 py-4">
+          <p className="text-lg font-bold text-[var(--ink)]">After you download</p>
+          <ol className="mt-2 list-decimal space-y-1 pl-6 text-base leading-relaxed text-[var(--ink)] md:text-lg">
+            <li>Open Allego and upload your MP4.</li>
+            <li>Add the video to a digital sales room.</li>
+            <li>Share that sales room link with your customer.</li>
+          </ol>
+        </div>
       </div>
 
       <div className="flex justify-start border-t-2 border-[var(--border)] pt-4">

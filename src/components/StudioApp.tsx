@@ -3,6 +3,7 @@
 import { StudioProvider, useStudio } from "@/lib/studio-context";
 import { StepIndicator } from "@/components/StepIndicator";
 import { HelpTip } from "@/components/HelpTip";
+import { PurposeGuide } from "@/components/PurposeGuide";
 import { VideoUploadStep } from "@/components/steps/VideoUploadStep";
 import { TeamPhotosStep } from "@/components/steps/TeamPhotosStep";
 import { PreviewExportStep } from "@/components/steps/PreviewExportStep";
@@ -41,23 +42,21 @@ function StudioShell() {
 
           <div className="flex max-w-md items-start gap-2">
             <p className="text-right text-base font-medium leading-snug text-[var(--ink)] md:text-lg">
-              Make a short team video in 3 easy steps. No video editing skills
-              needed.
+              Make a ~60 second team intro for customers. Then upload it to
+              Allego.
             </p>
             <HelpTip title="What is this tool?" size="lg">
               <p>
-                This app helps you make a about 60-second introduction video for
-                customers.
+                This tool helps Love&apos;s employees make a short video that
+                introduces you and your teammates to customers.
               </p>
               <p>
-                <strong>Step 1:</strong> Add your talking video.
+                You talk on camera. Still photos of teammates appear on screen
+                with their name and title while you introduce them.
               </p>
               <p>
-                <strong>Step 2:</strong> Add photos of your team.
-              </p>
-              <p>
-                <strong>Step 3:</strong> Choose music, check the preview, then
-                export an MP4 file.
+                When you finish, download the MP4, upload it to Allego, and add
+                it to a digital sales room you can share.
               </p>
               <p>Tap any yellow ? button anytime for help.</p>
             </HelpTip>
@@ -66,7 +65,10 @@ function StudioShell() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">
-        <div className="animate-fade-up-delay mb-6">
+        <div className="animate-fade-up-delay">
+          <PurposeGuide />
+        </div>
+        <div className="mb-6">
           <StepIndicator step={step} onChange={setStep} />
         </div>
 

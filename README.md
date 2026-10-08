@@ -1,6 +1,6 @@
 # Love's Video Studio
 
-Browser-based, template-driven introduction video creator for Love's Enterprise Sales. Employees upload one talking-head video, drop in team photos, drag simple timing blocks, and export a branded ~60s MP4 for Allego.
+Browser-based, template-driven introduction video creator for Love's employees. The goal is a concise ~60s video where one employee introduces themselves and teammates (via timed still photos with names/titles). Employees then upload the MP4 to Allego and place it in a shareable digital sales room for customers.
 
 This is a **Phase 1 working prototype** — not a full video editor. Presentation (PIP size, position, fades, export settings) comes from a central template; employees only control content and timing.
 
