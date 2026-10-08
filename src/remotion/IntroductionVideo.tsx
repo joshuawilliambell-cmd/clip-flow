@@ -2,9 +2,9 @@ import {
   AbsoluteFill,
   Audio,
   Sequence,
-  Html5Video,
   useVideoConfig,
 } from "remotion";
+import { Video } from "@remotion/media";
 import { IntroThumbnail } from "@/remotion/components/IntroThumbnail";
 import { PhotoOverlay } from "@/remotion/components/PhotoOverlay";
 import { VIDEO_TEMPLATE } from "@/lib/template";
@@ -50,20 +50,21 @@ export function IntroductionVideo(props: CompositionProps) {
   const showIntro =
     introThumbnailEnabled && Boolean(introThumbnailSrc);
 
-  // Html5Video works with browser blob: uploads; OffthreadVideo often stays black.
   const trimBefore = Math.max(0, Math.round(trimStartSeconds * fps));
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#0b0b0b" }}>
       {videoSrc ? (
         <AbsoluteFill>
-          <Html5Video
+          <Video
             src={videoSrc}
             trimBefore={trimBefore}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            style={{ width: "100%", height: "100%" }}
+            objectFit="cover"
             volume={videoVolume}
-            // Avoid pauseWhenBuffering — it often leaves blob uploads stuck on a black frame.
-            acceptableTimeShiftInSeconds={1.5}
+            // Prefer the media tagger path for blob uploads; OffthreadVideo often stays black.
+            disallowFallbackToOffthreadVideo
+            _experimentalInitiallyDrawCachedFrame
           />
         </AbsoluteFill>
       ) : (

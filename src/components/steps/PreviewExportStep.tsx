@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { clsx } from "clsx";
 import {
   Download,
@@ -8,6 +8,8 @@ import {
   Loader2,
   Mic,
   Music2,
+  Pause,
+  Play,
   Volume2,
   VolumeX,
 } from "lucide-react";
@@ -18,6 +20,8 @@ import { exportIntroductionVideo } from "@/lib/export-video";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
+
+const MUSIC_SAMPLE_SECONDS = 30;
 
 export function PreviewExportStep({
   onCreateThumbnail,
@@ -48,6 +52,53 @@ export function PreviewExportStep({
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [samplingTrackId, setSamplingTrackId] = useState<string | null>(null);
+  const sampleAudioRef = useRef<HTMLAudioElement | null>(null);
+  const sampleTimerRef = useRef<number | null>(null);
+
+  const stopMusicSample = () => {
+    if (sampleTimerRef.current !== null) {
+      window.clearTimeout(sampleTimerRef.current);
+      sampleTimerRef.current = null;
+    }
+    if (sampleAudioRef.current) {
+      sampleAudioRef.current.pause();
+      sampleAudioRef.current = null;
+    }
+    setSamplingTrackId(null);
+  };
+
+  const playMusicSample = (trackId: string, src: string) => {
+    if (samplingTrackId === trackId) {
+      stopMusicSample();
+      return;
+    }
+    stopMusicSample();
+    const audio = new Audio(src);
+    audio.volume = Math.min(1, Math.max(0.15, musicVolume));
+    sampleAudioRef.current = audio;
+    setSamplingTrackId(trackId);
+    void audio.play().catch(() => {
+      setSamplingTrackId(null);
+      sampleAudioRef.current = null;
+    });
+    sampleTimerRef.current = window.setTimeout(() => {
+      stopMusicSample();
+    }, MUSIC_SAMPLE_SECONDS * 1000);
+    audio.onended = () => stopMusicSample();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (sampleTimerRef.current !== null) {
+        window.clearTimeout(sampleTimerRef.current);
+      }
+      if (sampleAudioRef.current) {
+        sampleAudioRef.current.pause();
+        sampleAudioRef.current = null;
+      }
+    };
+  }, []);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   const generating = progress !== null && progress < 1;
@@ -238,6 +289,10 @@ export function PreviewExportStep({
               <p>There are four Corporate Chill music choices.</p>
               <p>Tap a card to select it. The yellow border means “selected.”</p>
               <p>
+                Tap the small Play button on a track for a {MUSIC_SAMPLE_SECONDS}
+                -second sample before you choose.
+              </p>
+              <p>
                 Tap Music off if you want only your voice with no background
                 music.
               </p>
@@ -245,7 +300,10 @@ export function PreviewExportStep({
           </div>
           <button
             type="button"
-            onClick={() => setMusicEnabled(!musicEnabled)}
+            onClick={() => {
+              stopMusicSample();
+              setMusicEnabled(!musicEnabled);
+            }}
             className="btn-secondary"
           >
             {musicEnabled ? (
@@ -263,34 +321,60 @@ export function PreviewExportStep({
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {MUSIC_TRACKS.map((track) => {
             const selected = musicTrackId === track.id;
+            const sampling = samplingTrackId === track.id;
             return (
-              <button
+              <div
                 key={track.id}
-                type="button"
-                disabled={!musicEnabled}
-                onClick={() => setMusicTrackId(track.id)}
                 className={clsx(
-                  "min-h-[8rem] rounded-2xl border-2 px-4 py-4 text-left transition disabled:opacity-40 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
+                  "min-h-[8rem] rounded-2xl border-2 px-4 py-4 text-left transition",
+                  !musicEnabled && "opacity-40",
                   selected
                     ? "border-[var(--ink)] bg-[var(--yellow)]"
-                    : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--primary)]",
+                    : "border-[var(--border-strong)] bg-[var(--panel-soft)]",
                 )}
               >
-                <div className="flex items-center gap-2">
-                  <Music2 className="h-5 w-5 text-[var(--primary)]" />
-                  <span className="text-lg font-bold text-[var(--ink)]">
-                    {track.label}
-                  </span>
+                <div className="flex items-start justify-between gap-2">
+                  <button
+                    type="button"
+                    disabled={!musicEnabled}
+                    onClick={() => setMusicTrackId(track.id)}
+                    className="min-w-0 flex-1 text-left focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Music2 className="h-5 w-5 shrink-0 text-[var(--primary)]" />
+                      <span className="text-lg font-bold text-[var(--ink)]">
+                        {track.label}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-base leading-relaxed text-[var(--muted)]">
+                      {track.description}
+                    </p>
+                    {selected ? (
+                      <p className="mt-3 text-sm font-bold uppercase tracking-wide text-[var(--ink)]">
+                        Selected ✓
+                      </p>
+                    ) : null}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => playMusicSample(track.id, track.src)}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-2 text-sm font-bold text-[var(--ink)] hover:bg-[var(--panel-soft)]"
+                    aria-label={
+                      sampling
+                        ? `Stop ${track.label} sample`
+                        : `Play 30 second sample of ${track.label}`
+                    }
+                    title={`Play ${MUSIC_SAMPLE_SECONDS}s sample`}
+                  >
+                    {sampling ? (
+                      <Pause className="h-4 w-4" />
+                    ) : (
+                      <Play className="h-4 w-4 fill-current" />
+                    )}
+                    {sampling ? "Stop" : "30s"}
+                  </button>
                 </div>
-                <p className="mt-2 text-base leading-relaxed text-[var(--muted)]">
-                  {track.description}
-                </p>
-                {selected ? (
-                  <p className="mt-3 text-sm font-bold uppercase tracking-wide text-[var(--ink)]">
-                    Selected ✓
-                  </p>
-                ) : null}
-              </button>
+              </div>
             );
           })}
         </div>

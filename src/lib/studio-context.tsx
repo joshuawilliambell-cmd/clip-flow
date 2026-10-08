@@ -35,6 +35,12 @@ import type {
   StudioStep,
   TeamPhoto,
 } from "@/lib/types";
+import type { ThumbnailMember } from "@/lib/thumbnail-template";
+import {
+  clearThumbnailMembers,
+  emptyThumbnailMembers,
+  resizeThumbnailMembers,
+} from "@/lib/thumbnail-members";
 
 type StudioContextValue = {
   step: StudioStep;
@@ -90,6 +96,13 @@ type StudioContextValue = {
   resetProject: () => void;
   /** Bumps when the project is cleared so UI with local state can remount. */
   projectEpoch: number;
+  /** Thumbnail builder cards — kept when switching modes so work is not lost. */
+  thumbnailMembers: ThumbnailMember[];
+  setThumbnailMembers: (
+    next:
+      | ThumbnailMember[]
+      | ((prev: ThumbnailMember[]) => ThumbnailMember[]),
+  ) => void;
 };
 
 function revokePhotoUrl(url: string | null) {
@@ -233,6 +246,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [projectEpoch, setProjectEpoch] = useState(0);
+  const [thumbnailMembers, setThumbnailMembers] = useState<ThumbnailMember[]>(
+    () => emptyThumbnailMembers(VIDEO_TEMPLATE.defaultTeamMemberCount),
+  );
 
   const setIntroThumbnail = useCallback((url: string, enabled = true) => {
     setIntroThumbnailUrl((prev) => {
@@ -265,6 +281,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         baselineRef.current = arranged.map((p) => ({ ...p }));
         return arranged;
       });
+      setThumbnailMembers((prev) => resizeThumbnailMembers(prev, count));
     },
     [outputDuration],
   );
@@ -347,6 +364,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setIntroThumbnailEnabled(false);
     setCurrentTime(0);
     setIsPlaying(false);
+    setThumbnailMembers((prev) => {
+      clearThumbnailMembers(prev);
+      return emptyThumbnailMembers(VIDEO_TEMPLATE.defaultTeamMemberCount);
+    });
     setStep(1);
     setProjectEpoch((n) => n + 1);
   }, []);
@@ -694,6 +715,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       clearIntroThumbnail,
       resetProject,
       projectEpoch,
+      thumbnailMembers,
+      setThumbnailMembers,
     }),
     [
       step,
@@ -714,6 +737,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       outputDuration,
       compositionProps,
       projectEpoch,
+      thumbnailMembers,
       setTeamMemberCount,
       setPhotoOnSlot,
       replaceTeamPhotosFromFiles,

@@ -25,18 +25,12 @@ import {
   defaultPhotoFit,
   type ThumbnailMember,
 } from "@/lib/thumbnail-template";
+import {
+  clearThumbnailMembers,
+  emptyThumbnailMembers,
+} from "@/lib/thumbnail-members";
 
 const SLOT_DRAG_TYPE = "application/x-loves-thumb-slot";
-
-function emptyMembers(count: number): ThumbnailMember[] {
-  return Array.from({ length: count }, () => ({
-    id: uuid(),
-    photoUrl: null,
-    name: "",
-    title: "",
-    photoFit: defaultPhotoFit(),
-  }));
-}
 
 export function ThumbnailCreator({
   onAddedToVideo,
@@ -50,6 +44,8 @@ export function ThumbnailCreator({
     clearIntroThumbnail,
     introThumbnailEnabled,
     introThumbnailUrl,
+    thumbnailMembers: members,
+    setThumbnailMembers: setMembers,
   } = useStudio();
 
   // Thumbnails need at least one card — bump "Just me" up to 1.
@@ -59,9 +55,6 @@ export function ThumbnailCreator({
 
   const slotCount = Math.max(1, teamMemberCount) as 1 | 2 | 3 | 4;
 
-  const [members, setMembers] = useState<ThumbnailMember[]>(() =>
-    emptyMembers(Math.max(1, teamMemberCount)),
-  );
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,20 +62,6 @@ export function ThumbnailCreator({
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
   const fileRefs = useRef<Array<HTMLInputElement | null>>([]);
-
-  // Keep thumbnail cards in sync with the shared 1–4 team size.
-  useEffect(() => {
-    setMembers((prev) => {
-      if (prev.length === slotCount) return prev;
-      if (prev.length > slotCount) {
-        prev.slice(slotCount).forEach((m) => {
-          if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-        });
-        return prev.slice(0, slotCount);
-      }
-      return [...prev, ...emptyMembers(slotCount - prev.length)];
-    });
-  }, [slotCount]);
 
   const filledCount = useMemo(
     () => members.filter((m) => m.photoUrl || m.name.trim() || m.title.trim()).length,
@@ -384,10 +363,8 @@ export function ThumbnailCreator({
           type="button"
           onClick={() => {
             setMembers((prev) => {
-              prev.forEach((m) => {
-                if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-              });
-              return emptyMembers(slotCount);
+              clearThumbnailMembers(prev);
+              return emptyThumbnailMembers(slotCount);
             });
             setStatus(null);
           }}
