@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, Trash2, Check } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
+import { Teleprompter } from "@/components/Teleprompter";
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
@@ -70,6 +71,17 @@ export function WebcamRecorder({
     setReviewBlob(null);
   }, [reviewUrl]);
 
+  const attachLivePreview = useCallback(async (stream: MediaStream) => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (el.srcObject !== stream) {
+      el.srcObject = stream;
+    }
+    el.muted = true;
+    el.playsInline = true;
+    await el.play().catch(() => undefined);
+  }, []);
+
   const closeCamera = useCallback(() => {
     clearTimer();
     if (recorderRef.current && recorderRef.current.state !== "inactive") {
@@ -96,6 +108,14 @@ export function WebcamRecorder({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Keep the live preview attached whenever we are in preview or recording.
+  useEffect(() => {
+    if (phase !== "preview" && phase !== "recording") return;
+    const stream = streamRef.current;
+    if (!stream) return;
+    void attachLivePreview(stream);
+  }, [phase, attachLivePreview]);
 
   const reportError = (message: string) => {
     setLocalError(message);
@@ -130,13 +150,13 @@ export function WebcamRecorder({
         },
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(() => undefined);
-      }
       resetReview();
       setPhase("preview");
       setSeconds(0);
+      // Attach after phase change so the video element is mounted.
+      requestAnimationFrame(() => {
+        void attachLivePreview(stream);
+      });
     } catch (e) {
       const name = e instanceof DOMException ? e.name : "";
       if (name === "NotAllowedError" || name === "PermissionDeniedError") {
@@ -159,9 +179,12 @@ export function WebcamRecorder({
     setLocalError(null);
     const stream = streamRef.current;
     if (!stream) {
-      reportError("Camera is not ready yet. Tap Use webcam again.");
+      reportError("Camera is not ready yet. Tap Start webcam again.");
       return;
     }
+
+    // Keep showing the live camera while MediaRecorder captures the same stream.
+    void attachLivePreview(stream);
 
     chunksRef.current = [];
     const options = mimeType ? { mimeType } : undefined;
@@ -195,6 +218,7 @@ export function WebcamRecorder({
       if (blob.size < 1000) {
         reportError("Recording was empty. Please try recording again.");
         setPhase("preview");
+        void attachLivePreview(stream);
         return;
       }
       const url = URL.createObjectURL(blob);
@@ -252,6 +276,8 @@ export function WebcamRecorder({
     }
   };
 
+  const live = phase === "preview" || phase === "recording";
+
   return (
     <div className="rounded-3xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -263,26 +289,27 @@ export function WebcamRecorder({
             </h3>
           </div>
           <p className="mt-2 text-lg text-[var(--muted)]">
-            Use your computer camera and microphone right here. No separate
-            file needed.
+            See yourself live while you record, and read a scrolling script
+            (teleprompter) next to the camera.
           </p>
         </div>
-        <HelpTip title="Webcam recording" size="lg">
+        <HelpTip title="Webcam + teleprompter" size="lg">
           <p>
-            Tap <strong>Start webcam</strong>. Your browser will ask to use the
-            camera and microphone — choose Allow.
-          </p>
-          <p>Check that you look bright and can hear yourself on a short test.</p>
-          <p>
-            Tap <strong>Start recording</strong>, say your intro (~60 seconds),
-            then <strong>Stop</strong>.
+            Tap <strong>Start webcam</strong>. Allow camera and microphone when
+            the browser asks.
           </p>
           <p>
-            Preview the clip, then tap <strong>Use this recording</strong>.
+            You will see a <strong>live preview</strong> of yourself the whole
+            time — before and during recording.
           </p>
           <p>
-            Sit a little to the left if you can — teammate photos appear on the
-            right in the finished video.
+            Edit the <strong>teleprompter</strong> script (or use the sample),
+            then tap <strong>Start recording</strong>. The words scroll so you
+            can read while looking near the camera.
+          </p>
+          <p>
+            Tap <strong>Stop</strong>, review the clip, then{" "}
+            <strong>Use this recording</strong>.
           </p>
         </HelpTip>
       </div>
@@ -301,58 +328,80 @@ export function WebcamRecorder({
         </div>
       ) : null}
 
-      {(phase === "preview" || phase === "recording") && (
+      {live ? (
         <div className="mt-4 space-y-4">
-          <div className="overflow-hidden rounded-2xl border-2 border-[var(--ink)] bg-black">
-            <video
-              ref={videoRef}
-              muted
-              playsInline
-              autoPlay
-              className="aspect-video w-full object-cover scale-x-[-1]"
-            />
+          <div className="how-banner">
+            Live camera stays on while you record. Use the teleprompter on the
+            right (or below on phones) so you can read your script.
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            {phase === "preview" ? (
-              <>
-                <button
-                  type="button"
-                  onClick={startRecording}
-                  className="btn-primary"
-                >
-                  <Circle className="h-5 w-5 fill-current" />
-                  Start recording
-                </button>
-                <button
-                  type="button"
-                  onClick={closeCamera}
-                  className="btn-secondary"
-                >
-                  Cancel webcam
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={stopRecording}
-                  className="btn-primary"
-                >
-                  <Square className="h-5 w-5 fill-current" />
-                  Stop recording
-                </button>
-                <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
-                  Recording… {formatClock(seconds)}
-                </span>
-              </>
-            )}
+
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+            <div className="space-y-3">
+              <div className="relative overflow-hidden rounded-2xl border-2 border-[var(--ink)] bg-black">
+                <video
+                  ref={videoRef}
+                  muted
+                  playsInline
+                  autoPlay
+                  className="aspect-video w-full object-cover scale-x-[-1]"
+                />
+                {phase === "recording" ? (
+                  <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
+                    <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
+                    Live · Rec {formatClock(seconds)}
+                  </div>
+                ) : (
+                  <div className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
+                    Live preview — not recording yet
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {phase === "preview" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      className="btn-primary"
+                    >
+                      <Circle className="h-5 w-5 fill-current" />
+                      Start recording
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeCamera}
+                      className="btn-secondary"
+                    >
+                      Cancel webcam
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={stopRecording}
+                      className="btn-primary"
+                    >
+                      <Square className="h-5 w-5 fill-current" />
+                      Stop recording
+                    </button>
+                    <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
+                      Recording… {formatClock(seconds)}
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="text-base text-[var(--muted)]">
+                Aim for about 60 seconds. Edit your script first, then record.
+                You can trim the clip on the timeline after you save it.
+              </p>
+            </div>
+
+            <Teleprompter recording={phase === "recording"} />
           </div>
-          <p className="text-base text-[var(--muted)]">
-            Aim for about 60 seconds. You can trim the clip on the timeline
-            after you save it.
-          </p>
         </div>
-      )}
+      ) : null}
 
       {phase === "review" && reviewUrl ? (
         <div className="mt-4 space-y-4">
