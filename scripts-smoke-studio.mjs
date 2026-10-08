@@ -28,7 +28,7 @@ await page.waitForSelector('input[placeholder="Example: Jared"]', {
   timeout: 15000,
 });
 
-await page.getByRole("button", { name: /Continue to Finish/i }).click();
+await page.getByRole("button", { name: /Continue to next step/i }).click();
 await page.waitForSelector("text=Export to MP4", { timeout: 10000 });
 await page.waitForSelector("text=Steady Focus", { timeout: 5000 });
 
