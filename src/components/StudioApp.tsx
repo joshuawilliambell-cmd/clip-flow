@@ -179,35 +179,41 @@ function StudioShell() {
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">
         <ModeSwitcher mode={mode} onChange={setMode} />
 
-        {mode === "video" ? (
-          <>
-            <div className="animate-fade-up-delay">
-              <PurposeGuide />
-            </div>
-            <div className="mb-6">
-              <StepIndicator step={step} onChange={setStep} />
-            </div>
-            <section className="studio-panel animate-rise p-4 md:p-8">
-              {step === 1 ? <VideoUploadStep /> : null}
-              {step === 2 ? <TeamPhotosStep /> : null}
-              {step === 3 ? (
-                <PreviewExportStep
-                  onCreateThumbnail={() => setMode("thumbnail")}
-                />
-              ) : null}
-            </section>
-          </>
-        ) : (
+        {/* Keep both modes mounted (hidden) so thumbnail photos and video
+            step work survive switching back and forth. */}
+        <div className={mode === "video" ? "block" : "hidden"} aria-hidden={mode !== "video"}>
+          <div className="animate-fade-up-delay">
+            <PurposeGuide />
+          </div>
+          <div className="mb-6">
+            <StepIndicator step={step} onChange={setStep} />
+          </div>
+          <section className="studio-panel animate-rise p-4 md:p-8">
+            {step === 1 ? <VideoUploadStep /> : null}
+            {step === 2 ? <TeamPhotosStep /> : null}
+            {step === 3 ? (
+              <PreviewExportStep
+                onCreateThumbnail={() => setMode("thumbnail")}
+              />
+            ) : null}
+          </section>
+        </div>
+
+        <div
+          className={mode === "thumbnail" ? "block" : "hidden"}
+          aria-hidden={mode !== "thumbnail"}
+        >
           <section className="studio-panel animate-rise p-4 md:p-8">
             <ThumbnailCreator
               key={projectEpoch}
+              active={mode === "thumbnail"}
               onAddedToVideo={() => {
                 setMode("video");
                 setStep(3);
               }}
             />
           </section>
-        )}
+        </div>
       </main>
 
       <footer className="mt-4 border-t-2 border-[var(--ink)] bg-[var(--olive)]">

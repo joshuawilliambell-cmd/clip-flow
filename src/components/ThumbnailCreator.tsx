@@ -34,8 +34,11 @@ const SLOT_DRAG_TYPE = "application/x-loves-thumb-slot";
 
 export function ThumbnailCreator({
   onAddedToVideo,
+  active = true,
 }: {
   onAddedToVideo?: () => void;
+  /** When false, this panel is only kept mounted for state retention. */
+  active?: boolean;
 } = {}) {
   const {
     teamMemberCount,
@@ -48,12 +51,29 @@ export function ThumbnailCreator({
     setThumbnailMembers: setMembers,
   } = useStudio();
 
-  // Thumbnails need at least one card — bump "Just me" up to 1.
+  // Thumbnails need at least one card — only bump while this mode is active
+  // so "Just me" on the video flow is not overwritten by a hidden mount.
   useEffect(() => {
-    if (teamMemberCount === 0) setTeamMemberCount(1);
-  }, [teamMemberCount, setTeamMemberCount]);
+    if (active && teamMemberCount === 0) setTeamMemberCount(1);
+  }, [active, teamMemberCount, setTeamMemberCount]);
 
   const slotCount = Math.max(1, teamMemberCount) as 1 | 2 | 3 | 4;
+
+  // Keep context member list length aligned with the shared team size.
+  useEffect(() => {
+    if (members.length === slotCount) return;
+    setMembers((prev) => {
+      if (prev.length === slotCount) return prev;
+      if (prev.length > slotCount) {
+        const dropped = prev.slice(slotCount);
+        dropped.forEach((m) => {
+          if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
+        });
+        return prev.slice(0, slotCount);
+      }
+      return [...prev, ...emptyThumbnailMembers(slotCount - prev.length)];
+    });
+  }, [slotCount, members.length, setMembers]);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
