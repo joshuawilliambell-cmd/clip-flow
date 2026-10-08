@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, Film } from "lucide-react";
+import { Upload, Film, FolderOpen } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
+import { WebcamRecorder } from "@/components/WebcamRecorder";
 
 export function VideoUploadStep() {
   const { video, setVideoFromFile, clearVideo, setStep } = useStudio();
@@ -50,131 +51,162 @@ export function VideoUploadStep() {
             Step 1: Add your video
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Upload the video of you talking. Then use the red handles on the
-            timeline to keep only the part you want (about 60 seconds).
+            Choose a video from a folder on your computer, or record a new one
+            with this computer’s webcam. Then trim it to about 60 seconds.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
           <p>
-            <strong>1.</strong> Tap the big upload box and choose an MP4 or MOV
-            file from your computer.
+            <strong>Option A:</strong> Tap Choose video from folder and pick an
+            MP4, MOV, or WebM file you already recorded.
           </p>
           <p>
-            <strong>2.</strong> Watch the preview. Tap the big Play button to
-            listen.
+            <strong>Option B:</strong> Tap Start webcam to record with this
+            computer’s camera and microphone.
           </p>
-          <p>
-            <strong>3.</strong> On the timeline, drag the red ends to cut extra
-            time from the start or end.
-          </p>
-          <p>
-            <strong>4.</strong> When it looks right, tap Continue to Team Photos.
-          </p>
+          <p>Watch the preview, then trim with the red timeline handles.</p>
+          <p>When it looks right, tap Continue to Team Photos.</p>
         </HelpTip>
       </div>
 
       <div className="how-banner">
-        Tip: Prefer a practice run first? Tap “Try a practice video” below. You
-        can replace it later with your real video.
+        Two ways to add video: upload a file from a folder, or record live with
+        your webcam below. Prefer a quick demo first? Use “Try a practice
+        video.”
       </div>
 
       <RecordingGuide />
 
       {!video ? (
-        <div
-          onDragEnter={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            void handleFiles(e.dataTransfer.files);
-          }}
-          className={`flex min-h-[260px] w-full flex-col items-center justify-center rounded-3xl border-4 border-dashed px-6 py-12 transition ${
-            dragging
-              ? "border-[var(--primary)] bg-[var(--yellow)]/40"
-              : "border-[var(--ink)] bg-[var(--panel-soft)]"
-          }`}
-        >
-          <div className="mb-2 flex items-center gap-2">
-            <p className="text-center text-2xl font-bold text-[var(--ink)] md:text-3xl">
-              Put your video here
-            </p>
-            <HelpTip title="How to upload a video">
-              <p>Tap “Choose video file”, then pick one video from your device.</p>
-              <p>Allowed types: MP4 or MOV.</p>
-              <p>Longer videos are OK — you will trim them on the timeline.</p>
-              <p>
-                You can also drag a file from a folder and drop it onto this box
-                (on a computer).
+        <div className="space-y-4">
+          <div
+            onDragEnter={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              void handleFiles(e.dataTransfer.files);
+            }}
+            className={`flex min-h-[220px] w-full flex-col items-center justify-center rounded-3xl border-4 border-dashed px-6 py-10 transition ${
+              dragging
+                ? "border-[var(--primary)] bg-[var(--yellow)]/40"
+                : "border-[var(--ink)] bg-[var(--panel-soft)]"
+            }`}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <FolderOpen className="h-7 w-7 text-[var(--primary)]" />
+              <p className="text-center text-2xl font-bold text-[var(--ink)] md:text-3xl">
+                Option A: Upload from a folder
               </p>
-            </HelpTip>
+              <HelpTip title="Upload from a folder">
+                <p>
+                  Tap <strong>Choose video from folder</strong>. Your computer’s
+                  file window opens.
+                </p>
+                <p>
+                  Find the video on your hard drive, Downloads folder, Desktop,
+                  USB drive, or cloud-synced folder.
+                </p>
+                <p>Select an MP4, MOV, or WebM file, then Open.</p>
+                <p>
+                  On a computer you can also drag a file from a folder and drop
+                  it onto this box.
+                </p>
+              </HelpTip>
+            </div>
+            <p className="mb-6 max-w-xl text-center text-lg text-[var(--muted)]">
+              Use a video you already recorded on this computer, phone, or
+              camera (then copied here). MP4, MOV, or WebM · up to about 500 MB.
+            </p>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="btn-primary"
+            >
+              <Upload className="h-6 w-6" />
+              Choose video from folder
+            </button>
+            <button
+              type="button"
+              onClick={() => void loadSample()}
+              className="btn-yellow mt-4"
+            >
+              {loadingSample ? "Loading practice video…" : "Try a practice video"}
+            </button>
           </div>
-          <p className="mb-6 max-w-lg text-center text-lg text-[var(--muted)]">
-            MP4 or MOV files work best. Up to about 500 MB.
-          </p>
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="btn-primary"
-          >
-            <Upload className="h-6 w-6" />
-            Choose video file
-          </button>
-          <button
-            type="button"
-            onClick={() => void loadSample()}
-            className="btn-yellow mt-4"
-          >
-            {loadingSample ? "Loading practice video…" : "Try a practice video"}
-          </button>
+
+          <div className="flex items-center gap-3">
+            <div className="h-0.5 flex-1 bg-[var(--ink)]" />
+            <p className="text-lg font-bold text-[var(--ink)]">or</p>
+            <div className="h-0.5 flex-1 bg-[var(--ink)]" />
+          </div>
+
+          <WebcamRecorder
+            onCaptured={async (file) => {
+              setError(null);
+              await setVideoFromFile(file);
+            }}
+            onError={setError}
+          />
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-4">
-          <Film className="h-7 w-7 text-[var(--primary)]" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-lg font-bold text-[var(--ink)]">
-              {video.fileName}
-            </p>
-            <p className="text-base text-[var(--muted)]">
-              Length: {video.durationSeconds.toFixed(1)} seconds
-            </p>
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-4">
+            <Film className="h-7 w-7 text-[var(--primary)]" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-lg font-bold text-[var(--ink)]">
+                {video.fileName}
+              </p>
+              <p className="text-base text-[var(--muted)]">
+                Length: {video.durationSeconds.toFixed(1)} seconds
+              </p>
+            </div>
+            <HelpTip title="Change or remove this video">
+              <p>
+                <strong>Replace from folder</strong> picks a different saved
+                file.
+              </p>
+              <p>
+                <strong>Record with webcam</strong> clears this clip so you can
+                record a new one.
+              </p>
+              <p>
+                <strong>Remove</strong> clears the video so you can start over.
+              </p>
+            </HelpTip>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="btn-secondary"
+            >
+              Replace from folder
+            </button>
+            <button
+              type="button"
+              onClick={clearVideo}
+              className="btn-secondary text-[var(--primary)]"
+            >
+              Remove
+            </button>
           </div>
-          <HelpTip title="Change or remove this video">
-            <p>
-              <strong>Replace</strong> lets you pick a different video file.
-            </p>
-            <p>
-              <strong>Remove</strong> clears the video so you can start over.
-            </p>
-          </HelpTip>
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="btn-secondary"
-          >
-            Replace
-          </button>
-          <button
-            type="button"
-            onClick={clearVideo}
-            className="btn-secondary text-[var(--primary)]"
-          >
-            Remove
-          </button>
+          <p className="text-base text-[var(--muted)]">
+            Want to record a new webcam clip instead? Tap Remove, then use
+            Option B: Record with webcam.
+          </p>
         </div>
       )}
 
       <input
         ref={inputRef}
         type="file"
-        accept="video/mp4,video/quicktime,.mp4,.mov"
+        accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
         className="hidden"
         onChange={(e) => void handleFiles(e.target.files)}
       />
@@ -191,8 +223,7 @@ export function VideoUploadStep() {
       <div className="flex flex-wrap items-center justify-end gap-3 border-t-2 border-[var(--border)] pt-4">
         <HelpTip title="Ready for the next step?">
           <p>
-            After your video is uploaded and trimmed, tap Continue to Team
-            Photos.
+            After your video is added and trimmed, tap Continue to Team Photos.
           </p>
           <p>You can always come back to this step later.</p>
         </HelpTip>

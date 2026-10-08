@@ -72,17 +72,25 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
     const el = document.createElement("video");
     el.preload = "metadata";
     el.onloadedmetadata = () => {
+      // Some WebM recordings report Infinity until enough data is available.
+      const raw = el.duration;
+      const durationSeconds =
+        Number.isFinite(raw) && raw > 0
+          ? raw
+          : VIDEO_TEMPLATE.targetDurationSeconds;
       resolve({
         url,
         fileName: file.name,
-        durationSeconds: el.duration || 0,
+        durationSeconds,
         width: el.videoWidth || VIDEO_TEMPLATE.width,
         height: el.videoHeight || VIDEO_TEMPLATE.height,
       });
     };
     el.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error("Could not read that video. Try an MP4 or MOV file."));
+      reject(
+        new Error("Could not read that video. Try an MP4, MOV, or WebM file."),
+      );
     };
     el.src = url;
   });
@@ -126,9 +134,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const setVideoFromFile = useCallback(async (file: File) => {
     const typeOk =
       VIDEO_TEMPLATE.uploads.videoAccept.includes(file.type) ||
-      /\.(mp4|mov)$/i.test(file.name);
+      /^video\//i.test(file.type) ||
+      /\.(mp4|mov|webm)$/i.test(file.name);
     if (!typeOk) {
-      throw new Error("Please upload an MP4 or MOV video.");
+      throw new Error("Please upload an MP4, MOV, or WebM video.");
     }
     if (file.size > VIDEO_TEMPLATE.uploads.maxVideoBytes) {
       throw new Error("Video is too large. Please use a file under 500 MB.");

@@ -61,8 +61,8 @@ const DEVICES: DeviceGuide[] = [
       "Save the file as MP4 or MOV when you are done.",
     ],
     getIntoTool: [
-      "Find the video file in Downloads or your Videos folder.",
-      "In Step 1 of this tool, tap Choose video file and select that recording.",
+      "Easiest: in Step 1, use Option B — Record with this computer’s webcam — to record right in this tool.",
+      "Or record in Camera / QuickTime, then in Step 1 tap Choose video from folder and select the file.",
       "Watch the preview, then trim with the red timeline handles if needed.",
     ],
   },
