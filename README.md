@@ -15,6 +15,25 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 `npm run dev` uses webpack (more reliable than Turbopack in some preview environments). For a production-style local run: `npm run build && npm start`.
 
+## Deploy to Vercel
+
+This repo includes `vercel.json` for Next.js.
+
+**Option A — claim a temporary deploy (no login required first):**
+
+```bash
+npx vercel deploy --temporary --yes
+```
+
+Open the printed URL to try the app, then use the **claim** link from the CLI output to attach the deployment to your Vercel account so it does not expire.
+
+**Option B — link a permanent project (after `npx vercel login`):**
+
+```bash
+npx vercel link
+npx vercel --prod
+```
+
 ## Employee flow
 
 ### Team intro video

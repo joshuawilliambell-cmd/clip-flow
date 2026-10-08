@@ -62,8 +62,8 @@ export function IntroductionVideo(props: CompositionProps) {
             trimBefore={trimBefore}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             volume={videoVolume}
-            pauseWhenBuffering
-            acceptableTimeShiftInSeconds={1}
+            // Avoid pauseWhenBuffering — it often leaves blob uploads stuck on a black frame.
+            acceptableTimeShiftInSeconds={1.5}
           />
         </AbsoluteFill>
       ) : (

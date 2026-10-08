@@ -141,7 +141,7 @@ export function TeamPhotosStep() {
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
             {teamMemberCount === 0
-              ? "You chose Just me — no teammate photos needed. Continue to Finish when your video looks good."
+              ? "You chose Just me — no teammate photos needed. Continue to the next step when your video looks good."
               : `You chose ${teamMemberCount} teammate${teamMemberCount === 1 ? "" : "s"}. Add a photo and name in each slot (${filledCount} of ${teamMemberCount} filled). Drag the grip to change who appears first.`}
           </p>
         </div>
@@ -173,7 +173,7 @@ export function TeamPhotosStep() {
       {teamMemberCount === 0 ? (
         <div className="how-banner">
           No teammate photo slots for this video. Your teleprompter script is
-          the &quot;Just me&quot; Fleet Hub welcome. Tap Continue to Finish when
+          the &quot;Just me&quot; Fleet Hub welcome. Tap Continue to next step when
           ready.
         </div>
       ) : (
@@ -440,10 +440,10 @@ export function TeamPhotosStep() {
           Back
         </button>
         <div className="flex items-center gap-2">
-          <HelpTip title="Ready for the last step?">
+          <HelpTip title="Ready for the next step?">
             <p>
-              When your photos and names look good, tap Continue to Finish &
-              Download.
+              When your photos and names look good, tap Continue to next step
+              for Finish & Download.
             </p>
           </HelpTip>
           <button
@@ -452,7 +452,7 @@ export function TeamPhotosStep() {
             onClick={() => setStep(3)}
             className="btn-primary min-w-[12rem]"
           >
-            Continue to Finish
+            Continue to next step
           </button>
         </div>
       </div>

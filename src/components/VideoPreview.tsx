@@ -70,12 +70,24 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     player.addEventListener("ended", onEnded);
     setReady(true);
 
+    // Nudge decode so the first frame paints (blob uploads can otherwise stay black).
+    const warm = window.setTimeout(() => {
+      try {
+        const frame = Math.max(0, Math.round(currentTime * VIDEO_TEMPLATE.fps));
+        player.seekTo(Math.min(frame, Math.max(0, durationInFrames - 1)));
+      } catch {
+        /* ignore */
+      }
+    }, 80);
+
     return () => {
+      window.clearTimeout(warm);
       player.removeEventListener("frameupdate", onFrame);
       player.removeEventListener("play", onPlay);
       player.removeEventListener("pause", onPause);
       player.removeEventListener("ended", onEnded);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setCurrentTime, setIsPlaying, inputProps.videoSrc, durationInFrames]);
 
   // Keep Remotion in sync when timeline (or other UI) seeks while paused.
@@ -83,10 +95,13 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     const player = playerRef.current;
     if (!player || isPlaying) return;
     const frame = Math.round(currentTime * VIDEO_TEMPLATE.fps);
-    if (Math.abs(player.getCurrentFrame() - frame) > 1) {
-      player.seekTo(frame);
-    }
-  }, [currentTime, isPlaying]);
+    const id = window.setTimeout(() => {
+      if (Math.abs(player.getCurrentFrame() - frame) > 1) {
+        player.seekTo(Math.min(frame, Math.max(0, durationInFrames - 1)));
+      }
+    }, 16);
+    return () => window.clearTimeout(id);
+  }, [currentTime, isPlaying, durationInFrames]);
 
   // Honor isPlaying from timeline Play/Pause (and the preview buttons).
   useEffect(() => {
