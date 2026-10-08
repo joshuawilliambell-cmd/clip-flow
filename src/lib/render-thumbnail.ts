@@ -1,5 +1,6 @@
 import {
   THUMBNAIL_TEMPLATE,
+  defaultPhotoFit,
   type ThumbnailMember,
 } from "@/lib/thumbnail-template";
 
@@ -267,6 +268,7 @@ export async function renderTeamThumbnail(
       photoUrl: null,
       name: "",
       title: "",
+      photoFit: defaultPhotoFit(),
     };
     await drawMemberCard(ctx, member, startX + i * (card.width + card.gap), cardY);
   }

@@ -7,10 +7,12 @@ import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
+import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 
 export function VideoUploadStep() {
-  const { video, setVideoFromFile, clearVideo, setStep } = useStudio();
+  const { video, setVideoFromFile, clearVideo, setStep, teamMemberCount } =
+    useStudio();
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -66,6 +68,10 @@ export function VideoUploadStep() {
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
           <p>
+            <strong>1.</strong> First choose how many teammates you will
+            introduce (1–4). That sets up the photo slots and thumbnail.
+          </p>
+          <p>
             <strong>Option A:</strong> Tap Choose video from folder and pick an
             MP4, MOV, or WebM file you already recorded.
           </p>
@@ -78,10 +84,12 @@ export function VideoUploadStep() {
         </HelpTip>
       </div>
 
+      <TeamSizePicker />
+
       <div className="how-banner">
-        Two ways to add video: upload a file from a folder, or record live with
-        your webcam below. Prefer a quick demo first? Use “Try a practice
-        video.”
+        You selected {teamMemberCount} teammate
+        {teamMemberCount === 1 ? "" : "s"}. Next, add your talking video — upload
+        a file, record with webcam, or try a practice video.
       </div>
 
       <RecordingGuide />

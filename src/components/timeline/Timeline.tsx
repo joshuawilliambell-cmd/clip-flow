@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useStudio } from "@/lib/studio-context";
 import { VIDEO_TEMPLATE } from "@/lib/template";
 import { formatClock, formatTime, sortPhotosByStart } from "@/lib/timeline";
+import { filledTeamPhotos } from "@/lib/team-slots";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
 
@@ -33,7 +34,10 @@ export function Timeline() {
 
   const trackRef = useRef<HTMLDivElement>(null);
   const [trackWidth, setTrackWidth] = useState(800);
-  const sorted = useMemo(() => sortPhotosByStart(photos), [photos]);
+  const sorted = useMemo(
+    () => sortPhotosByStart(filledTeamPhotos(photos)),
+    [photos],
+  );
   const trimOrigin = useRef({ start: 0, end: 0 });
 
   const measure = useCallback((node: HTMLDivElement | null) => {
@@ -202,7 +206,7 @@ export function Timeline() {
                     key={photo.id}
                     id={photo.id}
                     name={photo.name || "Teammate"}
-                    thumb={photo.url}
+                    thumb={photo.url ?? ""}
                     color={color}
                     left={photo.startSeconds * pxPerSecond}
                     width={Math.max(36, photo.durationSeconds * pxPerSecond)}

@@ -30,12 +30,16 @@ export function formatClock(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-/** Place photos sequentially starting at the template offset. */
+/** Place filled photos sequentially; empty slots stay at the end unused. */
 export function autoArrangePhotos(
   photos: TeamPhoto[],
   timelineDuration: number,
 ): TeamPhoto[] {
   if (photos.length === 0 || timelineDuration <= 0) return photos;
+
+  const filled = photos.filter((p) => p.url);
+  const empty = photos.filter((p) => !p.url);
+  if (filled.length === 0) return photos;
 
   const start = Math.min(
     VIDEO_TEMPLATE.photoStartOffsetSeconds,
@@ -45,12 +49,12 @@ export function autoArrangePhotos(
   const defaultDur = VIDEO_TEMPLATE.defaultPhotoDurationSeconds;
 
   let duration: number = defaultDur;
-  if (photos.length * defaultDur > available) {
-    duration = Math.max(MIN, available / photos.length);
+  if (filled.length * defaultDur > available) {
+    duration = Math.max(MIN, available / filled.length);
   }
 
   let cursor = start;
-  return photos.map((photo) => {
+  const arranged = filled.map((photo) => {
     const remaining = Math.max(0, timelineDuration - cursor);
     const dur = Math.min(duration, remaining);
     const next: TeamPhoto = {
@@ -67,6 +71,8 @@ export function autoArrangePhotos(
     }
     return next;
   });
+
+  return [...arranged, ...empty.map((p) => ({ ...p }))];
 }
 
 export function sortPhotosByStart(photos: TeamPhoto[]): TeamPhoto[] {

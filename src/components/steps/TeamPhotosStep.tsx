@@ -8,28 +8,46 @@ import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
 import { PipSidePicker } from "@/components/PipSidePicker";
+import { TeamSizePicker } from "@/components/TeamSizePicker";
+import { filledTeamPhotos } from "@/lib/team-slots";
 
 export function TeamPhotosStep() {
   const {
     photos,
     video,
+    teamMemberCount,
     addPhotosFromFiles,
+    setPhotoOnSlot,
+    replaceTeamPhotosFromFiles,
     updatePhotoMeta,
-    removePhoto,
+    clearPhotoSlot,
     autoArrange,
     resetTimeline,
     setStep,
   } = useStudio();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const fileRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const bulkRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [loadingSample, setLoadingSample] = useState(false);
+
+  const filledCount = filledTeamPhotos(photos).length;
 
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     setError(null);
     try {
       await addPhotosFromFiles(files);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
+    }
+  };
+
+  const handleSlotFile = async (id: string, file: File | undefined) => {
+    if (!file) return;
+    setError(null);
+    try {
+      await setPhotoOnSlot(id, file);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
     }
@@ -55,7 +73,12 @@ export function TeamPhotosStep() {
           name: "Teresa",
           title: "Fleet Account Specialist",
         },
-      ];
+        {
+          path: "/samples/team-jared.jpg",
+          name: "Alex",
+          title: "Account Manager",
+        },
+      ].slice(0, teamMemberCount);
       const files: File[] = [];
       for (const sample of samples) {
         const res = await fetch(sample.path);
@@ -67,7 +90,7 @@ export function TeamPhotosStep() {
           }),
         );
       }
-      const arranged = await addPhotosFromFiles(files);
+      const arranged = await replaceTeamPhotosFromFiles(files);
       for (const sample of samples) {
         const match = arranged.find(
           (p) => p.name.toLowerCase() === sample.name.toLowerCase(),
@@ -94,38 +117,36 @@ export function TeamPhotosStep() {
             Step 2: Add your team
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Add photos, type each person’s name and job title, then drag the
-            colored bars to choose when each photo appears.
+            You chose {teamMemberCount} teammate
+            {teamMemberCount === 1 ? "" : "s"}. Add a photo and name in each
+            slot ({filledCount} of {teamMemberCount} filled).
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
           <p>
-            <strong>1.</strong> Tap Choose photos and pick upright (portrait)
-            headshots — JPG, PNG, or WebP.
+            <strong>1.</strong> Confirm how many people (1–4) at the top if you
+            need to change it.
           </p>
           <p>
-            <strong>2.</strong> Fill in Name and Job title for each person.
+            <strong>2.</strong> Tap each slot and add a portrait headshot.
           </p>
           <p>
-            <strong>3.</strong> Choose Left side or Right side for where photos
-            appear (with padding, like the example).
+            <strong>3.</strong> Type Name and Job title for each person.
           </p>
           <p>
-            <strong>4.</strong> On Track 2 of the timeline, each photo starts at{" "}
-            {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds. Drag the bar
-            to change when it shows; drag the ends to make it shorter or longer.
-          </p>
-          <p>
-            Photos stay portrait on a 16:9 video. You do <strong>not</strong>{" "}
-            resize or drag them on the picture — that is done for you.
+            <strong>4.</strong> Each photo starts at{" "}
+            {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds on the
+            timeline — drag the ends to change length.
           </p>
         </HelpTip>
       </div>
 
+      <TeamSizePicker />
+
       <div className="how-banner">
         Each team photo starts at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}{" "}
-        seconds — long enough for a short intro. Drag the ends of a colored bar
-        on the timeline to make it shorter or longer.
+        seconds. Drag the ends of a colored bar on the timeline to make it
+        shorter or longer.
       </div>
 
       {!video ? (
@@ -138,36 +159,51 @@ export function TeamPhotosStep() {
         <button
           type="button"
           onClick={autoArrange}
-          disabled={photos.length === 0}
+          disabled={filledCount === 0}
           className="btn-secondary"
         >
           <Wand2 className="h-5 w-5" /> Auto Arrange Photos
         </button>
         <HelpTip title="Auto Arrange Photos">
           <p>
-            This lines up your photos one after another, each lasting{" "}
-            {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds by default,
-            starting a few seconds into the video.
+            This lines up your filled photos one after another, each lasting{" "}
+            {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds by default.
           </p>
-          <p>
-            After arranging, drag the ends of any photo bar to shorten or
-            lengthen that person&apos;s time on screen.
-          </p>
-          <p>Use it if the timing got messy and you want a clean starting point.</p>
         </HelpTip>
         <button
           type="button"
           onClick={resetTimeline}
-          disabled={photos.length === 0}
+          disabled={filledCount === 0}
           className="btn-secondary"
         >
           <RotateCcw className="h-5 w-5" /> Reset Timeline
         </button>
-        <HelpTip title="Reset Timeline">
-          <p>This puts the photo timing back to the last automatic arrangement.</p>
-          <p>Your names and titles stay the same.</p>
-        </HelpTip>
+        <button
+          type="button"
+          onClick={() => void loadSampleTeam()}
+          className="btn-yellow"
+        >
+          {loadingSample ? "Loading…" : "Load practice team"}
+        </button>
+        <button
+          type="button"
+          onClick={() => bulkRef.current?.click()}
+          className="btn-secondary"
+        >
+          <ImagePlus className="h-5 w-5" /> Fill empty slots
+        </button>
       </div>
+      <input
+        ref={bulkRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          void handleFiles(e.target.files);
+          e.currentTarget.value = "";
+        }}
+      />
 
       <div
         onDragEnter={(e) => {
@@ -184,52 +220,14 @@ export function TeamPhotosStep() {
           setDragging(false);
           void handleFiles(e.dataTransfer.files);
         }}
-        className={`flex w-full flex-wrap items-center justify-center gap-4 rounded-3xl border-4 border-dashed px-4 py-10 transition ${
+        className={`rounded-2xl border-2 border-dashed px-4 py-3 text-center text-base ${
           dragging
             ? "border-[var(--primary)] bg-[var(--yellow)]/40"
-            : "border-[var(--ink)] bg-[var(--panel-soft)]"
+            : "border-[var(--border)] bg-[var(--panel-soft)]"
         }`}
       >
-        <div className="flex items-center gap-3">
-          <ImagePlus className="h-8 w-8 text-[var(--primary)]" />
-          <div>
-            <p className="text-xl font-bold text-[var(--ink)]">
-              Add team photos here
-            </p>
-            <p className="text-base text-[var(--muted)]">
-              JPG, PNG, or WebP · up to {VIDEO_TEMPLATE.maxPhotos} photos ·{" "}
-              {photos.length} added
-            </p>
-          </div>
-          <HelpTip title="How to add photos">
-            <p>Tap Choose photos and select one or more pictures.</p>
-            <p>You can add several photos at once.</p>
-            <p>On a computer, you can also drag photos onto this box.</p>
-          </HelpTip>
-        </div>
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="btn-primary"
-        >
-          Choose photos
-        </button>
-        <button
-          type="button"
-          onClick={() => void loadSampleTeam()}
-          className="btn-yellow"
-        >
-          {loadingSample ? "Loading…" : "Load practice team"}
-        </button>
+        Tip: drag several photos onto this page to fill empty slots in order.
       </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-        multiple
-        className="hidden"
-        onChange={(e) => void handleFiles(e.target.files)}
-      />
 
       {error ? (
         <p className="rounded-xl border-2 border-[var(--primary)] bg-red-50 px-4 py-3 text-lg font-medium text-[var(--primary-dark)]">
@@ -237,83 +235,83 @@ export function TeamPhotosStep() {
         </p>
       ) : null}
 
-      {photos.length > 0 ? (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <h3 className="text-2xl font-bold text-[var(--ink)]">
-              Names and job titles
-            </h3>
-            <HelpTip title="Names and job titles">
-              <p>Type the person’s name and job title in the boxes.</p>
-              <p>
-                This text appears under their photo in the finished video
-                automatically.
-              </p>
-              <p>Department is optional.</p>
-            </HelpTip>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {photos.map((photo) => (
-              <article
-                key={photo.id}
-                className="flex gap-3 rounded-2xl border-2 border-[var(--ink)] bg-white p-4"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {photos.map((photo, index) => (
+          <article
+            key={photo.id}
+            className="flex gap-3 rounded-2xl border-2 border-[var(--ink)] bg-white p-4"
+          >
+            <button
+              type="button"
+              onClick={() => fileRefs.current[index]?.click()}
+              className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#eef1f6]"
+            >
+              {photo.url ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={photo.url}
-                  alt={photo.name}
-                  className="h-28 w-24 shrink-0 rounded-xl object-cover object-[center_28%] border-2 border-[var(--ink)]"
+                  alt={photo.name || `Teammate ${index + 1}`}
+                  className="h-full w-full object-cover object-[center_28%]"
                 />
-                <div className="min-w-0 flex-1 space-y-3">
-                  <label className="block">
-                    <span className="field-label">Name</span>
-                    <input
-                      value={photo.name}
-                      onChange={(e) =>
-                        updatePhotoMeta(photo.id, { name: e.target.value })
-                      }
-                      className="field-input"
-                      placeholder="Example: Jared"
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="field-label">Job title</span>
-                    <input
-                      value={photo.title}
-                      onChange={(e) =>
-                        updatePhotoMeta(photo.id, { title: e.target.value })
-                      }
-                      className="field-input"
-                      placeholder="Example: Total Truck Care"
-                    />
-                  </label>
-                  <label className="block">
-                    <span className="field-label">Department (optional)</span>
-                    <input
-                      value={photo.department}
-                      onChange={(e) =>
-                        updatePhotoMeta(photo.id, {
-                          department: e.target.value,
-                        })
-                      }
-                      className="field-input"
-                      placeholder="Example: Enterprise Sales"
-                    />
-                  </label>
-                </div>
+              ) : (
+                <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center text-xs font-semibold text-[var(--ink)]">
+                  <ImagePlus className="h-5 w-5 text-[var(--primary)]" />
+                  Add photo
+                </span>
+              )}
+            </button>
+            <input
+              ref={(el) => {
+                fileRefs.current[index] = el;
+              }}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+              className="hidden"
+              onChange={(e) => {
+                void handleSlotFile(photo.id, e.target.files?.[0]);
+                e.currentTarget.value = "";
+              }}
+            />
+
+            <div className="min-w-0 flex-1 space-y-3">
+              <p className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">
+                Teammate {index + 1} of {teamMemberCount}
+              </p>
+              <label className="block">
+                <span className="field-label">Name</span>
+                <input
+                  value={photo.name}
+                  onChange={(e) =>
+                    updatePhotoMeta(photo.id, { name: e.target.value })
+                  }
+                  className="field-input"
+                  placeholder="Example: Jared"
+                />
+              </label>
+              <label className="block">
+                <span className="field-label">Job title</span>
+                <input
+                  value={photo.title}
+                  onChange={(e) =>
+                    updatePhotoMeta(photo.id, { title: e.target.value })
+                  }
+                  className="field-input"
+                  placeholder="Example: Total Truck Care"
+                />
+              </label>
+              {photo.url ? (
                 <button
                   type="button"
-                  onClick={() => removePhoto(photo.id)}
-                  className="self-start rounded-xl border-2 border-[var(--ink)] p-3 text-[var(--ink)] hover:bg-red-50 hover:text-[var(--primary)]"
-                  aria-label={`Remove ${photo.name}`}
+                  onClick={() => clearPhotoSlot(photo.id)}
+                  className="inline-flex items-center gap-2 text-base font-semibold text-[var(--primary)]"
                 >
-                  <Trash2 className="h-5 w-5" />
+                  <Trash2 className="h-4 w-4" /> Clear photo
                 </button>
-              </article>
-            ))}
-          </div>
-        </div>
-      ) : null}
+              ) : null}
+            </div>
+          </article>
+        ))}
+      </div>
 
       <PipSidePicker />
       <VideoPreview compact />

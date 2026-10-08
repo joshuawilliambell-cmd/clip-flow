@@ -235,7 +235,7 @@ export function PreviewExportStep({
               </p>
             </div>
             <HelpTip title="Background music">
-              <p>There are three approved-style music choices.</p>
+              <p>There are four Corporate Chill music choices.</p>
               <p>Tap a card to select it. The yellow border means “selected.”</p>
               <p>
                 Tap Music off if you want only your voice with no background
@@ -260,7 +260,7 @@ export function PreviewExportStep({
           </button>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {MUSIC_TRACKS.map((track) => {
             const selected = musicTrackId === track.id;
             return (

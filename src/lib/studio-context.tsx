@@ -9,11 +9,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { v4 as uuid } from "uuid";
 import {
   MUSIC_TRACKS,
   VIDEO_TEMPLATE,
   type PipSide,
+  type TeamMemberCount,
 } from "@/lib/template";
 import {
   autoArrangePhotos,
@@ -24,6 +24,11 @@ import {
   resizePhotoStart,
   trimBounds,
 } from "@/lib/timeline";
+import {
+  createEmptyTeamPhoto,
+  filledTeamPhotos,
+  resizeTeamSlots,
+} from "@/lib/team-slots";
 import type {
   CompositionProps,
   SourceVideo,
@@ -38,6 +43,7 @@ type StudioContextValue = {
   trimStart: number;
   trimEnd: number;
   photos: TeamPhoto[];
+  teamMemberCount: TeamMemberCount;
   musicEnabled: boolean;
   musicVolume: number;
   videoVolume: number;
@@ -54,11 +60,16 @@ type StudioContextValue = {
   setVideoFromFile: (file: File) => Promise<void>;
   clearVideo: () => void;
   setTrim: (edge: "start" | "end", value: number) => void;
+  setTeamMemberCount: (count: TeamMemberCount) => void;
   addPhotosFromFiles: (files: FileList | File[]) => Promise<TeamPhoto[]>;
+  setPhotoOnSlot: (id: string, file: File) => Promise<void>;
+  /** Clear all slots, then fill from files in order (up to team size). */
+  replaceTeamPhotosFromFiles: (files: FileList | File[]) => Promise<TeamPhoto[]>;
   updatePhotoMeta: (
     id: string,
     patch: Partial<Pick<TeamPhoto, "name" | "title" | "department">>,
   ) => void;
+  clearPhotoSlot: (id: string) => void;
   removePhoto: (id: string) => void;
   movePhoto: (id: string, start: number) => void;
   resizePhoto: (id: string, edge: "start" | "end", value: number) => void;
@@ -74,6 +85,10 @@ type StudioContextValue = {
   setIntroThumbnailEnabled: (enabled: boolean) => void;
   clearIntroThumbnail: () => void;
 };
+
+function revokePhotoUrl(url: string | null) {
+  if (url) URL.revokeObjectURL(url);
+}
 
 const StudioContext = createContext<StudioContextValue | null>(null);
 
@@ -172,7 +187,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [trimEnd, setTrimEnd] = useState<number>(
     VIDEO_TEMPLATE.targetDurationSeconds,
   );
-  const [photos, setPhotos] = useState<TeamPhoto[]>([]);
+  const [teamMemberCount, setTeamMemberCountState] = useState<TeamMemberCount>(
+    VIDEO_TEMPLATE.defaultTeamMemberCount,
+  );
+  const [photos, setPhotos] = useState<TeamPhoto[]>(() =>
+    Array.from({ length: VIDEO_TEMPLATE.defaultTeamMemberCount }, () =>
+      createEmptyTeamPhoto(),
+    ),
+  );
   const baselineRef = useRef<TeamPhoto[]>([]);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState<number>(
@@ -212,6 +234,21 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
   const outputDuration = getOutputDuration(trimStart, trimEnd);
 
+  const setTeamMemberCount = useCallback(
+    (count: TeamMemberCount) => {
+      setTeamMemberCountState(count);
+      setPhotos((prev) => {
+        const trimmed = prev.slice(count);
+        trimmed.forEach((p) => revokePhotoUrl(p.url));
+        const resized = resizeTeamSlots(prev, count);
+        const arranged = autoArrangePhotos(resized, outputDuration);
+        baselineRef.current = arranged.map((p) => ({ ...p }));
+        return arranged;
+      });
+    },
+    [outputDuration],
+  );
+
   const setVideoFromFile = useCallback(async (file: File) => {
     const typeOk =
       VIDEO_TEMPLATE.uploads.videoAccept.includes(file.type) ||
@@ -238,11 +275,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setCurrentTime(0);
     setIsPlaying(false);
     setPhotos((prev) => {
-      prev.forEach((p) => URL.revokeObjectURL(p.url));
-      baselineRef.current = [];
-      return [];
+      prev.forEach((p) => revokePhotoUrl(p.url));
+      const slots = Array.from({ length: teamMemberCount }, () =>
+        createEmptyTeamPhoto(),
+      );
+      baselineRef.current = slots.map((p) => ({ ...p }));
+      return slots;
     });
-  }, []);
+  }, [teamMemberCount]);
 
   const clearVideo = useCallback(() => {
     setVideo((prev) => {
@@ -284,52 +324,126 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [video, trimStart, trimEnd],
   );
 
+  const setPhotoOnSlot = useCallback(
+    async (id: string, file: File) => {
+      const typeOk =
+        VIDEO_TEMPLATE.uploads.photoAccept.includes(file.type) ||
+        /\.(jpe?g|png|webp)$/i.test(file.name);
+      if (!typeOk) {
+        throw new Error("Please upload a JPG, PNG, or WebP headshot.");
+      }
+      if (file.size > VIDEO_TEMPLATE.uploads.maxPhotoBytes) {
+        throw new Error("That photo is too large. Please use a smaller image.");
+      }
+      const url = await loadImageUrl(file);
+      const guessed = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+      setPhotos((prev) => {
+        const next = prev.map((p) => {
+          if (p.id !== id) return p;
+          revokePhotoUrl(p.url);
+          return {
+            ...p,
+            url,
+            fileName: file.name,
+            name: p.name || guessed,
+          };
+        });
+        const arranged = autoArrangePhotos(next, outputDuration);
+        baselineRef.current = arranged.map((p) => ({ ...p }));
+        return arranged;
+      });
+    },
+    [outputDuration],
+  );
+
+  const prepareImageFiles = async (files: FileList | File[]) => {
+    const list = Array.from(files);
+    const prepared: Array<{ file: File; url: string }> = [];
+    for (const file of list) {
+      const typeOk =
+        VIDEO_TEMPLATE.uploads.photoAccept.includes(file.type) ||
+        /\.(jpe?g|png|webp)$/i.test(file.name);
+      if (!typeOk) continue;
+      if (file.size > VIDEO_TEMPLATE.uploads.maxPhotoBytes) continue;
+      prepared.push({ file, url: await loadImageUrl(file) });
+    }
+    return prepared;
+  };
+
   const addPhotosFromFiles = useCallback(
     async (files: FileList | File[]) => {
-      const list = Array.from(files);
-      const remaining = VIDEO_TEMPLATE.maxPhotos - photos.length;
-      if (remaining <= 0) {
-        throw new Error(
-          `You can add up to ${VIDEO_TEMPLATE.maxPhotos} team photos.`,
-        );
-      }
-
-      const accepted = list.slice(0, remaining);
-      const created: TeamPhoto[] = [];
-
-      for (const file of accepted) {
-        const typeOk =
-          VIDEO_TEMPLATE.uploads.photoAccept.includes(file.type) ||
-          /\.(jpe?g|png|webp)$/i.test(file.name);
-        if (!typeOk) continue;
-        if (file.size > VIDEO_TEMPLATE.uploads.maxPhotoBytes) continue;
-        const url = await loadImageUrl(file);
-        created.push({
-          id: uuid(),
-          url,
-          fileName: file.name,
-          name: file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "),
-          title: "",
-          department: "",
-          startSeconds: 0,
-          durationSeconds: VIDEO_TEMPLATE.defaultPhotoDurationSeconds,
-        });
-      }
-
-      if (created.length === 0) {
+      const prepared = await prepareImageFiles(files);
+      if (prepared.length === 0) {
         throw new Error("Please upload JPG, PNG, or WebP images.");
       }
 
       let arrangedResult: TeamPhoto[] = [];
       setPhotos((prev) => {
-        const merged = [...prev, ...created];
-        arrangedResult = autoArrangePhotos(merged, outputDuration);
+        const next = prev.map((p) => ({ ...p }));
+        let pi = 0;
+        for (let i = 0; i < next.length && pi < prepared.length; i += 1) {
+          if (next[i].url) continue;
+          const { file, url } = prepared[pi];
+          pi += 1;
+          const guessed = file.name
+            .replace(/\.[^.]+$/, "")
+            .replace(/[-_]/g, " ");
+          revokePhotoUrl(next[i].url);
+          next[i] = {
+            ...next[i],
+            url,
+            fileName: file.name,
+            name: next[i].name || guessed,
+          };
+        }
+        while (pi < prepared.length) {
+          URL.revokeObjectURL(prepared[pi].url);
+          pi += 1;
+        }
+        arrangedResult = autoArrangePhotos(next, outputDuration);
         baselineRef.current = arrangedResult.map((p) => ({ ...p }));
         return arrangedResult;
       });
       return arrangedResult;
     },
-    [photos.length, outputDuration],
+    [outputDuration],
+  );
+
+  const replaceTeamPhotosFromFiles = useCallback(
+    async (files: FileList | File[]) => {
+      const prepared = await prepareImageFiles(files);
+      if (prepared.length === 0) {
+        throw new Error("Please upload JPG, PNG, or WebP images.");
+      }
+
+      let arrangedResult: TeamPhoto[] = [];
+      setPhotos((prev) => {
+        prev.forEach((p) => revokePhotoUrl(p.url));
+        const next = Array.from({ length: teamMemberCount }, (_, i) => {
+          const slot = createEmptyTeamPhoto();
+          if (i >= prepared.length) return slot;
+          const { file, url } = prepared[i];
+          const guessed = file.name
+            .replace(/\.[^.]+$/, "")
+            .replace(/[-_]/g, " ");
+          return {
+            ...slot,
+            url,
+            fileName: file.name,
+            name: guessed,
+          };
+        });
+        // Revoke extras not used
+        for (let i = teamMemberCount; i < prepared.length; i += 1) {
+          URL.revokeObjectURL(prepared[i].url);
+        }
+        arrangedResult = autoArrangePhotos(next, outputDuration);
+        baselineRef.current = arrangedResult.map((p) => ({ ...p }));
+        return arrangedResult;
+      });
+      return arrangedResult;
+    },
+    [outputDuration, teamMemberCount],
   );
 
   const updatePhotoMeta = useCallback(
@@ -347,14 +461,32 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const removePhoto = useCallback((id: string) => {
-    setPhotos((prev) => {
-      const target = prev.find((p) => p.id === id);
-      if (target) URL.revokeObjectURL(target.url);
-      return prev.filter((p) => p.id !== id);
-    });
-    baselineRef.current = baselineRef.current.filter((p) => p.id !== id);
-  }, []);
+  const clearPhotoSlot = useCallback(
+    (id: string) => {
+      setPhotos((prev) => {
+        const next = prev.map((p) => {
+          if (p.id !== id) return p;
+          revokePhotoUrl(p.url);
+          return {
+            ...p,
+            url: null,
+            fileName: "",
+          };
+        });
+        const arranged = autoArrangePhotos(next, outputDuration);
+        baselineRef.current = arranged.map((p) => ({ ...p }));
+        return arranged;
+      });
+    },
+    [outputDuration],
+  );
+
+  const removePhoto = useCallback(
+    (id: string) => {
+      clearPhotoSlot(id);
+    },
+    [clearPhotoSlot],
+  );
 
   const movePhoto = useCallback(
     (id: string, start: number) => {
@@ -404,7 +536,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       videoSrc: video.url,
       trimStartSeconds: trimStart,
       durationInSeconds: outputDuration,
-      photos: photos.map((p) => ({
+      photos: filledTeamPhotos(photos).map((p) => ({
         id: p.id,
         src: p.url,
         name: p.name,
@@ -443,6 +575,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       trimStart,
       trimEnd,
       photos,
+      teamMemberCount,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -459,8 +592,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setVideoFromFile,
       clearVideo,
       setTrim,
+      setTeamMemberCount,
       addPhotosFromFiles,
+      setPhotoOnSlot,
+      replaceTeamPhotosFromFiles,
       updatePhotoMeta,
+      clearPhotoSlot,
       removePhoto,
       movePhoto,
       resizePhoto,
@@ -482,6 +619,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       trimStart,
       trimEnd,
       photos,
+      teamMemberCount,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -493,6 +631,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       isPlaying,
       outputDuration,
       compositionProps,
+      setTeamMemberCount,
+      setPhotoOnSlot,
+      replaceTeamPhotosFromFiles,
+      clearPhotoSlot,
       setIntroThumbnail,
       clearIntroThumbnail,
       setVideoFromFile,

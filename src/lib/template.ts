@@ -6,6 +6,11 @@
 
 export type PipSide = "left" | "right";
 
+/** How many teammates the employee plans to introduce (drives slots + thumbnail). */
+export type TeamMemberCount = 1 | 2 | 3 | 4;
+
+export const TEAM_MEMBER_COUNT_OPTIONS: TeamMemberCount[] = [1, 2, 3, 4];
+
 export const VIDEO_TEMPLATE = {
   id: "loves-team-intro-v1",
   name: "Love's Team Introduction",
@@ -13,7 +18,9 @@ export const VIDEO_TEMPLATE = {
   height: 1080,
   fps: 30,
   targetDurationSeconds: 60,
-  maxPhotos: 8,
+  /** Max teammates for intro videos / thumbnails (user picks 1–4 at the start). */
+  maxPhotos: 4,
+  defaultTeamMemberCount: 2 as TeamMemberCount,
   minPhotoDurationSeconds: 1,
   /** Default PIP still length — easy short videos; users can drag edges to change. */
   defaultPhotoDurationSeconds: 10,

@@ -11,6 +11,7 @@ import {
 import { v4 as uuid } from "uuid";
 import { HelpTip } from "@/components/HelpTip";
 import { PhotoFrameEditor } from "@/components/PhotoFrameEditor";
+import { TeamSizePicker } from "@/components/TeamSizePicker";
 import {
   exportTeamThumbnailPng,
   renderTeamThumbnail,
@@ -22,7 +23,7 @@ import {
   type ThumbnailMember,
 } from "@/lib/thumbnail-template";
 
-function emptyMembers(count = 4): ThumbnailMember[] {
+function emptyMembers(count: number): ThumbnailMember[] {
   return Array.from({ length: count }, () => ({
     id: uuid(),
     photoUrl: null,
@@ -38,18 +39,38 @@ export function ThumbnailCreator({
   onAddedToVideo?: () => void;
 } = {}) {
   const {
+    teamMemberCount,
     setIntroThumbnail,
     clearIntroThumbnail,
     introThumbnailEnabled,
     introThumbnailUrl,
   } = useStudio();
 
-  const [members, setMembers] = useState<ThumbnailMember[]>(() => emptyMembers(4));
+  const [members, setMembers] = useState<ThumbnailMember[]>(() =>
+    emptyMembers(teamMemberCount),
+  );
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const fileRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+  // Keep thumbnail cards in sync with the shared 1–4 team size.
+  useEffect(() => {
+    setMembers((prev) => {
+      if (prev.length === teamMemberCount) return prev;
+      if (prev.length > teamMemberCount) {
+        prev.slice(teamMemberCount).forEach((m) => {
+          if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
+        });
+        return prev.slice(0, teamMemberCount);
+      }
+      return [
+        ...prev,
+        ...emptyMembers(teamMemberCount - prev.length),
+      ];
+    });
+  }, [teamMemberCount]);
 
   const filledCount = useMemo(
     () => members.filter((m) => m.photoUrl || m.name.trim() || m.title.trim()).length,
@@ -61,12 +82,7 @@ export function ThumbnailCreator({
     const timer = window.setTimeout(() => {
       void (async () => {
         try {
-          const active = members.filter(
-            (m) => m.photoUrl || m.name.trim() || m.title.trim(),
-          );
-          const canvas = await renderTeamThumbnail(
-            active.length > 0 ? active : members.slice(0, 4),
-          );
+          const canvas = await renderTeamThumbnail(members);
           if (cancelled) return;
           const url = canvas.toDataURL("image/png");
           setPreviewUrl(url);
@@ -144,7 +160,7 @@ export function ThumbnailCreator({
           name: "Teresa Walker",
           title: "Fleet Account Specialist",
         },
-      ];
+      ].slice(0, teamMemberCount);
       const next: ThumbnailMember[] = [];
       for (const sample of samples) {
         const res = await fetch(sample.path);
@@ -172,19 +188,18 @@ export function ThumbnailCreator({
     }
   };
 
-  const getActiveMembers = () =>
-    members.filter((m) => m.photoUrl || m.name.trim() || m.title.trim());
+  const hasContent = () =>
+    members.some((m) => m.photoUrl || m.name.trim() || m.title.trim());
 
   const download = async () => {
     setBusy(true);
     setError(null);
     setStatus(null);
     try {
-      const active = getActiveMembers();
-      if (active.length === 0) {
+      if (!hasContent()) {
         throw new Error("Add at least one teammate photo or name first.");
       }
-      const blob = await exportTeamThumbnailPng(active);
+      const blob = await exportTeamThumbnailPng(members);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -204,11 +219,10 @@ export function ThumbnailCreator({
     setError(null);
     setStatus(null);
     try {
-      const active = getActiveMembers();
-      if (active.length === 0) {
+      if (!hasContent()) {
         throw new Error("Add at least one teammate photo or name first.");
       }
-      const blob = await exportTeamThumbnailPng(active);
+      const blob = await exportTeamThumbnailPng(members);
       const url = URL.createObjectURL(blob);
       setIntroThumbnail(url, true);
       setStatus(
@@ -232,8 +246,9 @@ export function ThumbnailCreator({
             Create a Love&apos;s Team thumbnail
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Build a navy-and-gold team image, then optionally place it at the
-            very start of your intro video for one quick second.
+            Build a navy-and-gold team image for {teamMemberCount} people, then
+            optionally place it at the very start of your intro video for one
+            quick second.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
@@ -248,11 +263,13 @@ export function ThumbnailCreator({
             only). You can also download a PNG for Allego or email.
           </p>
           <p>
-            <strong>How:</strong> Add headshots → drag/zoom each face in the
-            portrait frame → type names → preview → Add to video or Download PNG.
+            <strong>How:</strong> Pick team size (1–4) → add headshots →
+            drag/zoom faces → type names → preview → Add to video or Download PNG.
           </p>
         </HelpTip>
       </div>
+
+      <TeamSizePicker compact />
 
       {/* Purpose */}
       <section className="rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4 md:p-5">
@@ -330,7 +347,7 @@ export function ThumbnailCreator({
               prev.forEach((m) => {
                 if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
               });
-              return emptyMembers(4);
+              return emptyMembers(teamMemberCount);
             });
             setStatus(null);
           }}
@@ -442,8 +459,8 @@ export function ThumbnailCreator({
             </h3>
             <p className="text-base text-[var(--muted)]">
               Stock Love&apos;s Team frame · {filledCount || 0} of{" "}
-              {THUMBNAIL_TEMPLATE.maxMembers} people ·{" "}
-              {THUMBNAIL_TEMPLATE.width}×{THUMBNAIL_TEMPLATE.height}
+              {teamMemberCount} people · {THUMBNAIL_TEMPLATE.width}×
+              {THUMBNAIL_TEMPLATE.height}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

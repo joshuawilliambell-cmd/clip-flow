@@ -1,6 +1,7 @@
 export type TeamPhoto = {
   id: string;
-  url: string;
+  /** Null until the employee uploads a headshot into this slot. */
+  url: string | null;
   fileName: string;
   name: string;
   title: string;

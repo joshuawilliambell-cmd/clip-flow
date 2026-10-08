@@ -101,21 +101,21 @@ function StudioShell() {
 
       <header className="border-b-2 border-[var(--ink)] bg-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-5 md:px-6">
-          <div className="animate-fade-up flex items-center gap-3">
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)] shadow-sm"
-              aria-hidden
-            >
-              <svg viewBox="0 0 24 24" className="h-8 w-8 fill-white" aria-hidden>
-                <path d="M12 21s-6.7-4.35-9.33-8.1C.7 9.9 2.1 6 5.6 6c1.9 0 3.1 1.05 3.9 2.2C10.3 7.05 11.5 6 13.4 6c3.5 0 4.9 3.9 2.93 6.9C18.7 16.65 12 21 12 21z" />
-              </svg>
-            </div>
-            <div>
-              <p className="font-display text-4xl font-bold leading-none tracking-wide text-[var(--primary)] md:text-5xl">
-                Love&apos;s
-              </p>
-              <p className="mt-1 text-base font-bold uppercase tracking-[0.18em] text-[var(--ink)]">
+          <div className="animate-fade-up flex items-center gap-3 md:gap-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/loves-logo.png"
+              alt="Love's"
+              className="h-12 w-auto md:h-16"
+              width={194}
+              height={50}
+            />
+            <div className="border-l-2 border-[var(--ink)] pl-3 md:pl-4">
+              <p className="text-base font-bold uppercase tracking-[0.18em] text-[var(--ink)] md:text-lg">
                 Video Studio
+              </p>
+              <p className="text-sm font-medium text-[var(--muted)] md:text-base">
+                Team intros for Allego
               </p>
             </div>
           </div>

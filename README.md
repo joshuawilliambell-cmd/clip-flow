@@ -18,8 +18,8 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 ## Employee flow
 
 ### Team intro video
-1. **Add Your Video** — upload from a folder or record with webcam, trim, play
-2. **Add Your Team** — upload photos, enter name/title; each PIP still defaults to 10s (drag ends to change)
+1. **Add Your Video** — pick how many teammates (1–4), then upload or record, trim, play
+2. **Add Your Team** — fill that many photo slots; each PIP still defaults to 10s (drag ends to change)
 3. **Finish & Download** — choose music, set volumes, **Export to MP4**
 
 ### Team thumbnail
