@@ -86,6 +86,10 @@ type StudioContextValue = {
   setIntroThumbnail: (url: string, enabled?: boolean) => void;
   setIntroThumbnailEnabled: (enabled: boolean) => void;
   clearIntroThumbnail: () => void;
+  /** Wipe video, photos, trim, music, thumbnail — full project clear. */
+  resetProject: () => void;
+  /** Bumps when the project is cleared so UI with local state can remount. */
+  projectEpoch: number;
 };
 
 function revokePhotoUrl(url: string | null) {
@@ -228,6 +232,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [introThumbnailEnabled, setIntroThumbnailEnabled] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [projectEpoch, setProjectEpoch] = useState(0);
 
   const setIntroThumbnail = useCallback((url: string, enabled = true) => {
     setIntroThumbnailUrl((prev) => {
@@ -311,6 +316,39 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setTrimEnd(VIDEO_TEMPLATE.targetDurationSeconds);
     setCurrentTime(0);
     setIsPlaying(false);
+  }, []);
+
+  const resetProject = useCallback(() => {
+    setVideo((prev) => {
+      if (prev) URL.revokeObjectURL(prev.url);
+      return null;
+    });
+    setTrimStart(0);
+    setTrimEnd(VIDEO_TEMPLATE.targetDurationSeconds);
+    setTeamMemberCountState(VIDEO_TEMPLATE.defaultTeamMemberCount);
+    setPhotos((prev) => {
+      prev.forEach((p) => revokePhotoUrl(p.url));
+      const slots = Array.from(
+        { length: VIDEO_TEMPLATE.defaultTeamMemberCount },
+        () => createEmptyTeamPhoto(),
+      );
+      baselineRef.current = slots.map((p) => ({ ...p }));
+      return slots;
+    });
+    setMusicEnabled(true);
+    setMusicVolume(VIDEO_TEMPLATE.defaultMusicVolume);
+    setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);
+    setMusicTrackId(MUSIC_TRACKS[0].id);
+    setPipSide(VIDEO_TEMPLATE.pip.defaultSide);
+    setIntroThumbnailUrl((prev) => {
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setIntroThumbnailEnabled(false);
+    setCurrentTime(0);
+    setIsPlaying(false);
+    setStep(1);
+    setProjectEpoch((n) => n + 1);
   }, []);
 
   const setTrim = useCallback(
@@ -654,6 +692,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setIntroThumbnail,
       setIntroThumbnailEnabled,
       clearIntroThumbnail,
+      resetProject,
+      projectEpoch,
     }),
     [
       step,
@@ -673,6 +713,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       isPlaying,
       outputDuration,
       compositionProps,
+      projectEpoch,
       setTeamMemberCount,
       setPhotoOnSlot,
       replaceTeamPhotosFromFiles,
@@ -691,6 +732,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       reorderTeamSlots,
       autoArrange,
       resetTimeline,
+      resetProject,
     ],
   );
 

@@ -369,7 +369,7 @@ export function RecordingGuide() {
             <TipList heading="Extra tips" items={CONTENT_TIPS} />
             <div className="mt-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-3 text-base leading-relaxed text-[var(--ink)] md:text-lg">
               <strong>Example opener:</strong> “Hi, I&apos;m Alex with Love&apos;s
-              Enterprise Sales. I wanted to quickly introduce our team that will
+              Fleet Sales. I wanted to quickly introduce our team that will
               support your account…”
             </div>
           </div>

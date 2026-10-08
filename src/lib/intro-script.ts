@@ -60,7 +60,7 @@ Take a look around, and let me know what questions you have. We're looking forwa
 
 Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! Your proposal is here for you to review and share.
 
-Before you take a look, I wanted to introduce your Love's Enterprise Sales Team.
+Before you take a look, I wanted to introduce your Love's Fleet Sales Team.
 
 [Show first photo]
 
@@ -86,7 +86,7 @@ Take a look around, and let me know what you think. We're looking forward to wor
 
 Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! I've included your proposal here for you to review and share with your team.
 
-Let me put some faces to the names of your Love's Enterprise Sales Team.
+Let me put some faces to the names of your Love's Fleet Sales Team.
 
 [Show first photo]
 

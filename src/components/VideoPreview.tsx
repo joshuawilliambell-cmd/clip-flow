@@ -78,6 +78,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     };
   }, [setCurrentTime, setIsPlaying, inputProps.videoSrc, durationInFrames]);
 
+  // Keep Remotion in sync when timeline (or other UI) seeks while paused.
   useEffect(() => {
     const player = playerRef.current;
     if (!player || isPlaying) return;
@@ -87,18 +88,28 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     }
   }, [currentTime, isPlaying]);
 
-  const togglePlay = useCallback(() => {
+  // Honor isPlaying from timeline Play/Pause (and the preview buttons).
+  useEffect(() => {
     const player = playerRef.current;
     if (!player || !video) return;
-    if (player.isPlaying()) {
-      player.pause();
-    } else {
-      if (player.getCurrentFrame() >= durationInFrames - 1) {
-        player.seekTo(0);
+    const playing = player.isPlaying();
+    if (isPlaying && !playing) {
+      const frame = Math.round(currentTime * VIDEO_TEMPLATE.fps);
+      if (Math.abs(player.getCurrentFrame() - frame) > 1) {
+        player.seekTo(Math.min(frame, durationInFrames - 1));
       }
       player.play();
+    } else if (!isPlaying && playing) {
+      player.pause();
     }
-  }, [video, durationInFrames]);
+    // currentTime intentionally read only when play starts (not while scrubbing mid-play).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, video, durationInFrames]);
+
+  const togglePlay = useCallback(() => {
+    if (!video) return;
+    setIsPlaying(!isPlaying);
+  }, [video, isPlaying, setIsPlaying]);
 
   const restart = useCallback(() => {
     const player = playerRef.current;

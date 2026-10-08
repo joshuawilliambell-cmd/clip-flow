@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { Clapperboard, ImageIcon } from "lucide-react";
 import { StudioProvider, useStudio } from "@/lib/studio-context";
@@ -8,6 +8,7 @@ import { StepIndicator } from "@/components/StepIndicator";
 import { HelpTip } from "@/components/HelpTip";
 import { PurposeGuide } from "@/components/PurposeGuide";
 import { ThumbnailCreator } from "@/components/ThumbnailCreator";
+import { StartOverButton } from "@/components/StartOverButton";
 import { VideoUploadStep } from "@/components/steps/VideoUploadStep";
 import { TeamPhotosStep } from "@/components/steps/TeamPhotosStep";
 import { PreviewExportStep } from "@/components/steps/PreviewExportStep";
@@ -90,8 +91,13 @@ function ModeSwitcher({
 }
 
 function StudioShell() {
-  const { step, setStep } = useStudio();
+  const { step, setStep, projectEpoch } = useStudio();
   const [mode, setMode] = useState<AppMode>("video");
+
+  // After Start over, return to the video flow on step 1.
+  useEffect(() => {
+    if (projectEpoch > 0) setMode("video");
+  }, [projectEpoch]);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -153,14 +159,19 @@ function StudioShell() {
         {/* Dark olive nav strip like loves.com */}
         <div className="bg-[var(--olive)]">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm font-bold uppercase tracking-[0.14em] text-white md:px-6 md:text-base">
-            <span>Team intros</span>
-            <span className="hidden text-white/70 sm:inline">·</span>
-            <span className="hidden sm:inline">Photo overlays</span>
-            <span className="hidden text-white/70 md:inline">·</span>
-            <span className="hidden md:inline">Allego ready</span>
-            <span className="rounded-full bg-[var(--primary)] px-3 py-1 text-xs tracking-wide md:text-sm">
-              Easy for everyone
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span>Team intros</span>
+              <span className="hidden text-white/70 sm:inline">·</span>
+              <span className="hidden sm:inline">Photo overlays</span>
+              <span className="hidden text-white/70 md:inline">·</span>
+              <span className="hidden md:inline">Allego ready</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-[var(--primary)] px-3 py-1 text-xs tracking-wide md:text-sm">
+                Easy for everyone
+              </span>
+              <StartOverButton />
+            </div>
           </div>
         </div>
       </header>
@@ -189,6 +200,7 @@ function StudioShell() {
         ) : (
           <section className="studio-panel animate-rise p-4 md:p-8">
             <ThumbnailCreator
+              key={projectEpoch}
               onAddedToVideo={() => {
                 setMode("video");
                 setStep(3);
