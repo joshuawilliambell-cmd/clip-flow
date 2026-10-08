@@ -5,8 +5,10 @@ import {
   OffthreadVideo,
   useVideoConfig,
 } from "remotion";
+import { IntroThumbnail } from "@/remotion/components/IntroThumbnail";
 import { PhotoOverlay } from "@/remotion/components/PhotoOverlay";
 import { VIDEO_TEMPLATE } from "@/lib/template";
+import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import type { CompositionProps } from "@/lib/types";
 
 export const defaultCompositionProps: CompositionProps = {
@@ -15,6 +17,8 @@ export const defaultCompositionProps: CompositionProps = {
   durationInSeconds: VIDEO_TEMPLATE.targetDurationSeconds,
   photos: [],
   pipSide: VIDEO_TEMPLATE.pip.defaultSide,
+  introThumbnailSrc: null,
+  introThumbnailEnabled: false,
   videoVolume: VIDEO_TEMPLATE.defaultVideoVolume,
   musicSrc: null,
   musicVolume: VIDEO_TEMPLATE.defaultMusicVolume,
@@ -29,6 +33,8 @@ export function IntroductionVideo(props: CompositionProps) {
     durationInSeconds,
     photos,
     pipSide,
+    introThumbnailSrc,
+    introThumbnailEnabled,
     videoVolume,
     musicSrc,
     musicVolume,
@@ -37,6 +43,12 @@ export function IntroductionVideo(props: CompositionProps) {
 
   const durationFrames = Math.max(1, Math.round(durationInSeconds * fps));
   const musicFadeFrames = Math.round(VIDEO_TEMPLATE.musicFadeSeconds * fps);
+  const introFrames = Math.max(
+    1,
+    Math.round(THUMBNAIL_TEMPLATE.introDurationSeconds * fps),
+  );
+  const showIntro =
+    introThumbnailEnabled && Boolean(introThumbnailSrc);
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#0b0b0b" }}>
@@ -115,6 +127,12 @@ export function IntroductionVideo(props: CompositionProps) {
           background: `linear-gradient(90deg, ${VIDEO_TEMPLATE.branding.primary} 0%, ${VIDEO_TEMPLATE.branding.accent} 100%)`,
         }}
       />
+
+      {showIntro && introThumbnailSrc ? (
+        <Sequence from={0} durationInFrames={introFrames} layout="none">
+          <IntroThumbnail src={introThumbnailSrc} />
+        </Sequence>
+      ) : null}
     </AbsoluteFill>
   );
 }

@@ -19,6 +19,8 @@ export const VIDEO_TEMPLATE = {
   photoStartOffsetSeconds: 5,
   fadeInSeconds: 0.35,
   fadeOutSeconds: 0.35,
+  /** Optional Love's Team opening card length (keep in sync with thumbnail template). */
+  introThumbnailSeconds: 1,
   musicFadeSeconds: 1.2,
   defaultMusicVolume: 0.3,
   defaultVideoVolume: 1,

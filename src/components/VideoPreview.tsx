@@ -43,6 +43,8 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         durationInSeconds: VIDEO_TEMPLATE.targetDurationSeconds,
         photos: [],
         pipSide: VIDEO_TEMPLATE.pip.defaultSide,
+        introThumbnailSrc: null,
+        introThumbnailEnabled: false,
         videoVolume: VIDEO_TEMPLATE.defaultVideoVolume,
         musicSrc: null,
         musicVolume: VIDEO_TEMPLATE.defaultMusicVolume,

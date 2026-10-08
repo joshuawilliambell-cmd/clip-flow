@@ -43,6 +43,8 @@ type StudioContextValue = {
   videoVolume: number;
   musicTrackId: string;
   pipSide: PipSide;
+  introThumbnailUrl: string | null;
+  introThumbnailEnabled: boolean;
   currentTime: number;
   isPlaying: boolean;
   outputDuration: number;
@@ -68,6 +70,9 @@ type StudioContextValue = {
   setVideoVolume: (volume: number) => void;
   setMusicTrackId: (id: string) => void;
   setPipSide: (side: PipSide) => void;
+  setIntroThumbnail: (url: string, enabled?: boolean) => void;
+  setIntroThumbnailEnabled: (enabled: boolean) => void;
+  clearIntroThumbnail: () => void;
 };
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -180,8 +185,30 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [pipSide, setPipSide] = useState<PipSide>(
     VIDEO_TEMPLATE.pip.defaultSide,
   );
+  const [introThumbnailUrl, setIntroThumbnailUrl] = useState<string | null>(
+    null,
+  );
+  const [introThumbnailEnabled, setIntroThumbnailEnabled] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const setIntroThumbnail = useCallback((url: string, enabled = true) => {
+    setIntroThumbnailUrl((prev) => {
+      if (prev && prev.startsWith("blob:") && prev !== url) {
+        URL.revokeObjectURL(prev);
+      }
+      return url;
+    });
+    setIntroThumbnailEnabled(enabled);
+  }, []);
+
+  const clearIntroThumbnail = useCallback(() => {
+    setIntroThumbnailUrl((prev) => {
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setIntroThumbnailEnabled(false);
+  }, []);
 
   const outputDuration = getOutputDuration(trimStart, trimEnd);
 
@@ -387,6 +414,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         durationSeconds: p.durationSeconds,
       })),
       pipSide,
+      introThumbnailSrc: introThumbnailEnabled ? introThumbnailUrl : null,
+      introThumbnailEnabled,
       videoVolume,
       musicSrc: musicEnabled ? track.src : null,
       musicVolume,
@@ -402,6 +431,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     videoVolume,
     musicTrackId,
     pipSide,
+    introThumbnailUrl,
+    introThumbnailEnabled,
   ]);
 
   const value = useMemo<StudioContextValue>(
@@ -417,6 +448,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       videoVolume,
       musicTrackId,
       pipSide,
+      introThumbnailUrl,
+      introThumbnailEnabled,
       currentTime,
       isPlaying,
       outputDuration,
@@ -439,6 +472,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setVideoVolume,
       setMusicTrackId,
       setPipSide,
+      setIntroThumbnail,
+      setIntroThumbnailEnabled,
+      clearIntroThumbnail,
     }),
     [
       step,
@@ -451,10 +487,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       videoVolume,
       musicTrackId,
       pipSide,
+      introThumbnailUrl,
+      introThumbnailEnabled,
       currentTime,
       isPlaying,
       outputDuration,
       compositionProps,
+      setIntroThumbnail,
+      clearIntroThumbnail,
       setVideoFromFile,
       clearVideo,
       setTrim,

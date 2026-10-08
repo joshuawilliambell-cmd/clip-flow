@@ -1,15 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Download, ImagePlus, Trash2, Wand2 } from "lucide-react";
+import {
+  Clapperboard,
+  Download,
+  ImagePlus,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import { v4 as uuid } from "uuid";
 import { HelpTip } from "@/components/HelpTip";
+import { PhotoFrameEditor } from "@/components/PhotoFrameEditor";
 import {
   exportTeamThumbnailPng,
   renderTeamThumbnail,
 } from "@/lib/render-thumbnail";
+import { useStudio } from "@/lib/studio-context";
 import {
   THUMBNAIL_TEMPLATE,
+  defaultPhotoFit,
   type ThumbnailMember,
 } from "@/lib/thumbnail-template";
 
@@ -19,14 +28,27 @@ function emptyMembers(count = 4): ThumbnailMember[] {
     photoUrl: null,
     name: "",
     title: "",
+    photoFit: defaultPhotoFit(),
   }));
 }
 
-export function ThumbnailCreator() {
+export function ThumbnailCreator({
+  onAddedToVideo,
+}: {
+  onAddedToVideo?: () => void;
+} = {}) {
+  const {
+    setIntroThumbnail,
+    clearIntroThumbnail,
+    introThumbnailEnabled,
+    introThumbnailUrl,
+  } = useStudio();
+
   const [members, setMembers] = useState<ThumbnailMember[]>(() => emptyMembers(4));
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const fileRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const filledCount = useMemo(
@@ -47,10 +69,7 @@ export function ThumbnailCreator() {
           );
           if (cancelled) return;
           const url = canvas.toDataURL("image/png");
-          setPreviewUrl((prev) => {
-            if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
-            return url;
-          });
+          setPreviewUrl(url);
         } catch (e) {
           if (!cancelled) {
             setError(
@@ -73,7 +92,11 @@ export function ThumbnailCreator() {
   const onPickPhoto = async (id: string, file: File | undefined) => {
     if (!file) return;
     setError(null);
-    if (!/^image\/(jpeg|png|webp)$/i.test(file.type) && !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+    setStatus(null);
+    if (
+      !/^image\/(jpeg|png|webp)$/i.test(file.type) &&
+      !/\.(jpe?g|png|webp)$/i.test(file.name)
+    ) {
       setError("Please upload a JPG, PNG, or WebP headshot.");
       return;
     }
@@ -87,6 +110,7 @@ export function ThumbnailCreator() {
           ...m,
           photoUrl: url,
           name: m.name || guessed,
+          photoFit: defaultPhotoFit(),
         };
       }),
     );
@@ -97,7 +121,7 @@ export function ThumbnailCreator() {
       prev.map((m) => {
         if (m.id !== id) return m;
         if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-        return { ...m, photoUrl: null };
+        return { ...m, photoUrl: null, photoFit: defaultPhotoFit() };
       }),
     );
   };
@@ -105,6 +129,7 @@ export function ThumbnailCreator() {
   const loadPractice = async () => {
     setBusy(true);
     setError(null);
+    setStatus(null);
     try {
       const samples = [
         { path: "/samples/team-jared.jpg", name: "Jared Thueson", title: "Total Truck Care" },
@@ -131,6 +156,7 @@ export function ThumbnailCreator() {
           photoUrl: url,
           name: sample.name,
           title: sample.title,
+          photoFit: defaultPhotoFit(),
         });
       }
       setMembers((prev) => {
@@ -146,13 +172,15 @@ export function ThumbnailCreator() {
     }
   };
 
+  const getActiveMembers = () =>
+    members.filter((m) => m.photoUrl || m.name.trim() || m.title.trim());
+
   const download = async () => {
     setBusy(true);
     setError(null);
+    setStatus(null);
     try {
-      const active = members.filter(
-        (m) => m.photoUrl || m.name.trim() || m.title.trim(),
-      );
+      const active = getActiveMembers();
       if (active.length === 0) {
         throw new Error("Add at least one teammate photo or name first.");
       }
@@ -163,8 +191,34 @@ export function ThumbnailCreator() {
       a.download = "loves-team-thumbnail.png";
       a.click();
       URL.revokeObjectURL(url);
+      setStatus("PNG downloaded. You can also add it to the start of your video.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not download thumbnail.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addToVideo = async () => {
+    setBusy(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const active = getActiveMembers();
+      if (active.length === 0) {
+        throw new Error("Add at least one teammate photo or name first.");
+      }
+      const blob = await exportTeamThumbnailPng(active);
+      const url = URL.createObjectURL(blob);
+      setIntroThumbnail(url, true);
+      setStatus(
+        `Added to your intro video. It will show for ${THUMBNAIL_TEMPLATE.introDurationSeconds} second at the very start, then disappear. Open Team intro video → Step 3 to turn it on or off.`,
+      );
+      onAddedToVideo?.();
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "Could not add thumbnail to the video.",
+      );
     } finally {
       setBusy(false);
     }
@@ -178,33 +232,85 @@ export function ThumbnailCreator() {
             Create a Love&apos;s Team thumbnail
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Upload up to four headshots and type each person&apos;s name and job
-            title. The navy-and-gold frame stays the same — you only add the
-            people.
+            Build a navy-and-gold team image, then optionally place it at the
+            very start of your intro video for one quick second.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
           <p>
-            This makes a shareable team image for Allego or email — matching the
-            Love&apos;s Team template.
+            <strong>Why make a thumbnail?</strong> Customers see a clear
+            &quot;Love&apos;s Team&quot; card the moment they press play — then
+            it vanishes after one second so your talking video takes over.
           </p>
           <p>
-            <strong>1.</strong> Tap each card and choose a headshot photo.
+            <strong>Where it goes:</strong> Optional opening frame of your Allego
+            intro video (first {THUMBNAIL_TEMPLATE.introDurationSeconds} second
+            only). You can also download a PNG for Allego or email.
           </p>
           <p>
-            <strong>2.</strong> Type the name and job title under each photo.
+            <strong>How:</strong> Add headshots → drag/zoom each face in the
+            portrait frame → type names → preview → Add to video or Download PNG.
           </p>
-          <p>
-            <strong>3.</strong> Check the live preview, then tap Download
-            thumbnail PNG.
-          </p>
-          <p>You can fill 1 to 4 people. Empty slots are left out of the final image.</p>
         </HelpTip>
       </div>
 
+      {/* Purpose */}
+      <section className="rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4 md:p-5">
+        <h3 className="text-2xl font-bold text-[var(--ink)]">
+          Why this thumbnail matters
+        </h3>
+        <ul className="mt-3 list-disc space-y-2 pl-6 text-lg text-[var(--ink)]">
+          <li>
+            It introduces your team visually before you start speaking — helpful
+            in Allego digital sales rooms.
+          </li>
+          <li>
+            In the video, it appears at the <strong>very beginning</strong> for{" "}
+            <strong>only {THUMBNAIL_TEMPLATE.introDurationSeconds} second</strong>,
+            then disappears so customers get into your intro quickly.
+          </li>
+          <li>
+            Using a thumbnail is <strong>optional</strong>. Skip it anytime if
+            you only want the talking video.
+          </li>
+        </ul>
+      </section>
+
+      {/* How to */}
+      <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <h3 className="text-2xl font-bold text-[var(--ink)]">
+            How to use this tool
+          </h3>
+          <HelpTip title="Step-by-step">
+            <p>Follow the numbered steps on this page. Tap any yellow ? for more help.</p>
+          </HelpTip>
+        </div>
+        <ol className="mt-3 list-decimal space-y-2 pl-6 text-lg text-[var(--ink)]">
+          <li>
+            Tap <strong>Add headshot</strong> on each teammate card (1–4 people).
+          </li>
+          <li>
+            <strong>Drag</strong> the photo to center the face. Use the{" "}
+            <strong>Size</strong> slider if the face is too small or too large.
+          </li>
+          <li>
+            Type each person&apos;s <strong>Name</strong> and{" "}
+            <strong>Job title</strong>.
+          </li>
+          <li>
+            Check the <strong>live preview</strong> on the right / below.
+          </li>
+          <li>
+            Tap <strong>Add to start of video</strong> (shows for 1 second when
+            someone presses play) and/or <strong>Download PNG</strong>.
+          </li>
+        </ol>
+      </section>
+
       <div className="how-banner">
-        Tip: Use clear, well-lit head-and-shoulders photos. Names and titles
-        should be short so they stay easy to read.
+        Tip: Use clear, well-lit head-and-shoulders photos. Drag and zoom until
+        faces sit nicely in the tall portrait frames.
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -226,6 +332,7 @@ export function ThumbnailCreator() {
               });
               return emptyMembers(4);
             });
+            setStatus(null);
           }}
           className="btn-secondary"
         >
@@ -233,7 +340,7 @@ export function ThumbnailCreator() {
         </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {members.map((member, index) => (
           <article
             key={member.id}
@@ -244,45 +351,52 @@ export function ThumbnailCreator() {
                 Teammate {index + 1}
               </p>
               <HelpTip title={`Teammate ${index + 1}`}>
-                <p>Upload a headshot, then type their name and job title.</p>
+                <p>Upload a headshot, then drag and zoom so the face fills the tall frame.</p>
                 <p>Leave a card empty if you have fewer than four people.</p>
               </HelpTip>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => fileRefs.current[index]?.click()}
-                className="relative h-36 w-28 shrink-0 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#eef1f6]"
-              >
-                {member.photoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={member.photoUrl}
-                    alt=""
-                    className="h-full w-full object-cover object-[center_28%]"
-                  />
-                ) : (
-                  <span className="flex h-full flex-col items-center justify-center gap-2 px-2 text-center text-sm font-semibold text-[var(--ink)]">
-                    <ImagePlus className="h-6 w-6 text-[var(--primary)]" />
-                    Add headshot
-                  </span>
-                )}
-              </button>
-              <input
-                ref={(el) => {
-                  fileRefs.current[index] = el;
-                }}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                className="hidden"
-                onChange={(e) => {
-                  void onPickPhoto(member.id, e.target.files?.[0]);
-                  e.currentTarget.value = "";
-                }}
-              />
+            <div className="grid gap-4 sm:grid-cols-[auto_1fr]">
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => fileRefs.current[index]?.click()}
+                  className="relative flex h-28 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[var(--ink)] bg-[#eef1f6] sm:w-40"
+                >
+                  {member.photoUrl ? (
+                    <span className="text-sm font-semibold text-[var(--ink)]">
+                      Change photo
+                    </span>
+                  ) : (
+                    <span className="flex flex-col items-center gap-2 px-2 text-center text-sm font-semibold text-[var(--ink)]">
+                      <ImagePlus className="h-6 w-6 text-[var(--primary)]" />
+                      Add headshot
+                    </span>
+                  )}
+                </button>
+                <input
+                  ref={(el) => {
+                    fileRefs.current[index] = el;
+                  }}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    void onPickPhoto(member.id, e.target.files?.[0]);
+                    e.currentTarget.value = "";
+                  }}
+                />
 
-              <div className="min-w-0 flex-1 space-y-3">
+                {member.photoUrl ? (
+                  <PhotoFrameEditor
+                    photoUrl={member.photoUrl}
+                    fit={member.photoFit}
+                    onChange={(photoFit) => updateMember(member.id, { photoFit })}
+                  />
+                ) : null}
+              </div>
+
+              <div className="min-w-0 space-y-3">
                 <label className="block">
                   <span className="field-label">Name</span>
                   <input
@@ -328,19 +442,30 @@ export function ThumbnailCreator() {
             </h3>
             <p className="text-base text-[var(--muted)]">
               Stock Love&apos;s Team frame · {filledCount || 0} of{" "}
-              {THUMBNAIL_TEMPLATE.maxMembers} people filled · exports at{" "}
+              {THUMBNAIL_TEMPLATE.maxMembers} people ·{" "}
               {THUMBNAIL_TEMPLATE.width}×{THUMBNAIL_TEMPLATE.height}
             </p>
           </div>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void download()}
-            className="btn-primary"
-          >
-            <Download className="h-5 w-5" />
-            {busy ? "Working…" : "Download thumbnail PNG"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void addToVideo()}
+              className="btn-primary"
+            >
+              <Clapperboard className="h-5 w-5" />
+              {busy ? "Working…" : "Add to start of video"}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void download()}
+              className="btn-secondary"
+            >
+              <Download className="h-5 w-5" />
+              Download PNG
+            </button>
+          </div>
         </div>
 
         <div className="overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#f4f5f7]">
@@ -358,6 +483,30 @@ export function ThumbnailCreator() {
           )}
         </div>
 
+        {introThumbnailUrl && introThumbnailEnabled ? (
+          <p className="mt-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-4 py-3 text-lg font-medium text-[var(--ink)]">
+            This thumbnail is set to play for{" "}
+            {THUMBNAIL_TEMPLATE.introDurationSeconds} second at the start of your
+            intro video. You can turn that off in Step 3.
+            <button
+              type="button"
+              className="ml-2 underline"
+              onClick={() => {
+                clearIntroThumbnail();
+                setStatus("Opening thumbnail removed from the video.");
+              }}
+            >
+              Remove from video
+            </button>
+          </p>
+        ) : null}
+
+        {status ? (
+          <p className="mt-4 rounded-xl border-2 border-[var(--ink)] bg-[#e8f5e9] px-4 py-3 text-lg font-medium text-[var(--ink)]">
+            {status}
+          </p>
+        ) : null}
+
         {error ? (
           <p className="mt-4 rounded-xl border-2 border-[var(--primary)] bg-red-50 px-4 py-3 text-lg font-medium text-[var(--primary-dark)]">
             {error}
@@ -365,9 +514,9 @@ export function ThumbnailCreator() {
         ) : null}
 
         <p className="mt-4 text-base text-[var(--muted)] md:text-lg">
-          Use this PNG as your Allego video thumbnail or sales-room image. The
-          decorative corners and &quot;Love&apos;s Team&quot; header are fixed in
-          the template.
+          <strong>Add to start of video</strong> places this image as an optional
+          opening card ({THUMBNAIL_TEMPLATE.introDurationSeconds}s).{" "}
+          <strong>Download PNG</strong> saves a still image for Allego or email.
         </p>
       </section>
     </div>

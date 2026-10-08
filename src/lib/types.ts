@@ -41,6 +41,9 @@ export type CompositionProps = {
     durationSeconds: number;
   }>;
   pipSide: PipSide;
+  /** Optional Love's Team thumbnail shown for the first second. */
+  introThumbnailSrc: string | null;
+  introThumbnailEnabled: boolean;
   videoVolume: number;
   musicSrc: string | null;
   musicVolume: number;

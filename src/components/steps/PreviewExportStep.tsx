@@ -2,15 +2,28 @@
 
 import { useState } from "react";
 import { clsx } from "clsx";
-import { Download, Loader2, Mic, Music2, Volume2, VolumeX } from "lucide-react";
+import {
+  Download,
+  ImageIcon,
+  Loader2,
+  Mic,
+  Music2,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { MUSIC_TRACKS } from "@/lib/template";
+import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { exportIntroductionVideo } from "@/lib/export-video";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
 
-export function PreviewExportStep() {
+export function PreviewExportStep({
+  onCreateThumbnail,
+}: {
+  onCreateThumbnail?: () => void;
+} = {}) {
   const {
     video,
     compositionProps,
@@ -18,6 +31,10 @@ export function PreviewExportStep() {
     musicVolume,
     videoVolume,
     musicTrackId,
+    introThumbnailUrl,
+    introThumbnailEnabled,
+    setIntroThumbnailEnabled,
+    clearIntroThumbnail,
     setMusicEnabled,
     setMusicVolume,
     setVideoVolume,
@@ -79,18 +96,23 @@ export function PreviewExportStep() {
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
           <p>
-            <strong>1.</strong> Tap one of the three music cards (or turn music
+            <strong>1.</strong> Optional: turn the opening team thumbnail on or
+            off (first {THUMBNAIL_TEMPLATE.introDurationSeconds} second only).
+          </p>
+          <p>
+            <strong>2.</strong> Tap one of the three music cards (or turn music
             off).
           </p>
           <p>
-            <strong>2.</strong> Move the two volume sliders until speech is easy
+            <strong>3.</strong> Move the two volume sliders until speech is easy
             to hear and music is softer in the background.
           </p>
           <p>
-            <strong>3.</strong> Tap Play to preview.
+            <strong>4.</strong> Tap Play to preview — the thumbnail flashes at
+            the start if enabled.
           </p>
           <p>
-            <strong>4.</strong> Tap Export to MP4, wait for the green progress to
+            <strong>5.</strong> Tap Export to MP4, wait for the green progress to
             finish, then tap Download MP4.
           </p>
         </HelpTip>
@@ -100,6 +122,103 @@ export function PreviewExportStep() {
         Keep your voice louder than the music. Start with narration near 100%
         and music near 30%, then adjust.
       </div>
+
+      <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <div>
+              <h3 className="text-2xl font-bold text-[var(--ink)]">
+                Opening thumbnail (optional)
+              </h3>
+              <p className="mt-1 text-lg text-[var(--muted)]">
+                Shows for {THUMBNAIL_TEMPLATE.introDurationSeconds} second at
+                the very start when a customer presses play, then disappears.
+              </p>
+            </div>
+            <HelpTip title="Opening thumbnail">
+              <p>
+                This is the Love&apos;s Team image from the Team thumbnail tool.
+              </p>
+              <p>
+                It is optional. Leave it off if you only want your talking video.
+              </p>
+              <p>
+                When on, customers see the team card for one quick second, then
+                your video continues.
+              </p>
+            </HelpTip>
+          </div>
+        </div>
+
+        {introThumbnailUrl ? (
+          <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,14rem)_1fr] md:items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={introThumbnailUrl}
+              alt="Opening team thumbnail"
+              className="w-full rounded-xl border-2 border-[var(--ink)]"
+            />
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setIntroThumbnailEnabled(!introThumbnailEnabled)
+                  }
+                  className={clsx(
+                    "btn-secondary",
+                    introThumbnailEnabled && "bg-[var(--yellow)]",
+                  )}
+                >
+                  <ImageIcon className="h-5 w-5" />
+                  {introThumbnailEnabled
+                    ? "Thumbnail on (1s at start) ✓"
+                    : "Thumbnail off"}
+                </button>
+                <button
+                  type="button"
+                  onClick={clearIntroThumbnail}
+                  className="btn-secondary"
+                >
+                  Remove thumbnail
+                </button>
+                {onCreateThumbnail ? (
+                  <button
+                    type="button"
+                    onClick={onCreateThumbnail}
+                    className="btn-secondary"
+                  >
+                    Edit in Team thumbnail
+                  </button>
+                ) : null}
+              </div>
+              <p className="text-base text-[var(--muted)]">
+                {introThumbnailEnabled
+                  ? "Preview from the start of the timeline to see the 1-second opening card."
+                  : "Thumbnail is saved but not shown in the video. Tap Thumbnail on to include it."}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-4 rounded-xl border-2 border-dashed border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-5">
+            <p className="text-lg text-[var(--ink)]">
+              No opening thumbnail yet. You can skip this, or create one in{" "}
+              <strong>Team thumbnail</strong> and tap{" "}
+              <strong>Add to start of video</strong>.
+            </p>
+            {onCreateThumbnail ? (
+              <button
+                type="button"
+                onClick={onCreateThumbnail}
+                className="btn-yellow mt-4"
+              >
+                <ImageIcon className="h-5 w-5" />
+                Create team thumbnail
+              </button>
+            ) : null}
+          </div>
+        )}
+      </section>
 
       <VideoPreview />
       <Timeline />

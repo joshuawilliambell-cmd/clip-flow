@@ -24,8 +24,10 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
 ### Team thumbnail
 1. Choose **Team thumbnail** at the top of the app
-2. Upload up to four headshots and enter names/titles
-3. Download the navy-and-gold **Love's Team** PNG for Allego
+2. Upload up to four headshots; drag/zoom each face in the portrait frame
+3. Enter names/titles and check the live preview
+4. **Add to start of video** (optional 1-second opener) and/or **Download PNG**
+5. In the video tool Step 3, turn the opening thumbnail on or off anytime
 
 ## Stack
 

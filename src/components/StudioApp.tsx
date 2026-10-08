@@ -32,7 +32,8 @@ function ModeSwitcher({
           </p>
           <p>
             <strong>Team thumbnail</strong> builds a Love&apos;s Team image with
-            up to four headshots, names, and titles — ready to download as a PNG.
+            up to four headshots. You can download a PNG or add it as a 1-second
+            opening card on your intro video.
           </p>
         </HelpTip>
       </div>
@@ -77,7 +78,7 @@ function ModeSwitcher({
               Team thumbnail
             </span>
             <span className="block text-base text-[var(--muted)]">
-              Headshots + names on the Love&apos;s Team template → PNG
+              Headshots + names → PNG or 1-second video opener
             </span>
           </span>
         </button>
@@ -156,12 +157,21 @@ function StudioShell() {
             <section className="animate-rise rounded-3xl border-2 border-[var(--ink)] bg-white p-4 shadow-[0_12px_0_rgba(0,0,0,0.06)] md:p-8">
               {step === 1 ? <VideoUploadStep /> : null}
               {step === 2 ? <TeamPhotosStep /> : null}
-              {step === 3 ? <PreviewExportStep /> : null}
+              {step === 3 ? (
+                <PreviewExportStep
+                  onCreateThumbnail={() => setMode("thumbnail")}
+                />
+              ) : null}
             </section>
           </>
         ) : (
           <section className="animate-rise rounded-3xl border-2 border-[var(--ink)] bg-white p-4 shadow-[0_12px_0_rgba(0,0,0,0.06)] md:p-8">
-            <ThumbnailCreator />
+            <ThumbnailCreator
+              onAddedToVideo={() => {
+                setMode("video");
+                setStep(3);
+              }}
+            />
           </section>
         )}
       </main>

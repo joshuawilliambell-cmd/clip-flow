@@ -38,13 +38,25 @@ function drawCoverImage(
   y: number,
   w: number,
   h: number,
+  fit?: { scale: number; focusX: number; focusY: number },
 ) {
-  const scale = Math.max(w / img.width, h / img.height);
-  const sw = w / scale;
-  const sh = h / scale;
-  const sx = (img.width - sw) / 2;
-  // Bias upward for headshots
-  const sy = Math.max(0, (img.height - sh) * 0.22);
+  const zoom = Math.max(
+    THUMBNAIL_TEMPLATE.photoFit.minScale,
+    Math.min(
+      THUMBNAIL_TEMPLATE.photoFit.maxScale,
+      fit?.scale ?? THUMBNAIL_TEMPLATE.photoFit.defaultScale,
+    ),
+  );
+  const focusX = Math.min(1, Math.max(0, fit?.focusX ?? 0.5));
+  const focusY = Math.min(1, Math.max(0, fit?.focusY ?? 0.28));
+  const baseScale = Math.max(w / img.width, h / img.height);
+  const scale = baseScale * zoom;
+  const sw = Math.min(img.width, w / scale);
+  const sh = Math.min(img.height, h / scale);
+  let sx = focusX * img.width - sw / 2;
+  let sy = focusY * img.height - sh / 2;
+  sx = Math.max(0, Math.min(img.width - sw, sx));
+  sy = Math.max(0, Math.min(img.height - sh, sy));
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
@@ -162,7 +174,7 @@ async function drawMemberCard(
   if (member.photoUrl) {
     try {
       const img = await loadImage(member.photoUrl);
-      drawCoverImage(ctx, img, x, y, card.width, card.photoHeight);
+      drawCoverImage(ctx, img, x, y, card.width, card.photoHeight, member.photoFit);
     } catch {
       ctx.fillStyle = colors.mutedPhoto;
       ctx.fillRect(x, y, card.width, card.photoHeight);
