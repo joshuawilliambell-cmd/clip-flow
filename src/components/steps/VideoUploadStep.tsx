@@ -138,15 +138,34 @@ export function VideoUploadStep() {
               type="button"
               onClick={() => inputRef.current?.click()}
               className="btn-primary"
+              data-testid="choose-video-folder"
             >
               <Upload className="h-6 w-6" />
               Choose video from folder
             </button>
+          </div>
+
+          <div className="rounded-3xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-6 py-5 text-center">
+            <p className="text-xl font-bold text-[var(--ink)]">
+              Just exploring? Load a practice video
+            </p>
+            <p className="mt-1 text-lg text-[var(--ink)]/80">
+              No file picker — this loads a built-in sample so you can try Steps
+              2 and 3 right away.
+            </p>
             <button
               type="button"
-              onClick={() => void loadSample()}
-              className="btn-yellow mt-4"
+              id="try-practice-video"
+              data-testid="try-practice-video"
+              disabled={loadingSample}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                void loadSample();
+              }}
+              className="btn-primary mt-4"
             >
+              <Film className="h-6 w-6" />
               {loadingSample ? "Loading practice video…" : "Try a practice video"}
             </button>
           </div>
