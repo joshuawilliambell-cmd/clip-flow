@@ -1,6 +1,5 @@
 "use client";
 
-import { Player, type PlayerRef } from "@remotion/player";
 import {
   useCallback,
   useEffect,
@@ -9,117 +8,151 @@ import {
   useState,
 } from "react";
 import { Maximize2, Pause, Play, RotateCcw } from "lucide-react";
-import { IntroductionVideo } from "@/remotion/IntroductionVideo";
 import { useStudio } from "@/lib/studio-context";
-import { VIDEO_TEMPLATE } from "@/lib/template";
+import { getPipLayout, VIDEO_TEMPLATE } from "@/lib/template";
+import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { formatClock } from "@/lib/timeline";
 import { HelpTip } from "@/components/HelpTip";
+import { filledTeamPhotos } from "@/lib/team-slots";
 
+/**
+ * Native HTML5 preview — Remotion Player often stays black on blob: uploads
+ * (esp. phone MP4s). Export still uses Remotion separately.
+ */
 export function VideoPreview({ compact = false }: { compact?: boolean }) {
   const {
-    compositionProps,
+    video,
+    trimStart,
     outputDuration,
     currentTime,
     isPlaying,
     setCurrentTime,
     setIsPlaying,
-    video,
+    photos,
+    pipSide,
+    introThumbnailUrl,
+    introThumbnailEnabled,
+    videoVolume,
+    musicEnabled,
+    musicVolume,
+    musicTrackId,
+    compositionProps,
   } = useStudio();
 
-  const playerRef = useRef<PlayerRef>(null);
   const shellRef = useRef<HTMLDivElement>(null);
-  const [, setReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
+  const [nativeError, setNativeError] = useState<string | null>(null);
+  const [hasFrame, setHasFrame] = useState(false);
 
-  const durationInFrames = Math.max(
-    1,
-    Math.round(outputDuration * VIDEO_TEMPLATE.fps),
-  );
+  const musicSrc = compositionProps?.musicSrc ?? null;
+  const layout = useMemo(() => getPipLayout(pipSide), [pipSide]);
+  const activePhotos = useMemo(() => {
+    return filledTeamPhotos(photos).filter(
+      (p) =>
+        currentTime >= p.startSeconds &&
+        currentTime < p.startSeconds + p.durationSeconds,
+    );
+  }, [photos, currentTime]);
 
-  const inputProps = useMemo(
-    () =>
-      compositionProps ?? {
-        videoSrc: "",
-        trimStartSeconds: 0,
-        durationInSeconds: VIDEO_TEMPLATE.targetDurationSeconds,
-        photos: [],
-        pipSide: VIDEO_TEMPLATE.pip.defaultSide,
-        introThumbnailSrc: null,
-        introThumbnailEnabled: false,
-        videoVolume: VIDEO_TEMPLATE.defaultVideoVolume,
-        musicSrc: null,
-        musicVolume: VIDEO_TEMPLATE.defaultMusicVolume,
-        musicEnabled: false,
-      },
-    [compositionProps],
-  );
+  const showIntro =
+    introThumbnailEnabled &&
+    Boolean(introThumbnailUrl) &&
+    currentTime < THUMBNAIL_TEMPLATE.introDurationSeconds;
 
+  // Map composition time → source file time (respect trim).
+  const sourceTime = (t: number) => trimStart + Math.max(0, t);
+
+  // Keep the native element in sync when scrubbing / restarting while paused.
   useEffect(() => {
-    const player = playerRef.current;
-    if (!player) return;
-
-    const onFrame = (e: { detail: { frame: number } }) => {
-      setCurrentTime(e.detail.frame / VIDEO_TEMPLATE.fps);
-    };
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
-
-    player.addEventListener("frameupdate", onFrame);
-    player.addEventListener("play", onPlay);
-    player.addEventListener("pause", onPause);
-    player.addEventListener("ended", onEnded);
-    setReady(true);
-
-    // Nudge decode so the first frame paints (blob uploads can otherwise stay black).
-    const warm = window.setTimeout(() => {
+    const el = videoRef.current;
+    if (!el || !video || isPlaying) return;
+    const target = sourceTime(currentTime);
+    if (Math.abs(el.currentTime - target) > 0.12) {
       try {
-        const frame = Math.max(0, Math.round(currentTime * VIDEO_TEMPLATE.fps));
-        player.seekTo(Math.min(frame, Math.max(0, durationInFrames - 1)));
+        el.currentTime = target;
       } catch {
-        /* ignore */
+        /* ignore seek races while metadata loads */
       }
-    }, 80);
-
-    return () => {
-      window.clearTimeout(warm);
-      player.removeEventListener("frameupdate", onFrame);
-      player.removeEventListener("play", onPlay);
-      player.removeEventListener("pause", onPause);
-      player.removeEventListener("ended", onEnded);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setCurrentTime, setIsPlaying, inputProps.videoSrc, durationInFrames]);
-
-  // Keep Remotion in sync when timeline (or other UI) seeks while paused.
-  useEffect(() => {
-    const player = playerRef.current;
-    if (!player || isPlaying) return;
-    const frame = Math.round(currentTime * VIDEO_TEMPLATE.fps);
-    const id = window.setTimeout(() => {
-      if (Math.abs(player.getCurrentFrame() - frame) > 1) {
-        player.seekTo(Math.min(frame, Math.max(0, durationInFrames - 1)));
-      }
-    }, 16);
-    return () => window.clearTimeout(id);
-  }, [currentTime, isPlaying, durationInFrames]);
-
-  // Honor isPlaying from timeline Play/Pause (and the preview buttons).
-  useEffect(() => {
-    const player = playerRef.current;
-    if (!player || !video) return;
-    const playing = player.isPlaying();
-    if (isPlaying && !playing) {
-      const frame = Math.round(currentTime * VIDEO_TEMPLATE.fps);
-      if (Math.abs(player.getCurrentFrame() - frame) > 1) {
-        player.seekTo(Math.min(frame, durationInFrames - 1));
-      }
-      player.play();
-    } else if (!isPlaying && playing) {
-      player.pause();
     }
-    // currentTime intentionally read only when play starts (not while scrubbing mid-play).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, video, durationInFrames]);
+  }, [currentTime, isPlaying, video, trimStart]);
+
+  // Volume
+  useEffect(() => {
+    const el = videoRef.current;
+    if (el) el.volume = Math.min(1, Math.max(0, videoVolume));
+  }, [videoVolume, video]);
+
+  // Keep a looping music bed element for the selected track.
+  useEffect(() => {
+    if (musicRef.current) {
+      musicRef.current.pause();
+      musicRef.current = null;
+    }
+    if (!musicSrc) return;
+    const audio = new Audio(musicSrc);
+    audio.loop = true;
+    audio.preload = "auto";
+    musicRef.current = audio;
+    return () => {
+      audio.pause();
+      if (musicRef.current === audio) musicRef.current = null;
+    };
+  }, [musicSrc, musicTrackId, video?.url]);
+
+  // Play / pause the native video + optional music bed.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !video) return;
+
+    if (isPlaying) {
+      const atEnd = currentTime >= outputDuration - 0.05;
+      if (atEnd) {
+        el.currentTime = sourceTime(0);
+        setCurrentTime(0);
+      }
+      void el.play().catch(() => {
+        setIsPlaying(false);
+        setNativeError(
+          "Could not play this video in the browser. Try an H.264 MP4 or the webcam recorder.",
+        );
+      });
+
+      if (musicEnabled && musicRef.current) {
+        musicRef.current.volume = Math.min(1, Math.max(0, musicVolume));
+        void musicRef.current.play().catch(() => {
+          /* music is optional */
+        });
+      } else {
+        musicRef.current?.pause();
+      }
+    } else {
+      el.pause();
+      musicRef.current?.pause();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, video, musicEnabled, musicVolume, outputDuration]);
+
+  // Reset frame flag when source changes
+  useEffect(() => {
+    setHasFrame(false);
+    setNativeError(null);
+  }, [video?.url]);
+
+  const onTimeUpdate = () => {
+    const el = videoRef.current;
+    if (!el || !video) return;
+    const t = Math.max(0, el.currentTime - trimStart);
+    if (t >= outputDuration) {
+      el.pause();
+      setIsPlaying(false);
+      setCurrentTime(outputDuration);
+      musicRef.current?.pause();
+      return;
+    }
+    if (isPlaying) setCurrentTime(t);
+  };
 
   const togglePlay = useCallback(() => {
     if (!video) return;
@@ -127,13 +160,16 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
   }, [video, isPlaying, setIsPlaying]);
 
   const restart = useCallback(() => {
-    const player = playerRef.current;
-    if (!player) return;
-    player.pause();
-    player.seekTo(0);
+    const el = videoRef.current;
+    if (el) {
+      el.pause();
+      el.currentTime = sourceTime(0);
+    }
+    musicRef.current?.pause();
     setCurrentTime(0);
     setIsPlaying(false);
-  }, [setCurrentTime, setIsPlaying]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setCurrentTime, setIsPlaying, trimStart]);
 
   const fullScreen = useCallback(async () => {
     const el = shellRef.current;
@@ -154,9 +190,9 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
           <p>Team photos and names appear when it is their turn.</p>
           <p>Tap the big Play button to watch and listen.</p>
           <p>
-            If you only see a black screen, the file may use a phone codec this
-            browser cannot play. Re-export as an H.264 MP4, or record with the
-            webcam option here.
+            Preview uses your browser&apos;s built-in video player so uploads
+            show correctly. If it stays black, the file may be iPhone HEVC —
+            export as H.264 MP4 or use Record with webcam.
           </p>
         </HelpTip>
       </div>
@@ -167,23 +203,157 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
       >
         <div className={compact ? "aspect-video" : "aspect-video"}>
           {video ? (
-            <Player
-              key={video.url}
-              ref={playerRef}
-              component={IntroductionVideo}
-              inputProps={inputProps}
-              durationInFrames={durationInFrames}
-              compositionWidth={VIDEO_TEMPLATE.width}
-              compositionHeight={VIDEO_TEMPLATE.height}
-              fps={VIDEO_TEMPLATE.fps}
-              style={{ width: "100%", height: "100%" }}
-              controls={false}
-              clickToPlay
-              loop={false}
-              spaceKeyToPlayOrPause
-              acknowledgeRemotionLicense
-              overflowVisible={false}
-            />
+            <>
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+              <video
+                key={video.url}
+                ref={videoRef}
+                src={video.url}
+                playsInline
+                preload="auto"
+                className="h-full w-full object-cover"
+                onLoadedData={() => {
+                  setHasFrame(true);
+                  const el = videoRef.current;
+                  if (el) {
+                    try {
+                      el.currentTime = sourceTime(currentTime);
+                    } catch {
+                      /* ignore */
+                    }
+                  }
+                }}
+                onLoadedMetadata={() => {
+                  const el = videoRef.current;
+                  if (el && el.videoWidth > 0) setHasFrame(true);
+                }}
+                onSeeked={() => setHasFrame(true)}
+                onTimeUpdate={onTimeUpdate}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => {
+                  /* only sync if user paused via element; timeline drives pause */
+                }}
+                onError={() =>
+                  setNativeError(
+                    "This browser cannot decode that video. Export as H.264 MP4, or record with the webcam option.",
+                  )
+                }
+                onClick={togglePlay}
+              />
+
+              {!hasFrame && !nativeError ? (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/80">
+                  <p className="text-lg font-semibold text-white">
+                    Loading video preview…
+                  </p>
+                </div>
+              ) : null}
+
+              {nativeError ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/90 px-6 text-center">
+                  <p className="max-w-lg text-lg font-semibold text-white">
+                    {nativeError}
+                  </p>
+                </div>
+              ) : null}
+
+              {/* Team photo PIP overlays */}
+              {activePhotos.map((photo) => {
+                if (!photo.url) return null;
+                const labelLines = [photo.title, photo.department]
+                  .filter(Boolean)
+                  .join(" · ");
+                return (
+                  <div
+                    key={photo.id}
+                    className="pointer-events-none absolute inset-0"
+                  >
+                    <div
+                      className="absolute overflow-hidden"
+                      style={{
+                        left: `${layout.xPercent}%`,
+                        top: `${layout.yPercent}%`,
+                        width: `${layout.widthPercent}%`,
+                        height: `${layout.heightPercent}%`,
+                        borderRadius: VIDEO_TEMPLATE.pip.borderRadiusPx,
+                        border: `${VIDEO_TEMPLATE.pip.borderWidthPx}px solid ${VIDEO_TEMPLATE.pip.borderColor}`,
+                        boxShadow: VIDEO_TEMPLATE.pip.shadow,
+                        backgroundColor: "#111",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photo.url}
+                        alt={photo.name || "Teammate"}
+                        className="h-full w-full object-cover object-[center_22%]"
+                      />
+                    </div>
+                    {(photo.name || labelLines) && (
+                      <div
+                        className="absolute box-border"
+                        style={{
+                          left: `${layout.xPercent}%`,
+                          top: `calc(${layout.yPercent}% + ${layout.heightPercent}% + ${VIDEO_TEMPLATE.pip.label.belowGapPx}px)`,
+                          width: `${layout.widthPercent}%`,
+                          background: VIDEO_TEMPLATE.pip.label.background,
+                          color: VIDEO_TEMPLATE.pip.label.textColor,
+                          padding: `${VIDEO_TEMPLATE.pip.label.paddingY}px ${VIDEO_TEMPLATE.pip.label.paddingX}px`,
+                          borderRadius: VIDEO_TEMPLATE.pip.label.borderRadiusPx,
+                        }}
+                      >
+                        {photo.name ? (
+                          <div
+                            style={{
+                              fontSize: Math.max(
+                                12,
+                                VIDEO_TEMPLATE.pip.label.nameSizePx * 0.45,
+                              ),
+                              fontWeight: VIDEO_TEMPLATE.pip.label.nameWeight,
+                              lineHeight: 1.2,
+                            }}
+                          >
+                            {photo.name}
+                          </div>
+                        ) : null}
+                        {labelLines ? (
+                          <div
+                            style={{
+                              marginTop: 2,
+                              fontSize: Math.max(
+                                11,
+                                VIDEO_TEMPLATE.pip.label.titleSizePx * 0.45,
+                              ),
+                              fontWeight: VIDEO_TEMPLATE.pip.label.titleWeight,
+                              opacity: 0.92,
+                              lineHeight: 1.25,
+                            }}
+                          >
+                            {labelLines}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Optional 1s opener thumbnail */}
+              {showIntro && introThumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={introThumbnailUrl}
+                  alt="Team thumbnail opener"
+                  className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                />
+              ) : null}
+
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-1.5"
+                style={{
+                  background: `linear-gradient(90deg, ${VIDEO_TEMPLATE.branding.primary} 0%, ${VIDEO_TEMPLATE.branding.accent} 100%)`,
+                }}
+              />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#ed2024_0%,#000000_55%,#997b1d_100%)] px-6 text-center">
               <div>
@@ -242,7 +412,10 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         </button>
         <HelpTip title="Full screen">
           <p>Makes the preview fill your screen so it is easier to see.</p>
-          <p>Press Escape on a keyboard, or use your device’s back control, to exit.</p>
+          <p>
+            Press Escape on a keyboard, or use your device’s back control, to
+            exit.
+          </p>
         </HelpTip>
         <div className="ml-auto rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-3 py-2 text-lg font-bold text-[var(--ink)]">
           {formatClock(currentTime)} / {formatClock(outputDuration)}

@@ -1,10 +1,10 @@
 import {
   AbsoluteFill,
   Audio,
+  Html5Video,
   Sequence,
   useVideoConfig,
 } from "remotion";
-import { Video } from "@remotion/media";
 import { IntroThumbnail } from "@/remotion/components/IntroThumbnail";
 import { PhotoOverlay } from "@/remotion/components/PhotoOverlay";
 import { VIDEO_TEMPLATE } from "@/lib/template";
@@ -56,15 +56,13 @@ export function IntroductionVideo(props: CompositionProps) {
     <AbsoluteFill style={{ backgroundColor: "#0b0b0b" }}>
       {videoSrc ? (
         <AbsoluteFill>
-          <Video
+          {/* Html5Video for export/browser decode of blob: uploads (OffthreadVideo often black). */}
+          <Html5Video
             src={videoSrc}
             trimBefore={trimBefore}
-            style={{ width: "100%", height: "100%" }}
-            objectFit="cover"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
             volume={videoVolume}
-            // Prefer the media tagger path for blob uploads; OffthreadVideo often stays black.
-            disallowFallbackToOffthreadVideo
-            _experimentalInitiallyDrawCachedFrame
+            acceptableTimeShiftInSeconds={1.5}
           />
         </AbsoluteFill>
       ) : (
