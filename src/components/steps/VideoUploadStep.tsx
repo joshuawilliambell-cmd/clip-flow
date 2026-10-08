@@ -141,7 +141,7 @@ export function VideoUploadStep() {
             </div>
             <p className="mb-6 max-w-xl text-center text-lg text-[var(--muted)]">
               Use a video you already recorded on this computer, phone, or
-              camera (then copied here). MP4, MOV, or WebM · up to about 500 MB.
+              camera (then copied here). MP4, MOV, or WebM · up to about 4 GB.
             </p>
             <button
               type="button"

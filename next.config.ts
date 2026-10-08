@@ -18,7 +18,8 @@ const nextConfig: NextConfig = {
   // Prototype keeps media in the browser; increase body size for future upload APIs.
   experimental: {
     serverActions: {
-      bodySizeLimit: "512mb",
+      // Uploads stay in the browser; keep headroom if any server path is used.
+      bodySizeLimit: "4gb",
     },
   },
 };

@@ -258,7 +258,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       throw new Error("Please upload an MP4, MOV, or WebM video.");
     }
     if (file.size > VIDEO_TEMPLATE.uploads.maxVideoBytes) {
-      throw new Error("Video is too large. Please use a file under 500 MB.");
+      const maxGb = VIDEO_TEMPLATE.uploads.maxVideoBytes / (1024 * 1024 * 1024);
+      throw new Error(
+        `Video is too large. Please use a file under ${maxGb} GB, or trim/export a shorter clip first.`,
+      );
     }
 
     const meta = await loadVideoMetadata(file);

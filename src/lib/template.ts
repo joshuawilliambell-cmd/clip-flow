@@ -89,7 +89,8 @@ export const VIDEO_TEMPLATE = {
     },
   },
   uploads: {
-    maxVideoBytes: 500 * 1024 * 1024,
+    /** Browser-side ceiling for phone/camera files (about 4 GB). */
+    maxVideoBytes: 4 * 1024 * 1024 * 1024,
     maxPhotoBytes: 15 * 1024 * 1024,
     videoAccept: [
       "video/mp4",
