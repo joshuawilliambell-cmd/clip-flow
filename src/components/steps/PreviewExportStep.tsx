@@ -282,7 +282,8 @@ export function PreviewExportStep({
                 Choose background music
               </h3>
               <p className="mt-1 text-lg text-[var(--muted)]">
-                Tap one track. Only one plays at a time.
+                Tap a track to select it. Use the Play / 30s button to hear a
+                thirty-second sample.
               </p>
             </div>
             <HelpTip title="Background music">
