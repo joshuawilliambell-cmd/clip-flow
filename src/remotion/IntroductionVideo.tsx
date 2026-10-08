@@ -2,7 +2,7 @@ import {
   AbsoluteFill,
   Audio,
   Sequence,
-  OffthreadVideo,
+  Html5Video,
   useVideoConfig,
 } from "remotion";
 import { IntroThumbnail } from "@/remotion/components/IntroThumbnail";
@@ -50,15 +50,20 @@ export function IntroductionVideo(props: CompositionProps) {
   const showIntro =
     introThumbnailEnabled && Boolean(introThumbnailSrc);
 
+  // Html5Video works with browser blob: uploads; OffthreadVideo often stays black.
+  const trimBefore = Math.max(0, Math.round(trimStartSeconds * fps));
+
   return (
     <AbsoluteFill style={{ backgroundColor: "#0b0b0b" }}>
       {videoSrc ? (
         <AbsoluteFill>
-          <OffthreadVideo
+          <Html5Video
             src={videoSrc}
-            trimBefore={Math.round(trimStartSeconds * fps)}
+            trimBefore={trimBefore}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             volume={videoVolume}
+            pauseWhenBuffering
+            acceptableTimeShiftInSeconds={1}
           />
         </AbsoluteFill>
       ) : (

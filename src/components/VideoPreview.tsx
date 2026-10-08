@@ -125,8 +125,13 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         <h3 className="text-2xl font-bold text-[var(--ink)]">Video preview</h3>
         <HelpTip title="Video preview">
           <p>This window shows what your finished video will look like.</p>
-          <p>Team photos and names appear on the right when it is their turn.</p>
+          <p>Team photos and names appear when it is their turn.</p>
           <p>Tap the big Play button to watch and listen.</p>
+          <p>
+            If you only see a black screen, the file may use a phone codec this
+            browser cannot play. Re-export as an H.264 MP4, or record with the
+            webcam option here.
+          </p>
         </HelpTip>
       </div>
 
@@ -137,6 +142,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         <div className={compact ? "aspect-video" : "aspect-video"}>
           {video ? (
             <Player
+              key={video.url}
               ref={playerRef}
               component={IntroductionVideo}
               inputProps={inputProps}
@@ -146,9 +152,11 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
               fps={VIDEO_TEMPLATE.fps}
               style={{ width: "100%", height: "100%" }}
               controls={false}
-              clickToPlay={false}
+              clickToPlay
               loop={false}
+              spaceKeyToPlayOrPause
               acknowledgeRemotionLicense
+              overflowVisible={false}
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#ed2024_0%,#000000_55%,#997b1d_100%)] px-6 text-center">

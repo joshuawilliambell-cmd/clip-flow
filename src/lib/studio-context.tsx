@@ -97,6 +97,8 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
     const url = URL.createObjectURL(file);
     const el = document.createElement("video");
     el.preload = "auto";
+    el.muted = true;
+    el.playsInline = true;
     let settled = false;
 
     const finish = () => {
@@ -111,6 +113,17 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
         (!el.videoWidth || !el.videoHeight) &&
         !(Number.isFinite(raw) && raw > 0)
       ) {
+        return;
+      }
+      // No video track dimensions usually means HEVC/unsupported in this browser.
+      if (!el.videoWidth || !el.videoHeight) {
+        settled = true;
+        URL.revokeObjectURL(url);
+        reject(
+          new Error(
+            "This browser cannot display that video (often iPhone HEVC). Export or convert to an H.264 MP4, or use Record with webcam.",
+          ),
+        );
         return;
       }
       settled = true;
