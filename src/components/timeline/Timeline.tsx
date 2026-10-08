@@ -6,6 +6,7 @@ import { VIDEO_TEMPLATE } from "@/lib/template";
 import { formatClock, formatTime, sortPhotosByStart } from "@/lib/timeline";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
+import { VIDEO_TEMPLATE } from "@/lib/template";
 
 function useTimelineMetrics(duration: number, width: number) {
   const pxPerSecond = Math.max(

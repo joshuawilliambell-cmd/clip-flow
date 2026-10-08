@@ -15,7 +15,8 @@ export const VIDEO_TEMPLATE = {
   targetDurationSeconds: 60,
   maxPhotos: 8,
   minPhotoDurationSeconds: 1,
-  defaultPhotoDurationSeconds: 6,
+  /** Default PIP still length — easy short videos; users can drag edges to change. */
+  defaultPhotoDurationSeconds: 10,
   photoStartOffsetSeconds: 5,
   fadeInSeconds: 0.35,
   fadeOutSeconds: 0.35,

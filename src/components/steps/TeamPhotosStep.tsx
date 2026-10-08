@@ -111,8 +111,9 @@ export function TeamPhotosStep() {
             appear (with padding, like the example).
           </p>
           <p>
-            <strong>4.</strong> On Track 2 of the timeline, drag a photo bar to
-            change when it shows.
+            <strong>4.</strong> On Track 2 of the timeline, each photo starts at{" "}
+            {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds. Drag the bar
+            to change when it shows; drag the ends to make it shorter or longer.
           </p>
           <p>
             Photos stay portrait on a 16:9 video. You do <strong>not</strong>{" "}
@@ -122,9 +123,9 @@ export function TeamPhotosStep() {
       </div>
 
       <div className="how-banner">
-        Team photos are always portrait and placed in a padded top corner on the
-        16:9 video. Choose left or right below — you only set the timing on the
-        timeline.
+        Each team photo starts at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}{" "}
+        seconds — long enough for a short intro. Drag the ends of a colored bar
+        on the timeline to make it shorter or longer.
       </div>
 
       {!video ? (
@@ -144,8 +145,13 @@ export function TeamPhotosStep() {
         </button>
         <HelpTip title="Auto Arrange Photos">
           <p>
-            This lines up your photos one after another automatically, starting
-            a few seconds into the video.
+            This lines up your photos one after another, each lasting{" "}
+            {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds by default,
+            starting a few seconds into the video.
+          </p>
+          <p>
+            After arranging, drag the ends of any photo bar to shorten or
+            lengthen that person&apos;s time on screen.
           </p>
           <p>Use it if the timing got messy and you want a clean starting point.</p>
         </HelpTip>
