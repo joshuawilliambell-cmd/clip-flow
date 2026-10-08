@@ -8,16 +8,12 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  Maximize2,
-  Pause,
-  Play,
-  RotateCcw,
-} from "lucide-react";
+import { Maximize2, Pause, Play, RotateCcw } from "lucide-react";
 import { IntroductionVideo } from "@/remotion/IntroductionVideo";
 import { useStudio } from "@/lib/studio-context";
 import { VIDEO_TEMPLATE } from "@/lib/template";
 import { formatClock } from "@/lib/timeline";
+import { HelpTip } from "@/components/HelpTip";
 
 export function VideoPreview({ compact = false }: { compact?: boolean }) {
   const {
@@ -32,7 +28,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
   const playerRef = useRef<PlayerRef>(null);
   const shellRef = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
+  const [, setReady] = useState(false);
 
   const durationInFrames = Math.max(
     1,
@@ -79,7 +75,6 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     };
   }, [setCurrentTime, setIsPlaying, inputProps.videoSrc, durationInFrames]);
 
-  // External scrub sync
   useEffect(() => {
     const player = playerRef.current;
     if (!player || isPlaying) return;
@@ -123,9 +118,18 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <h3 className="text-2xl font-bold text-[var(--ink)]">Video preview</h3>
+        <HelpTip title="Video preview">
+          <p>This window shows what your finished video will look like.</p>
+          <p>Team photos and names appear on the right when it is their turn.</p>
+          <p>Tap the big Play button to watch and listen.</p>
+        </HelpTip>
+      </div>
+
       <div
         ref={shellRef}
-        className="relative overflow-hidden rounded-2xl bg-black shadow-[0_24px_60px_rgba(0,0,0,0.28)] ring-1 ring-black/10"
+        className="relative overflow-hidden rounded-2xl border-2 border-[var(--ink)] bg-black"
       >
         <div className={compact ? "aspect-video" : "aspect-video"}>
           {video ? (
@@ -144,14 +148,13 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
               acknowledgeRemotionLicense
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#2a1218] via-[#1a1a1a] to-[#0f1720] px-6 text-center">
+            <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#ed2024_0%,#000000_55%,#997b1d_100%)] px-6 text-center">
               <div>
-                <p className="font-display text-3xl tracking-wide text-white md:text-4xl">
-                  Your preview appears here
+                <p className="font-display text-4xl tracking-wide text-white">
+                  Your preview will show here
                 </p>
-                <p className="mt-2 text-sm text-white/70">
-                  Upload an introduction video to see the 16:9 canvas with team
-                  overlays.
+                <p className="mt-3 text-lg text-white">
+                  First, upload a video in Step 1.
                 </p>
               </div>
             </div>
@@ -164,37 +167,48 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
           type="button"
           onClick={togglePlay}
           disabled={!video}
-          className="inline-flex h-14 min-w-[9.5rem] items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 text-base font-semibold text-white shadow transition hover:bg-[var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-primary min-w-[11rem] text-xl"
         >
           {isPlaying ? (
             <>
-              <Pause className="h-5 w-5" /> Pause
+              <Pause className="h-6 w-6" /> Pause
             </>
           ) : (
             <>
-              <Play className="h-5 w-5 fill-current" /> Play
+              <Play className="h-6 w-6 fill-current" /> Play
             </>
           )}
         </button>
+        <HelpTip title="Play and Pause">
+          <p>
+            <strong>Play</strong> starts the preview.
+          </p>
+          <p>
+            <strong>Pause</strong> stops it so you can look at one moment.
+          </p>
+        </HelpTip>
         <button
           type="button"
           onClick={restart}
           disabled={!video}
-          className="inline-flex h-11 items-center gap-2 rounded-xl border border-[var(--border-strong)] bg-white px-4 text-sm font-semibold text-[var(--ink)] disabled:opacity-40"
+          className="btn-secondary"
         >
-          <RotateCcw className="h-4 w-4" /> Restart
+          <RotateCcw className="h-5 w-5" /> Restart from beginning
         </button>
         <button
           type="button"
           onClick={fullScreen}
           disabled={!video}
-          className="inline-flex h-11 items-center gap-2 rounded-xl border border-[var(--border-strong)] bg-white px-4 text-sm font-semibold text-[var(--ink)] disabled:opacity-40"
+          className="btn-secondary"
         >
-          <Maximize2 className="h-4 w-4" /> Full Screen Preview
+          <Maximize2 className="h-5 w-5" /> Full screen
         </button>
-        <div className="ml-auto font-mono text-sm text-[var(--muted)]">
+        <HelpTip title="Full screen">
+          <p>Makes the preview fill your screen so it is easier to see.</p>
+          <p>Press Escape on a keyboard, or use your device’s back control, to exit.</p>
+        </HelpTip>
+        <div className="ml-auto rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-3 py-2 text-lg font-bold text-[var(--ink)]">
           {formatClock(currentTime)} / {formatClock(outputDuration)}
-          {ready ? "" : ""}
         </div>
       </div>
     </div>

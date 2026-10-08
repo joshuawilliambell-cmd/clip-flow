@@ -109,7 +109,7 @@ export function IntroductionVideo(props: CompositionProps) {
           right: 0,
           bottom: 0,
           height: 8,
-          background: `linear-gradient(90deg, ${VIDEO_TEMPLATE.branding.primary}, ${VIDEO_TEMPLATE.branding.primaryDark})`,
+          background: `linear-gradient(90deg, ${VIDEO_TEMPLATE.branding.primary} 0%, ${VIDEO_TEMPLATE.branding.accent} 100%)`,
         }}
       />
     </AbsoluteFill>

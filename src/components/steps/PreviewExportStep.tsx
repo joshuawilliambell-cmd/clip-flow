@@ -8,6 +8,7 @@ import { MUSIC_TRACKS } from "@/lib/template";
 import { exportIntroductionVideo } from "@/lib/export-video";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
+import { HelpTip } from "@/components/HelpTip";
 
 export function PreviewExportStep() {
   const {
@@ -51,7 +52,7 @@ export function PreviewExportStep() {
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
       setProgress(1);
-      setStatus("Your MP4 is ready to download.");
+      setStatus("Your MP4 is ready. Tap Download MP4 below.");
     } catch (e) {
       console.error(e);
       setProgress(null);
@@ -59,49 +60,82 @@ export function PreviewExportStep() {
       setError(
         e instanceof Error
           ? e.message
-          : "Export failed. Try a shorter clip or another browser (Chrome/Edge work best).",
+          : "Export failed. Try Chrome or Edge, or use a shorter video.",
       );
     }
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-3xl tracking-wide text-[var(--ink)] md:text-4xl">
-          Preview and download
-        </h2>
-        <p className="mt-2 max-w-2xl text-[var(--muted)]">
-          Choose one of three music beds, balance narration vs music volume, then
-          export your project as an Allego-ready MP4 (1920×1080).
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-3xl">
+          <h2 className="font-display text-4xl tracking-wide text-[var(--ink)] md:text-5xl">
+            Step 3: Finish and download
+          </h2>
+          <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
+            Pick a music track, set the volumes, watch the preview, then export
+            your MP4.
+          </p>
+        </div>
+        <HelpTip title="What do I do on this page?" size="lg">
+          <p>
+            <strong>1.</strong> Tap one of the three music cards (or turn music
+            off).
+          </p>
+          <p>
+            <strong>2.</strong> Move the two volume sliders until speech is easy
+            to hear and music is softer in the background.
+          </p>
+          <p>
+            <strong>3.</strong> Tap Play to preview.
+          </p>
+          <p>
+            <strong>4.</strong> Tap Export to MP4, wait for the green progress to
+            finish, then tap Download MP4.
+          </p>
+        </HelpTip>
+      </div>
+
+      <div className="how-banner">
+        Keep your voice louder than the music. Start with narration near 100%
+        and music near 30%, then adjust.
       </div>
 
       <VideoPreview />
       <Timeline />
 
-      <section className="rounded-2xl border border-[var(--border)] bg-white p-5">
+      <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="font-display text-xl tracking-wide text-[var(--ink)]">
-              Audio tracks
-            </h3>
-            <p className="text-sm text-[var(--muted)]">
-              Pick one background track. Your video narration stays on its own
-              volume slider.
-            </p>
+          <div className="flex items-start gap-2">
+            <div>
+              <h3 className="text-2xl font-bold text-[var(--ink)]">
+                Choose background music
+              </h3>
+              <p className="mt-1 text-lg text-[var(--muted)]">
+                Tap one track. Only one plays at a time.
+              </p>
+            </div>
+            <HelpTip title="Background music">
+              <p>There are three approved-style music choices.</p>
+              <p>Tap a card to select it. The yellow border means “selected.”</p>
+              <p>
+                Tap Music off if you want only your voice with no background
+                music.
+              </p>
+            </HelpTip>
           </div>
           <button
             type="button"
             onClick={() => setMusicEnabled(!musicEnabled)}
-            className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-strong)] px-4 py-2 text-sm font-semibold"
+            className="btn-secondary"
           >
             {musicEnabled ? (
               <>
-                <Volume2 className="h-4 w-4" /> Music on
+                <Volume2 className="h-5 w-5" /> Music on
               </>
             ) : (
               <>
-                <VolumeX className="h-4 w-4" /> Music off
+                <VolumeX className="h-5 w-5" /> Music off
               </>
             )}
           </button>
@@ -117,29 +151,24 @@ export function PreviewExportStep() {
                 disabled={!musicEnabled}
                 onClick={() => setMusicTrackId(track.id)}
                 className={clsx(
-                  "rounded-2xl border px-4 py-4 text-left transition disabled:opacity-40",
+                  "min-h-[8rem] rounded-2xl border-2 px-4 py-4 text-left transition disabled:opacity-40 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
                   selected
-                    ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-sm"
-                    : "border-[var(--border)] bg-[var(--panel-soft)] hover:border-[var(--border-strong)]",
+                    ? "border-[var(--ink)] bg-[var(--yellow)]"
+                    : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--primary)]",
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <Music2
-                    className={clsx(
-                      "h-4 w-4",
-                      selected ? "text-[var(--primary)]" : "text-[var(--muted)]",
-                    )}
-                  />
-                  <span className="font-semibold text-[var(--ink)]">
+                  <Music2 className="h-5 w-5 text-[var(--primary)]" />
+                  <span className="text-lg font-bold text-[var(--ink)]">
                     {track.label}
                   </span>
                 </div>
-                <p className="mt-2 text-xs leading-relaxed text-[var(--muted)]">
+                <p className="mt-2 text-base leading-relaxed text-[var(--muted)]">
                   {track.description}
                 </p>
                 {selected ? (
-                  <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--primary)]">
-                    Selected
+                  <p className="mt-3 text-sm font-bold uppercase tracking-wide text-[var(--ink)]">
+                    Selected ✓
                   </p>
                 ) : null}
               </button>
@@ -147,15 +176,18 @@ export function PreviewExportStep() {
           })}
         </div>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <label className="block rounded-2xl border border-[var(--border)] bg-[var(--panel-soft)] p-4">
-            <span className="flex items-center gap-2 text-sm font-semibold text-[var(--ink)]">
-              <Mic className="h-4 w-4 text-[var(--primary)]" />
-              Video narration volume ({Math.round(videoVolume * 100)}%)
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <label className="block rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4">
+            <span className="flex items-center gap-2 text-lg font-bold text-[var(--ink)]">
+              <Mic className="h-5 w-5 text-[var(--primary)]" />
+              Your voice volume: {Math.round(videoVolume * 100)}%
+              <HelpTip title="Your voice volume">
+                <p>This controls how loud your talking video sounds.</p>
+                <p>Drag right to make your voice louder.</p>
+                <p>Drag left to make your voice quieter.</p>
+                <p>Most people leave this near 100%.</p>
+              </HelpTip>
             </span>
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              Spoken audio from your uploaded introduction video.
-            </p>
             <input
               type="range"
               min={0}
@@ -163,18 +195,21 @@ export function PreviewExportStep() {
               step={0.01}
               value={videoVolume}
               onChange={(e) => setVideoVolume(Number(e.target.value))}
-              className="mt-4 w-full accent-[var(--primary)]"
+              className="mt-5 h-3 w-full accent-[var(--primary)]"
+              aria-label="Your voice volume"
             />
           </label>
 
-          <label className="block rounded-2xl border border-[var(--border)] bg-[var(--panel-soft)] p-4">
-            <span className="flex items-center gap-2 text-sm font-semibold text-[var(--ink)]">
-              <Music2 className="h-4 w-4 text-[var(--primary)]" />
-              Music track volume ({Math.round(musicVolume * 100)}%)
+          <label className="block rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4">
+            <span className="flex items-center gap-2 text-lg font-bold text-[var(--ink)]">
+              <Music2 className="h-5 w-5 text-[var(--primary)]" />
+              Music volume: {Math.round(musicVolume * 100)}%
+              <HelpTip title="Music volume">
+                <p>This controls how loud the background music is.</p>
+                <p>Keep it quieter than your voice so customers can hear you.</p>
+                <p>A good starting point is about 30%.</p>
+              </HelpTip>
             </span>
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              Background bed under narration. Default 30%.
-            </p>
             <input
               type="range"
               min={0}
@@ -183,23 +218,19 @@ export function PreviewExportStep() {
               value={musicVolume}
               disabled={!musicEnabled}
               onChange={(e) => setMusicVolume(Number(e.target.value))}
-              className="mt-4 w-full accent-[var(--primary)] disabled:opacity-40"
+              className="mt-5 h-3 w-full accent-[var(--primary)] disabled:opacity-40"
+              aria-label="Music volume"
             />
           </label>
         </div>
-
-        <p className="mt-3 text-xs text-[var(--muted)]">
-          Placeholder instrumentals for this prototype. Replace with
-          Love&apos;s-approved licensed tracks before production.
-        </p>
       </section>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={autoArrange}
           disabled={photos.length === 0}
-          className="rounded-xl border border-[var(--border-strong)] bg-white px-4 py-2 text-sm font-semibold disabled:opacity-40"
+          className="btn-secondary"
         >
           Auto Arrange Photos
         </button>
@@ -207,29 +238,41 @@ export function PreviewExportStep() {
           type="button"
           onClick={resetTimeline}
           disabled={photos.length === 0}
-          className="rounded-xl border border-[var(--border-strong)] bg-white px-4 py-2 text-sm font-semibold disabled:opacity-40"
+          className="btn-secondary"
         >
           Reset Timeline
         </button>
       </div>
 
-      <div className="rounded-2xl border border-[var(--border)] bg-gradient-to-br from-white to-[#fff5f5] p-5">
-        <h3 className="font-display text-xl tracking-wide text-[var(--ink)]">
-          Export project to MP4
-        </h3>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          Renders your trimmed video, photo overlays, names/titles, and mixed
-          audio into a single 1920×1080 file.
-        </p>
+      <div className="rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-2xl font-bold text-[var(--ink)]">
+              Export your video to MP4
+            </h3>
+            <p className="mt-1 text-lg text-[var(--muted)]">
+              Creates one finished file you can upload to Allego.
+            </p>
+          </div>
+          <HelpTip title="Export to MP4" size="lg">
+            <p>Tap Export to MP4 and wait. A progress bar shows the work.</p>
+            <p>When it finishes, tap Download MP4 to save the file.</p>
+            <p>
+              Then open Allego and upload that MP4 file there. This tool does
+              not upload to Allego by itself yet.
+            </p>
+            <p>Chrome or Edge works best for exporting.</p>
+          </HelpTip>
+        </div>
         <button
           type="button"
           disabled={!video || generating}
           onClick={() => void exportMp4()}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-6 py-4 text-lg font-bold text-white shadow-[0_16px_40px_rgba(200,16,46,0.35)] transition hover:bg-[var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-40 md:w-auto"
+          className="btn-primary mt-4 min-w-[16rem] text-xl"
         >
           {generating ? (
             <>
-              <Loader2 className="h-5 w-5 animate-spin" /> Exporting MP4…
+              <Loader2 className="h-6 w-6 animate-spin" /> Exporting MP4…
             </>
           ) : (
             "Export to MP4"
@@ -238,13 +281,13 @@ export function PreviewExportStep() {
 
         {progress !== null ? (
           <div className="mt-4">
-            <div className="mb-1 flex justify-between text-sm text-[var(--muted)]">
+            <div className="mb-1 flex justify-between text-base font-medium text-[var(--ink)]">
               <span>{status}</span>
               <span>{Math.round(progress * 100)}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-black/10">
+            <div className="h-4 overflow-hidden rounded-full border-2 border-[var(--ink)] bg-white">
               <div
-                className="h-full rounded-full bg-[var(--primary)] transition-all"
+                className="h-full bg-[var(--primary)] transition-all"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>
@@ -252,33 +295,20 @@ export function PreviewExportStep() {
         ) : null}
 
         {downloadUrl ? (
-          <a
-            href={downloadUrl}
-            download="loves-team-introduction.mp4"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white"
-          >
-            <Download className="h-4 w-4" /> Download MP4
+          <a href={downloadUrl} download="loves-team-introduction.mp4" className="btn-yellow mt-4 inline-flex">
+            <Download className="h-5 w-5" /> Download MP4
           </a>
         ) : null}
 
         {error ? (
-          <p className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p className="mt-4 rounded-xl border-2 border-[var(--primary)] bg-red-50 px-4 py-3 text-lg font-medium text-[var(--primary-dark)]">
             {error}
           </p>
         ) : null}
-
-        <p className="mt-4 text-sm text-[var(--muted)]">
-          Download the MP4, then upload it manually to Allego. Corporate SSO and
-          direct Allego publishing are planned for a later phase.
-        </p>
       </div>
 
-      <div className="flex justify-start">
-        <button
-          type="button"
-          onClick={() => setStep(2)}
-          className="rounded-xl border border-[var(--border-strong)] bg-white px-5 py-3 text-sm font-semibold"
-        >
+      <div className="flex justify-start border-t-2 border-[var(--border)] pt-4">
+        <button type="button" onClick={() => setStep(2)} className="btn-secondary">
           Back
         </button>
       </div>

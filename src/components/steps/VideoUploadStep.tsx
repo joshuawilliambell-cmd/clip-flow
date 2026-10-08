@@ -5,6 +5,7 @@ import { Upload, Film } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
+import { HelpTip } from "@/components/HelpTip";
 
 export function VideoUploadStep() {
   const { video, setVideoFromFile, clearVideo, setStep } = useStudio();
@@ -20,7 +21,7 @@ export function VideoUploadStep() {
     try {
       await setVideoFromFile(file);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed.");
+      setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
     }
   };
 
@@ -29,12 +30,12 @@ export function VideoUploadStep() {
     setError(null);
     try {
       const res = await fetch("/samples/sample-intro.mp4");
-      if (!res.ok) throw new Error("Sample video missing.");
+      if (!res.ok) throw new Error("Sample video is missing.");
       const blob = await res.blob();
       const file = new File([blob], "sample-intro.mp4", { type: "video/mp4" });
       await setVideoFromFile(file);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load sample.");
+      setError(e instanceof Error ? e.message : "Could not load the sample.");
     } finally {
       setLoadingSample(false);
     }
@@ -42,14 +43,38 @@ export function VideoUploadStep() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-3xl tracking-wide text-[var(--ink)] md:text-4xl">
-          Add your introduction video
-        </h2>
-        <p className="mt-2 max-w-2xl text-[var(--muted)]">
-          Drop in an MP4 or MOV. Trim to about 60 seconds using the handles on
-          the timeline — no export settings to worry about.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-3xl">
+          <h2 className="font-display text-4xl tracking-wide text-[var(--ink)] md:text-5xl">
+            Step 1: Add your video
+          </h2>
+          <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
+            Upload the video of you talking. Then use the red handles on the
+            timeline to keep only the part you want (about 60 seconds).
+          </p>
+        </div>
+        <HelpTip title="What do I do on this page?" size="lg">
+          <p>
+            <strong>1.</strong> Tap the big upload box and choose an MP4 or MOV
+            file from your computer.
+          </p>
+          <p>
+            <strong>2.</strong> Watch the preview. Tap the big Play button to
+            listen.
+          </p>
+          <p>
+            <strong>3.</strong> On the timeline, drag the red ends to cut extra
+            time from the start or end.
+          </p>
+          <p>
+            <strong>4.</strong> When it looks right, tap Continue to Team Photos.
+          </p>
+        </HelpTip>
+      </div>
+
+      <div className="how-banner">
+        Tip: Prefer a practice run first? Tap “Try a practice video” below. You
+        can replace it later with your real video.
       </div>
 
       {!video ? (
@@ -68,58 +93,75 @@ export function VideoUploadStep() {
             setDragging(false);
             void handleFiles(e.dataTransfer.files);
           }}
-          className={`flex min-h-[240px] w-full flex-col items-center justify-center rounded-3xl border-2 border-dashed px-6 py-12 transition ${
+          className={`flex min-h-[260px] w-full flex-col items-center justify-center rounded-3xl border-4 border-dashed px-6 py-12 transition ${
             dragging
-              ? "border-[var(--primary)] bg-[var(--primary)]/5"
-              : "border-[var(--border-strong)] bg-white/70"
+              ? "border-[var(--primary)] bg-[var(--yellow)]/40"
+              : "border-[var(--ink)] bg-[var(--panel-soft)]"
           }`}
         >
+          <div className="mb-2 flex items-center gap-2">
+            <p className="text-center text-2xl font-bold text-[var(--ink)] md:text-3xl">
+              Put your video here
+            </p>
+            <HelpTip title="How to upload a video">
+              <p>Tap “Choose video file”, then pick one video from your device.</p>
+              <p>Allowed types: MP4 or MOV.</p>
+              <p>Longer videos are OK — you will trim them on the timeline.</p>
+              <p>
+                You can also drag a file from a folder and drop it onto this box
+                (on a computer).
+              </p>
+            </HelpTip>
+          </div>
+          <p className="mb-6 max-w-lg text-center text-lg text-[var(--muted)]">
+            MP4 or MOV files work best. Up to about 500 MB.
+          </p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex flex-col items-center"
+            className="btn-primary"
           >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)] text-white shadow-lg">
-              <Upload className="h-7 w-7" />
-            </div>
-            <p className="font-display text-2xl tracking-wide text-[var(--ink)]">
-              Drag & drop your video here
-            </p>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              MP4 or MOV · up to 500 MB · longer clips are OK (you can trim)
-            </p>
+            <Upload className="h-6 w-6" />
+            Choose video file
           </button>
           <button
             type="button"
             onClick={() => void loadSample()}
-            className="mt-5 rounded-xl bg-[var(--ink)] px-4 py-2 text-sm font-semibold text-white"
+            className="btn-yellow mt-4"
           >
-            {loadingSample ? "Loading sample…" : "Try sample introduction video"}
+            {loadingSample ? "Loading practice video…" : "Try a practice video"}
           </button>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3">
-          <Film className="h-5 w-5 text-[var(--primary)]" />
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-4">
+          <Film className="h-7 w-7 text-[var(--primary)]" />
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold text-[var(--ink)]">
+            <p className="truncate text-lg font-bold text-[var(--ink)]">
               {video.fileName}
             </p>
-            <p className="text-xs text-[var(--muted)]">
-              Source {video.durationSeconds.toFixed(1)}s · {video.width}×
-              {video.height}
+            <p className="text-base text-[var(--muted)]">
+              Length: {video.durationSeconds.toFixed(1)} seconds
             </p>
           </div>
+          <HelpTip title="Change or remove this video">
+            <p>
+              <strong>Replace</strong> lets you pick a different video file.
+            </p>
+            <p>
+              <strong>Remove</strong> clears the video so you can start over.
+            </p>
+          </HelpTip>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="rounded-lg border border-[var(--border-strong)] px-3 py-2 text-sm font-semibold"
+            className="btn-secondary"
           >
             Replace
           </button>
           <button
             type="button"
             onClick={clearVideo}
-            className="rounded-lg px-3 py-2 text-sm font-semibold text-[var(--primary)]"
+            className="btn-secondary text-[var(--primary)]"
           >
             Remove
           </button>
@@ -135,7 +177,7 @@ export function VideoUploadStep() {
       />
 
       {error ? (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="rounded-xl border-2 border-[var(--primary)] bg-red-50 px-4 py-3 text-lg font-medium text-[var(--primary-dark)]">
           {error}
         </p>
       ) : null}
@@ -143,12 +185,19 @@ export function VideoUploadStep() {
       <VideoPreview />
       <Timeline />
 
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t-2 border-[var(--border)] pt-4">
+        <HelpTip title="Ready for the next step?">
+          <p>
+            After your video is uploaded and trimmed, tap Continue to Team
+            Photos.
+          </p>
+          <p>You can always come back to this step later.</p>
+        </HelpTip>
         <button
           type="button"
           disabled={!video}
           onClick={() => setStep(2)}
-          className="rounded-xl bg-[var(--ink)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-40"
+          className="btn-primary min-w-[14rem]"
         >
           Continue to Team Photos
         </button>

@@ -2,25 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Love's Travel Stops inspired palette: red, yellow, black, white */
 :root {
-  --background: #efe7dc;
-  --foreground: #1a1a1a;
-  --ink: #1a1a1a;
-  --muted: #6b6560;
-  --primary: #c8102e;
-  --primary-dark: #8b0a1e;
-  --accent: #f5b700;
+  --background: #ffffff;
+  --foreground: #000000;
+  --ink: #000000;
+  --muted: #444444;
+  --primary: #ed2024;
+  --primary-dark: #c41418;
+  --yellow: #ffe200;
+  --accent: #ffe200;
+  --brown: #997b1d;
   --panel: #ffffff;
-  --panel-soft: #faf7f2;
-  --border: #e6ddd2;
-  --border-strong: #d2c6b6;
-  --track-video: #2f3a4a;
+  --panel-soft: #fffdf2;
+  --border: #e5e5e5;
+  --border-strong: #000000;
+  --track-video: #1a1a1a;
+  --focus-ring: #ffe200;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-sans), "Source Sans 3", Helvetica, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
 }
 
 .font-display {
@@ -28,10 +34,35 @@ body {
     sans-serif;
 }
 
+/* Large, readable controls for all ages */
+.btn-primary {
+  @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-6 text-lg font-bold text-white shadow-sm transition hover:bg-[var(--primary-dark)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)] disabled:cursor-not-allowed disabled:opacity-45;
+}
+
+.btn-secondary {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-white px-5 text-base font-bold text-[var(--ink)] transition hover:bg-[var(--yellow)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)] disabled:cursor-not-allowed disabled:opacity-45;
+}
+
+.btn-yellow {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-5 text-base font-bold text-[var(--ink)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-45;
+}
+
+.field-label {
+  @apply mb-1 block text-base font-bold text-[var(--ink)];
+}
+
+.field-input {
+  @apply w-full rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-3 text-lg text-[var(--ink)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--yellow)];
+}
+
+.how-banner {
+  @apply rounded-2xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-4 py-4 text-base font-medium leading-relaxed text-[var(--ink)] md:text-lg;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -39,27 +70,16 @@ body {
   }
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .animate-fade-up {
-  animation: fade-up 0.55s ease-out both;
+  animation: fade-up 0.45s ease-out both;
 }
 
 .animate-fade-up-delay {
-  animation: fade-up 0.65s ease-out 0.08s both;
+  animation: fade-up 0.55s ease-out 0.06s both;
 }
 
 .animate-rise {
-  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+  animation: fade-up 0.55s ease-out 0.1s both;
 }
 
 @media (prefers-reduced-motion: reduce) {

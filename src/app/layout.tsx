@@ -17,7 +17,7 @@ const sans = Source_Sans_3({
 export const metadata: Metadata = {
   title: "Love's Video Studio",
   description:
-    "Simple template-based introduction video creator for Love's Enterprise Sales and Allego.",
+    "Simple Love's-branded introduction video creator for Allego. Upload, add team photos, export an MP4.",
 };
 
 export default function RootLayout({

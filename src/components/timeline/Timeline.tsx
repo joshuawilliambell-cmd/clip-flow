@@ -5,6 +5,7 @@ import { useStudio } from "@/lib/studio-context";
 import { VIDEO_TEMPLATE } from "@/lib/template";
 import { formatClock, formatTime, sortPhotosByStart } from "@/lib/timeline";
 import { clsx } from "clsx";
+import { HelpTip } from "@/components/HelpTip";
 
 function useTimelineMetrics(duration: number, width: number) {
   const pxPerSecond = Math.max(
@@ -61,8 +62,8 @@ export function Timeline() {
 
   if (!video) {
     return (
-      <div className="rounded-xl border border-dashed border-[var(--border)] bg-white/60 px-4 py-8 text-center text-sm text-[var(--muted)]">
-        Upload a video to unlock the timeline.
+      <div className="rounded-2xl border-2 border-dashed border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-8 text-center text-lg text-[var(--muted)]">
+        Add a video in Step 1 to use the timeline.
       </div>
     );
   }
@@ -73,24 +74,39 @@ export function Timeline() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h3 className="font-display text-lg tracking-wide text-[var(--ink)]">
-            Timeline
-          </h3>
-          <p className="text-sm text-[var(--muted)]">
-            Drag the video ends to trim. Drag photo blocks to choose when each
-            teammate appears.
-          </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-start gap-2">
+          <div>
+            <h3 className="text-2xl font-bold text-[var(--ink)]">Timeline</h3>
+            <p className="mt-1 text-lg text-[var(--muted)]">
+              Drag the red ends to shorten your video. Drag photo bars to change
+              when each teammate appears.
+            </p>
+          </div>
+          <HelpTip title="How to use the timeline" size="lg">
+            <p>
+              <strong>Track 1 (dark bar)</strong> is your main video. Drag the
+              red left or right ends to cut time off the start or end.
+            </p>
+            <p>
+              <strong>Track 2 (colored bars)</strong> are team photos. Drag a
+              whole bar to move it. Drag a bar’s ends to make it shorter or
+              longer.
+            </p>
+            <p>
+              Tap empty space on a track to jump the red play line to that time.
+            </p>
+            <p>Photos cannot overlap in this version.</p>
+          </HelpTip>
         </div>
-        <div className="rounded-full bg-[var(--ink)] px-3 py-1 text-xs font-semibold text-white">
-          Finished length {formatClock(outputDuration)}
+        <div className="rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-3 py-2 text-base font-bold text-[var(--ink)]">
+          Finished length: {formatClock(outputDuration)}
         </div>
       </div>
 
       <div
         ref={measure}
-        className="relative overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--panel-soft)] p-3"
+        className="relative overflow-x-auto rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-3"
       >
         <div className="relative mb-2 h-6" style={{ width: trackInnerWidth }}>
           {Array.from({ length: Math.floor(outputDuration) + 1 }).map((_, s) => (
@@ -106,8 +122,8 @@ export function Timeline() {
         </div>
 
         <div className="mb-3">
-          <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-            Track 1 · Main video
+          <div className="mb-1 text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+            Track 1 · Your video
           </div>
           <div
             className="relative h-14 rounded-lg bg-black/5"
@@ -152,14 +168,14 @@ export function Timeline() {
               />
             </div>
           </div>
-          <p className="mt-1 text-[11px] text-[var(--muted)]">
-            Source length {formatClock(sourceDuration)}. Drag the red handles to
-            choose your finished segment.
+          <p className="mt-2 text-base text-[var(--muted)]">
+            Original length {formatClock(sourceDuration)}. Drag the red ends to
+            keep only the part you want.
           </p>
         </div>
 
         <div>
-          <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+          <div className="mb-1 text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
             Track 2 · Team photos
           </div>
           <div
@@ -171,8 +187,8 @@ export function Timeline() {
             }}
           >
             {sorted.length === 0 ? (
-              <div className="flex h-full items-center px-3 text-sm text-[var(--muted)]">
-                Add team photos to place them on this track.
+              <div className="flex h-full items-center px-3 text-base text-[var(--muted)]">
+                Add team photos in Step 2. They will show up here as colored bars.
               </div>
             ) : (
               sorted.map((photo, index) => {
@@ -239,7 +255,7 @@ function EdgeDrag({
       data-handle={side}
       aria-label={side === "left" ? "Trim start" : "Trim end"}
       className={clsx(
-        "absolute top-0 z-10 h-full w-3 cursor-ew-resize touch-none bg-[var(--primary)]/90",
+        "absolute top-0 z-10 h-full w-4 cursor-ew-resize touch-none bg-[var(--primary)]",
         side === "left" ? "left-0 rounded-l-md" : "right-0 rounded-r-md",
       )}
       onPointerDown={(e) => {
