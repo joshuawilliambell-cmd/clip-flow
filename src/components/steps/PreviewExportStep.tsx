@@ -100,7 +100,7 @@ export function PreviewExportStep({
             off (first {THUMBNAIL_TEMPLATE.introDurationSeconds} second only).
           </p>
           <p>
-            <strong>2.</strong> Tap one of the three music cards (or turn music
+            <strong>2.</strong> Tap one of the four music cards (or turn music
             off).
           </p>
           <p>
@@ -304,7 +304,10 @@ export function PreviewExportStep({
                 <p>This controls how loud your talking video sounds.</p>
                 <p>Drag right to make your voice louder.</p>
                 <p>Drag left to make your voice quieter.</p>
-                <p>Most people leave this near 100%.</p>
+                <p>
+                  Starts at 50% so playback is not too loud. Raise it if your
+                  voice is hard to hear.
+                </p>
               </HelpTip>
             </span>
             <input

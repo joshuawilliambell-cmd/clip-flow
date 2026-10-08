@@ -111,21 +111,27 @@ export function getPipLayout(side: PipSide = VIDEO_TEMPLATE.pip.defaultSide) {
 
 export const MUSIC_TRACKS = [
   {
-    id: "corporate-ambient",
-    label: "Corporate Ambient",
-    description: "Light, professional bed for customer intros",
-    src: "/music/corporate-ambient.mp3",
+    id: "corporate-chill-2",
+    label: "Corporate Chill 2",
+    description: "Smooth corporate bed for team intros",
+    src: "/music/corporate-chill-2.mp3",
   },
   {
-    id: "soft-corporate",
-    label: "Soft Corporate",
-    description: "Quieter tone that stays under narration",
-    src: "/music/soft-corporate.mp3",
+    id: "corporate-chill-3",
+    label: "Corporate Chill 3",
+    description: "Warm, easy background for narration",
+    src: "/music/corporate-chill-3.mp3",
   },
   {
-    id: "steady-focus",
-    label: "Steady Focus",
-    description: "Calm pulse for longer team walkthroughs",
-    src: "/music/steady-focus.mp3",
+    id: "corporate-chill-guitar-1",
+    label: "Corporate Chill Guitar 1",
+    description: "Light guitar bed that stays under your voice",
+    src: "/music/corporate-chill-guitar-1.mp3",
+  },
+  {
+    id: "corporate-chill-guitar-2",
+    label: "Corporate Chill Guitar 2",
+    description: "Gentle guitar alternative for customer videos",
+    src: "/music/corporate-chill-guitar-2.mp3",
   },
 ] as const;
