@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, ScrollText } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import {
-  SAMPLE_INTRO_SCRIPT,
+  INTRO_SCRIPTS,
   TELEPROMPTER_SPEEDS,
+  scriptForTeamCount,
   type TeleprompterSpeedId,
 } from "@/lib/intro-script";
+import { useStudio } from "@/lib/studio-context";
+import { TEAM_MEMBER_COUNT_OPTIONS, type TeamMemberCount } from "@/lib/template";
 import { clsx } from "clsx";
 
 type TeleprompterProps = {
@@ -17,11 +20,20 @@ type TeleprompterProps = {
 };
 
 export function Teleprompter({ recording, className }: TeleprompterProps) {
+  const { teamMemberCount, setTeamMemberCount } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [script, setScript] = useState(SAMPLE_INTRO_SCRIPT);
+  const [script, setScript] = useState(() => scriptForTeamCount(teamMemberCount));
+  const [edited, setEdited] = useState(false);
   const [speedId, setSpeedId] = useState<TeleprompterSpeedId>("medium");
   const [scrolling, setScrolling] = useState(false);
   const [fontLarge, setFontLarge] = useState(true);
+
+  // Keep script matched to team size unless the user customized it.
+  useEffect(() => {
+    if (edited) return;
+    setScript(scriptForTeamCount(teamMemberCount));
+    if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
+  }, [teamMemberCount, edited]);
 
   // Auto-start scroll shortly after recording begins; pause when recording ends.
   useEffect(() => {
@@ -53,10 +65,17 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
     setScrolling(false);
   };
 
+  const loadOfficialScript = (count: TeamMemberCount) => {
+    setTeamMemberCount(count);
+    setScript(scriptForTeamCount(count));
+    setEdited(false);
+    resetScroll();
+  };
+
   return (
     <div
       className={clsx(
-        "flex h-full min-h-[16rem] flex-col rounded-2xl border-2 border-[var(--ink)] bg-[#0B2C5C] text-white",
+        "flex h-full min-h-[16rem] flex-col rounded-2xl border-2 border-[var(--ink)] bg-[var(--olive)] text-white",
         className,
       )}
     >
@@ -64,51 +83,74 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
         <div className="flex items-center gap-2">
           <ScrollText className="h-5 w-5 text-[var(--yellow)]" aria-hidden />
           <div>
-            <p className="text-lg font-bold">Teleprompter</p>
-            <p className="text-sm text-white/80">
-              Read this while you look near the camera
+            <p className="text-lg font-extrabold">Teleprompter</p>
+            <p className="text-sm font-semibold text-white/80">
+              Script: {INTRO_SCRIPTS[teamMemberCount].title}
             </p>
           </div>
         </div>
         <HelpTip title="How the teleprompter works">
           <p>
-            Type or paste your talking points. When you start recording, the
-            words scroll slowly so you can read them.
+            The script matches how many teammates you chose (0–4). Replace the
+            bracketed names before you record.
           </p>
           <p>
-            Place this panel near your webcam (usually at the top of your
-            laptop) so your eyes stay close to the camera.
+            Cue lines like <strong>[Show first photo]</strong> tell you when a
+            team photo should appear on the timeline.
           </p>
           <p>
-            Tap <strong>Slow / Medium / Fast</strong> if the scroll is too
-            quick or too slow. You can also scroll with your finger or mouse.
+            When you start recording, the words scroll so you can read near the
+            camera. Change speed anytime.
           </p>
         </HelpTip>
       </div>
 
       {!recording ? (
-        <label className="block border-b border-white/15 px-4 py-3">
-          <span className="mb-1 block text-sm font-semibold text-[var(--yellow)]">
-            Your script (edit before you record)
-          </span>
-          <textarea
-            value={script}
-            onChange={(e) => setScript(e.target.value)}
-            rows={5}
-            className="w-full resize-y rounded-xl border-2 border-white/30 bg-white/10 px-3 py-2 text-base leading-relaxed text-white placeholder:text-white/50 focus:border-[var(--yellow)] focus:outline-none"
-            placeholder="Type what you want to say…"
-          />
+        <div className="space-y-3 border-b border-white/15 px-4 py-3">
+          <p className="text-sm font-bold text-[var(--yellow)]">
+            Choose a script (by team size)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {TEAM_MEMBER_COUNT_OPTIONS.map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => loadOfficialScript(count)}
+                className={clsx(
+                  "rounded-xl border-2 px-3 py-2 text-sm font-bold",
+                  teamMemberCount === count && !edited
+                    ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                    : "border-white/40 text-white hover:border-[var(--yellow)]",
+                )}
+              >
+                {count === 0 ? "Just me" : `${count}`}
+              </button>
+            ))}
+          </div>
+
+          <label className="block">
+            <span className="mb-1 block text-sm font-semibold text-[var(--yellow)]">
+              Your script (edit names before you record)
+            </span>
+            <textarea
+              value={script}
+              onChange={(e) => {
+                setScript(e.target.value);
+                setEdited(true);
+              }}
+              rows={6}
+              className="w-full resize-y rounded-xl border-2 border-white/30 bg-white/10 px-3 py-2 text-base font-semibold leading-relaxed text-white placeholder:text-white/50 focus:border-[var(--yellow)] focus:outline-none"
+              placeholder="Type what you want to say…"
+            />
+          </label>
           <button
             type="button"
-            className="mt-2 text-sm font-semibold text-[var(--yellow)] underline"
-            onClick={() => {
-              setScript(SAMPLE_INTRO_SCRIPT);
-              resetScroll();
-            }}
+            className="text-sm font-bold text-[var(--yellow)] underline"
+            onClick={() => loadOfficialScript(teamMemberCount)}
           >
-            Load sample Love&apos;s intro script
+            Reset to official {INTRO_SCRIPTS[teamMemberCount].title} script
           </button>
-        </label>
+        </div>
       ) : null}
 
       <div
@@ -119,10 +161,9 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
         )}
         aria-live="polite"
       >
-        <div className="mx-auto max-w-xl whitespace-pre-wrap font-semibold tracking-wide">
+        <div className="mx-auto max-w-xl whitespace-pre-wrap font-extrabold tracking-wide">
           {script.trim() || "Add a script above, then start recording."}
         </div>
-        {/* Extra space so last lines can scroll to center */}
         <div className="h-40" aria-hidden />
       </div>
 

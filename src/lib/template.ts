@@ -6,10 +6,10 @@
 
 export type PipSide = "left" | "right";
 
-/** How many teammates the employee plans to introduce (drives slots + thumbnail). */
-export type TeamMemberCount = 1 | 2 | 3 | 4;
+/** How many teammates the employee plans to introduce (drives slots, thumbnail, script). */
+export type TeamMemberCount = 0 | 1 | 2 | 3 | 4;
 
-export const TEAM_MEMBER_COUNT_OPTIONS: TeamMemberCount[] = [1, 2, 3, 4];
+export const TEAM_MEMBER_COUNT_OPTIONS: TeamMemberCount[] = [0, 1, 2, 3, 4];
 
 export const VIDEO_TEMPLATE = {
   id: "loves-team-intro-v1",

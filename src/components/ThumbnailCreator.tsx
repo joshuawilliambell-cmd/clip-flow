@@ -40,14 +40,22 @@ export function ThumbnailCreator({
 } = {}) {
   const {
     teamMemberCount,
+    setTeamMemberCount,
     setIntroThumbnail,
     clearIntroThumbnail,
     introThumbnailEnabled,
     introThumbnailUrl,
   } = useStudio();
 
+  // Thumbnails need at least one card — bump "Just me" up to 1.
+  useEffect(() => {
+    if (teamMemberCount === 0) setTeamMemberCount(1);
+  }, [teamMemberCount, setTeamMemberCount]);
+
+  const slotCount = Math.max(1, teamMemberCount) as 1 | 2 | 3 | 4;
+
   const [members, setMembers] = useState<ThumbnailMember[]>(() =>
-    emptyMembers(teamMemberCount),
+    emptyMembers(Math.max(1, teamMemberCount)),
   );
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -58,19 +66,16 @@ export function ThumbnailCreator({
   // Keep thumbnail cards in sync with the shared 1–4 team size.
   useEffect(() => {
     setMembers((prev) => {
-      if (prev.length === teamMemberCount) return prev;
-      if (prev.length > teamMemberCount) {
-        prev.slice(teamMemberCount).forEach((m) => {
+      if (prev.length === slotCount) return prev;
+      if (prev.length > slotCount) {
+        prev.slice(slotCount).forEach((m) => {
           if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
         });
-        return prev.slice(0, teamMemberCount);
+        return prev.slice(0, slotCount);
       }
-      return [
-        ...prev,
-        ...emptyMembers(teamMemberCount - prev.length),
-      ];
+      return [...prev, ...emptyMembers(slotCount - prev.length)];
     });
-  }, [teamMemberCount]);
+  }, [slotCount]);
 
   const filledCount = useMemo(
     () => members.filter((m) => m.photoUrl || m.name.trim() || m.title.trim()).length,
@@ -160,7 +165,7 @@ export function ThumbnailCreator({
           name: "Teresa Walker",
           title: "Fleet Account Specialist",
         },
-      ].slice(0, teamMemberCount);
+      ].slice(0, slotCount);
       const next: ThumbnailMember[] = [];
       for (const sample of samples) {
         const res = await fetch(sample.path);
@@ -246,7 +251,7 @@ export function ThumbnailCreator({
             Create a Love&apos;s Team thumbnail
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Build a navy-and-gold team image for {teamMemberCount} people, then
+            Build a navy-and-gold team image for {slotCount} people, then
             optionally place it at the very start of your intro video for one
             quick second.
           </p>
@@ -347,7 +352,7 @@ export function ThumbnailCreator({
               prev.forEach((m) => {
                 if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
               });
-              return emptyMembers(teamMemberCount);
+              return emptyMembers(slotCount);
             });
             setStatus(null);
           }}
@@ -459,7 +464,7 @@ export function ThumbnailCreator({
             </h3>
             <p className="text-base text-[var(--muted)]">
               Stock Love&apos;s Team frame · {filledCount || 0} of{" "}
-              {teamMemberCount} people · {THUMBNAIL_TEMPLATE.width}×
+              {slotCount} people · {THUMBNAIL_TEMPLATE.width}×
               {THUMBNAIL_TEMPLATE.height}
             </p>
           </div>

@@ -257,20 +257,27 @@ export async function renderTeamThumbnail(
   drawHeader(ctx);
 
   const active = members.slice(0, THUMBNAIL_TEMPLATE.maxMembers);
-  const count = Math.max(1, active.length);
-  const totalWidth = count * card.width + (count - 1) * card.gap;
-  const startX = (width - totalWidth) / 2;
-  const cardY = 250;
+  const count = active.length;
+  if (count > 0) {
+    const totalWidth = count * card.width + (count - 1) * card.gap;
+    const startX = (width - totalWidth) / 2;
+    const cardY = 250;
 
-  for (let i = 0; i < count; i += 1) {
-    const member = active[i] ?? {
-      id: `empty-${i}`,
-      photoUrl: null,
-      name: "",
-      title: "",
-      photoFit: defaultPhotoFit(),
-    };
-    await drawMemberCard(ctx, member, startX + i * (card.width + card.gap), cardY);
+    for (let i = 0; i < count; i += 1) {
+      const member = active[i] ?? {
+        id: `empty-${i}`,
+        photoUrl: null,
+        name: "",
+        title: "",
+        photoFit: defaultPhotoFit(),
+      };
+      await drawMemberCard(
+        ctx,
+        member,
+        startX + i * (card.width + card.gap),
+        cardY,
+      );
+    }
   }
 
   return canvas;

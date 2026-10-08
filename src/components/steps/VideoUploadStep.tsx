@@ -87,9 +87,10 @@ export function VideoUploadStep() {
       <TeamSizePicker />
 
       <div className="how-banner">
-        You selected {teamMemberCount} teammate
-        {teamMemberCount === 1 ? "" : "s"}. Next, add your talking video — upload
-        a file, record with webcam, or try a practice video.
+        {teamMemberCount === 0
+          ? "You selected Just me — no teammate photo overlays. The teleprompter will use the no-intro Fleet Hub script."
+          : `You selected ${teamMemberCount} teammate${teamMemberCount === 1 ? "" : "s"}. The matching Fleet Hub script loads in the webcam teleprompter.`}{" "}
+        Next, add your talking video — upload, record, or try a practice video.
       </div>
 
       <RecordingGuide />

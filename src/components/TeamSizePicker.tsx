@@ -10,6 +10,7 @@ import {
 } from "@/lib/template";
 
 const LABELS: Record<TeamMemberCount, string> = {
+  0: "Just me",
   1: "1 person",
   2: "2 people",
   3: "3 people",
@@ -23,6 +24,9 @@ type TeamSizePickerProps = {
 
 export function TeamSizePicker({ compact }: TeamSizePickerProps) {
   const { teamMemberCount, setTeamMemberCount } = useStudio();
+  const options = compact
+    ? TEAM_MEMBER_COUNT_OPTIONS.filter((n) => n > 0)
+    : TEAM_MEMBER_COUNT_OPTIONS;
 
   return (
     <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
@@ -32,33 +36,41 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
             <Users className="h-6 w-6" />
           </span>
           <div>
-            <h3 className="text-2xl font-bold text-[var(--ink)]">
+            <h3 className="text-2xl font-extrabold text-[var(--ink)]">
               {compact
                 ? "How many people on this thumbnail?"
                 : "How many teammates will you introduce?"}
             </h3>
-            <p className="mt-1 text-lg text-[var(--muted)]">
+            <p className="mt-1 text-lg font-semibold text-[var(--muted)]">
               {compact
                 ? "Pick 1–4. The Love’s Team template shows that many portrait cards."
-                : "Pick 1, 2, 3, or 4. The video and thumbnail templates will set up that many photo slots for you."}
+                : "Pick 0–4. This sets photo slots, the thumbnail layout, and the teleprompter script."}
             </p>
           </div>
         </div>
         <HelpTip title="Team size" size="lg">
           <p>
-            Choose how many people you will show in this intro (not counting
-            yourself on camera, unless you also add your own still photo).
+            Choose how many teammates you will introduce (not counting yourself
+            on camera).
           </p>
           <p>
-            The tool creates that many photo slots on the timeline and the same
-            number of cards on the Love&apos;s Team thumbnail.
+            <strong>Just me (0)</strong> means no photo overlays — the
+            teleprompter loads the Fleet Hub script with no introductions.
           </p>
-          <p>You can change this later — extra slots are added or removed.</p>
+          <p>
+            For 1–4, the tool creates that many photo slots and loads the
+            matching script for you to read while recording.
+          </p>
         </HelpTip>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {TEAM_MEMBER_COUNT_OPTIONS.map((count) => {
+      <div
+        className={clsx(
+          "mt-4 grid gap-3",
+          compact ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2 md:grid-cols-5",
+        )}
+      >
+        {options.map((count) => {
           const selected = teamMemberCount === count;
           return (
             <button
@@ -66,16 +78,16 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
               type="button"
               onClick={() => setTeamMemberCount(count)}
               className={clsx(
-                "min-h-[5.5rem] rounded-2xl border-2 px-3 py-4 text-center transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
+                "min-h-[5.5rem] rounded-2xl border-2 px-3 py-4 text-center transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]",
                 selected
-                  ? "border-[var(--ink)] bg-[var(--yellow)]"
+                  ? "border-[var(--ink)] bg-[var(--yellow-bright)]"
                   : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
               )}
             >
-              <span className="block text-4xl font-bold text-[var(--ink)]">
+              <span className="block text-4xl font-extrabold text-[var(--ink)]">
                 {count}
               </span>
-              <span className="mt-1 block text-base font-semibold text-[var(--ink)]">
+              <span className="mt-1 block text-base font-bold text-[var(--ink)]">
                 {LABELS[count]}
                 {selected ? " ✓" : ""}
               </span>
