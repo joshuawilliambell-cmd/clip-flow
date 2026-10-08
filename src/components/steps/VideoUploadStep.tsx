@@ -6,6 +6,7 @@ import { useStudio } from "@/lib/studio-context";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
+import { RecordingGuide } from "@/components/RecordingGuide";
 
 export function VideoUploadStep() {
   const { video, setVideoFromFile, clearVideo, setStep } = useStudio();
@@ -76,6 +77,8 @@ export function VideoUploadStep() {
         Tip: Prefer a practice run first? Tap “Try a practice video” below. You
         can replace it later with your real video.
       </div>
+
+      <RecordingGuide />
 
       {!video ? (
         <div

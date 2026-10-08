@@ -83,6 +83,10 @@ export function PurposeGuide() {
             <strong>Stay clear and natural.</strong> No fancy editing—this tool
             handles the look for you.
           </li>
+          <li>
+            <strong>Need recording help?</strong> In Step 1, tap your device
+            (computer, iPhone, Android, or separate camera) for setup tips.
+          </li>
         </ul>
       </div>
     </section>
