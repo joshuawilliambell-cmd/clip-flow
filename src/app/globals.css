@@ -2,61 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Love's Travel Stops inspired palette: red, yellow, black, white */
+/*
+  Love's Travel Stops website-inspired theme:
+  sunny yellow field, dark olive nav, red accents, bold friendly type.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
-  --ink: #000000;
-  --muted: #444444;
+  --background: #ffd400;
+  --background-deep: #f5c400;
+  --foreground: #1a1a1a;
+  --ink: #1a1a1a;
+  --muted: #3f3a2a;
   --primary: #ed2024;
   --primary-dark: #c41418;
-  --yellow: #ffe200;
-  --accent: #ffe200;
+  --yellow: #ffd400;
+  --yellow-bright: #ffe34a;
+  --accent: #ffd400;
+  --olive: #3a3a1f;
+  --olive-soft: #4a4a28;
   --brown: #997b1d;
   --panel: #ffffff;
-  --panel-soft: #fffdf2;
-  --border: #e5e5e5;
-  --border-strong: #000000;
+  --panel-soft: #fff8d6;
+  --border: #d6b800;
+  --border-strong: #1a1a1a;
   --track-video: #1a1a1a;
-  --focus-ring: #ffe200;
+  --focus-ring: #ffd400;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-sans), "Source Sans 3", Helvetica, sans-serif;
+  font-family: var(--font-sans), "Nunito", Helvetica, sans-serif;
   font-size: 18px;
   line-height: 1.5;
 }
 
 .font-display {
-  font-family: var(--font-display), "Barlow Condensed", "Arial Narrow",
-    sans-serif;
+  font-family: var(--font-display), "Nunito", Helvetica, sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Big outlined headline style like Love's "Rewards" lettering */
+.font-hero {
+  font-family: var(--font-display), "Nunito", Helvetica, sans-serif;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  text-shadow:
+    -2px -2px 0 #1a1a1a,
+    2px -2px 0 #1a1a1a,
+    -2px 2px 0 #1a1a1a,
+    2px 2px 0 #1a1a1a,
+    0 3px 0 #1a1a1a,
+    0 6px 10px rgba(0, 0, 0, 0.18);
 }
 
 /* Large, readable controls for all ages */
 .btn-primary {
-  @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-6 text-lg font-bold text-white shadow-sm transition hover:bg-[var(--primary-dark)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)] disabled:cursor-not-allowed disabled:opacity-45;
+  @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-6 text-lg font-extrabold text-white shadow-sm transition hover:bg-[var(--primary-dark)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)] disabled:cursor-not-allowed disabled:opacity-45;
 }
 
 .btn-secondary {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-white px-5 text-base font-bold text-[var(--ink)] transition hover:bg-[var(--yellow)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)] disabled:cursor-not-allowed disabled:opacity-45;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-white px-5 text-base font-extrabold text-[var(--ink)] transition hover:bg-[var(--yellow-bright)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)] disabled:cursor-not-allowed disabled:opacity-45;
 }
 
 .btn-yellow {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-5 text-base font-bold text-[var(--ink)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-45;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow-bright)] px-5 text-base font-extrabold text-[var(--ink)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-45;
 }
 
 .field-label {
-  @apply mb-1 block text-base font-bold text-[var(--ink)];
+  @apply mb-1 block text-base font-extrabold text-[var(--ink)];
 }
 
 .field-input {
-  @apply w-full rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-3 text-lg text-[var(--ink)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--yellow)];
+  @apply w-full rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-3 text-lg font-semibold text-[var(--ink)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--yellow)];
 }
 
 .how-banner {
-  @apply rounded-2xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-4 py-4 text-base font-medium leading-relaxed text-[var(--ink)] md:text-lg;
+  @apply rounded-2xl border-2 border-[var(--ink)] bg-white px-4 py-4 text-base font-semibold leading-relaxed text-[var(--ink)] md:text-lg;
+}
+
+.studio-panel {
+  @apply rounded-3xl border-2 border-[var(--ink)] bg-white shadow-[0_12px_0_rgba(58,58,31,0.12)];
 }
 
 @keyframes fade-up {

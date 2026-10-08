@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Source_Sans_3 } from "next/font/google";
+import { Nunito } from "next/font/google";
 import "./globals.css";
 
-const display = Barlow_Condensed({
+const nunito = Nunito({
   subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-display",
+  weight: ["400", "600", "700", "800", "900"],
+  variable: "--font-sans",
 });
 
-const sans = Source_Sans_3({
+const nunitoDisplay = Nunito({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-sans",
+  weight: ["800", "900"],
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${display.variable} ${sans.variable} antialiased`}>
+      <body
+        className={`${nunito.variable} ${nunitoDisplay.variable} antialiased`}
+      >
         {children}
       </body>
     </html>

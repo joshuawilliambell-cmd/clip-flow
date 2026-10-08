@@ -9,13 +9,13 @@ export function PurposeGuide() {
   return (
     <section
       aria-labelledby="purpose-heading"
-      className="mb-6 rounded-3xl border-2 border-[var(--ink)] bg-[var(--yellow)] p-5 md:p-6"
+      className="studio-panel mb-6 p-5 md:p-6"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
           <h2
             id="purpose-heading"
-            className="font-display text-3xl tracking-wide text-[var(--ink)] md:text-4xl"
+            className="font-display text-3xl text-[var(--ink)] md:text-4xl"
           >
             Why we make this video
           </h2>

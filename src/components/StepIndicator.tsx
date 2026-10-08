@@ -59,17 +59,17 @@ export function StepIndicator({
                 type="button"
                 onClick={() => onChange(item.id)}
                 className={clsx(
-                  "flex min-h-[5.5rem] w-full items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
+                  "flex min-h-[5.5rem] w-full items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]",
                   active &&
-                    "border-[var(--ink)] bg-[var(--yellow)] shadow-[0_6px_0_rgba(0,0,0,0.12)]",
+                    "border-[var(--ink)] bg-[var(--yellow-bright)] shadow-[0_6px_0_rgba(58,58,31,0.18)]",
                   !active && done && "border-[var(--primary)] bg-white",
-                  !active && !done && "border-[var(--border)] bg-white",
+                  !active && !done && "border-[var(--ink)] bg-white/90",
                 )}
               >
                 <span
                   className={clsx(
-                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl font-bold",
-                    active && "bg-[var(--ink)] text-[var(--yellow)]",
+                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl font-extrabold",
+                    active && "bg-[var(--olive)] text-[var(--yellow)]",
                     done && !active && "bg-[var(--primary)] text-white",
                     !active && !done && "bg-black/10 text-[var(--ink)]",
                   )}

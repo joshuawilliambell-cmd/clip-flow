@@ -22,9 +22,11 @@ function ModeSwitcher({
   onChange: (mode: AppMode) => void;
 }) {
   return (
-    <div className="mb-6 rounded-3xl border-2 border-[var(--ink)] bg-white p-3">
+    <div className="studio-panel mb-6 p-3">
       <div className="mb-2 flex items-center gap-2 px-1">
-        <p className="text-lg font-bold text-[var(--ink)]">What do you want to make?</p>
+        <p className="text-lg font-extrabold text-[var(--ink)]">
+          What do you want to make?
+        </p>
         <HelpTip title="Video or thumbnail?">
           <p>
             <strong>Team intro video</strong> builds the ~60 second Allego video
@@ -42,20 +44,20 @@ function ModeSwitcher({
           type="button"
           onClick={() => onChange("video")}
           className={clsx(
-            "flex min-h-[5.5rem] items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
+            "flex min-h-[5.5rem] items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]",
             mode === "video"
-              ? "border-[var(--ink)] bg-[var(--yellow)]"
-              : "border-[var(--border)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
+              ? "border-[var(--ink)] bg-[var(--yellow-bright)]"
+              : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
           )}
         >
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primary)] text-white">
             <Clapperboard className="h-6 w-6" />
           </span>
           <span>
-            <span className="block text-xl font-bold text-[var(--ink)]">
+            <span className="block text-xl font-extrabold text-[var(--ink)]">
               Team intro video
             </span>
-            <span className="block text-base text-[var(--muted)]">
+            <span className="block text-base font-semibold text-[var(--muted)]">
               Record/upload video + photo overlays → MP4
             </span>
           </span>
@@ -64,20 +66,20 @@ function ModeSwitcher({
           type="button"
           onClick={() => onChange("thumbnail")}
           className={clsx(
-            "flex min-h-[5.5rem] items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
+            "flex min-h-[5.5rem] items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]",
             mode === "thumbnail"
-              ? "border-[var(--ink)] bg-[var(--yellow)]"
-              : "border-[var(--border)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
+              ? "border-[var(--ink)] bg-[var(--yellow-bright)]"
+              : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
           )}
         >
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#0B2C5C] text-white">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--olive)] text-white">
             <ImageIcon className="h-6 w-6" />
           </span>
           <span>
-            <span className="block text-xl font-bold text-[var(--ink)]">
+            <span className="block text-xl font-extrabold text-[var(--ink)]">
               Team thumbnail
             </span>
-            <span className="block text-base text-[var(--muted)]">
+            <span className="block text-base font-semibold text-[var(--muted)]">
               Headshots + names → PNG or 1-second video opener
             </span>
           </span>
@@ -92,36 +94,42 @@ function StudioShell() {
   const [mode, setMode] = useState<AppMode>("video");
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* Sunny Love's yellow field */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,#fffdf2_0%,#ffffff_45%,#fff7f7_100%)]" />
-        <div className="absolute left-0 right-0 top-0 h-2 bg-[var(--primary)]" />
-        <div className="absolute bottom-0 left-0 right-0 h-2 bg-[var(--yellow)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#ffe34a_0%,#ffd400_55%,#f0c200_100%)]" />
+        <div className="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(#1a1a1a_1px,transparent_1px)] [background-size:18px_18px]" />
       </div>
 
-      <header className="border-b-2 border-[var(--ink)] bg-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-5 md:px-6">
+      {/* Top brand bar — matches Love's yellow header strip */}
+      <header className="border-b-2 border-[var(--ink)] bg-[var(--yellow)]">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-6">
           <div className="animate-fade-up flex items-center gap-3 md:gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/loves-logo.png"
-              alt="Love's"
-              className="h-12 w-auto md:h-16"
-              width={194}
-              height={50}
+              src="/brand/loves-video-mascot.jpg"
+              alt="Love's Video Studio mascot"
+              className="h-16 w-16 rounded-2xl border-2 border-[var(--ink)] bg-white object-cover shadow-sm md:h-20 md:w-20"
+              width={1024}
+              height={1024}
             />
-            <div className="border-l-2 border-[var(--ink)] pl-3 md:pl-4">
-              <p className="text-base font-bold uppercase tracking-[0.18em] text-[var(--ink)] md:text-lg">
+            <div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/loves-logo.png"
+                alt="Love's"
+                className="h-9 w-auto md:h-11"
+                width={194}
+                height={50}
+              />
+              <p className="font-hero mt-1 text-3xl leading-none md:text-4xl">
                 Video Studio
-              </p>
-              <p className="text-sm font-medium text-[var(--muted)] md:text-base">
-                Team intros for Allego
               </p>
             </div>
           </div>
 
           <div className="flex max-w-md items-start gap-2">
-            <p className="text-right text-base font-medium leading-snug text-[var(--ink)] md:text-lg">
+            <p className="text-right text-base font-extrabold leading-snug text-[var(--ink)] md:text-lg">
               Make a team intro video or a Love&apos;s Team thumbnail for Allego.
             </p>
             <HelpTip title="What is this tool?" size="lg">
@@ -141,6 +149,20 @@ function StudioShell() {
             </HelpTip>
           </div>
         </div>
+
+        {/* Dark olive nav strip like loves.com */}
+        <div className="bg-[var(--olive)]">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm font-bold uppercase tracking-[0.14em] text-white md:px-6 md:text-base">
+            <span>Team intros</span>
+            <span className="hidden text-white/70 sm:inline">·</span>
+            <span className="hidden sm:inline">Photo overlays</span>
+            <span className="hidden text-white/70 md:inline">·</span>
+            <span className="hidden md:inline">Allego ready</span>
+            <span className="rounded-full bg-[var(--primary)] px-3 py-1 text-xs tracking-wide md:text-sm">
+              Easy for everyone
+            </span>
+          </div>
+        </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">
@@ -154,7 +176,7 @@ function StudioShell() {
             <div className="mb-6">
               <StepIndicator step={step} onChange={setStep} />
             </div>
-            <section className="animate-rise rounded-3xl border-2 border-[var(--ink)] bg-white p-4 shadow-[0_12px_0_rgba(0,0,0,0.06)] md:p-8">
+            <section className="studio-panel animate-rise p-4 md:p-8">
               {step === 1 ? <VideoUploadStep /> : null}
               {step === 2 ? <TeamPhotosStep /> : null}
               {step === 3 ? (
@@ -165,7 +187,7 @@ function StudioShell() {
             </section>
           </>
         ) : (
-          <section className="animate-rise rounded-3xl border-2 border-[var(--ink)] bg-white p-4 shadow-[0_12px_0_rgba(0,0,0,0.06)] md:p-8">
+          <section className="studio-panel animate-rise p-4 md:p-8">
             <ThumbnailCreator
               onAddedToVideo={() => {
                 setMode("video");
@@ -175,6 +197,17 @@ function StudioShell() {
           </section>
         )}
       </main>
+
+      <footer className="mt-4 border-t-2 border-[var(--ink)] bg-[var(--olive)]">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-white md:px-6">
+          <p className="text-base font-bold">
+            Love&apos;s Video Studio · for Allego digital sales rooms
+          </p>
+          <p className="text-sm font-semibold text-white/80">
+            Keep it short. Keep it friendly. Keep it you.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
