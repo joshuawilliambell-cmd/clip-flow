@@ -252,8 +252,9 @@ export function VideoUploadStep() {
                 Photo overlays & timing
               </h3>
               <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-                {filledCount} of {teamMemberCount} photos · choose corner, then
-                drag timeline bars for when each face appears
+                {filledCount} of {teamMemberCount} teammate PIP photos (not you
+                — your photo is thumbnail-only) · choose corner, then drag
+                timeline bars for when each face appears
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
