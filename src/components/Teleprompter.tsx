@@ -23,6 +23,7 @@ import {
   suggestedPixelsPerTickForScript,
 } from "@/lib/intro-script";
 import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
+import { PanelSteps } from "@/components/PanelStep";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 
@@ -256,7 +257,7 @@ export function Teleprompter({
           <ScrollText className="h-5 w-5 text-[var(--yellow)]" aria-hidden />
           <div>
             <p className="text-[15px] font-semibold tracking-tight">
-              Teleprompter
+              Script Teleprompter
             </p>
             <p className="text-[12px] font-medium text-white/75">
               {enabled
@@ -264,30 +265,17 @@ export function Teleprompter({
                   ? `Official · ${INTRO_SCRIPTS[teamMemberCount].title}`
                   : uploadName
                     ? `Custom · ${uploadName}`
-                    : "Custom script"
+                    : "Custom Script"
                 : "Off"}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <HelpTip title="Teleprompter">
+          <HelpTip title="Script Teleprompter">
             <p>
-              <strong>On/Off</strong> shows or hides the scrolling script.
-            </p>
-            <p>
-              Use the <strong>official</strong> Fleet Hub script for your team
-              size — your opening intro plus teammate names, pronouns, titles,
-              and duties from above are filled in — or{" "}
-              <strong>upload / paste</strong> your own.
-            </p>
-            <p>
-              Drag the <strong>scroll speed</strong> slider slower or faster.
-              Default is paced for about {TARGET_INTRO_SECONDS} seconds.
-            </p>
-            <p>
-              Phone on a tripod? Leave this panel on your computer screen behind
-              the phone and tap Scroll when you start talking.
+              Practice reading here before you record. The speed you set also
+              applies to the webcam teleprompter.
             </p>
           </HelpTip>
 
@@ -324,14 +312,39 @@ export function Teleprompter({
       {!enabled ? (
         <div className="flex flex-1 items-center justify-center px-6 py-10 text-center">
           <p className="max-w-sm text-[15px] font-medium text-white/75">
-            Teleprompter is off. Flip the switch to show your script while
-            recording.
+            Teleprompter is off. Flip the switch to show your script.
           </p>
         </div>
       ) : (
         <>
           {!recording ? (
             <div className="space-y-3 border-b border-white/15 px-4 py-3">
+              <p className="rounded-md border border-[var(--yellow)]/50 bg-black/30 px-3 py-2 text-[12px] font-medium leading-snug text-white/90">
+                <strong className="text-[var(--yellow)]">Disclaimer:</strong>{" "}
+                This script was built automatically from the blanks you filled
+                in. You can edit it, remove parts, or replace it with your own
+                script.
+              </p>
+
+              <PanelSteps
+                className="rounded-md bg-black/25 px-3 py-2 text-white [&_strong]:text-[var(--yellow)]"
+                steps={[
+                  <>
+                    Review or edit the script in the box below (or click{" "}
+                    <strong>My Script</strong> / <strong>Upload .txt</strong>).
+                  </>,
+                  <>
+                    Click <strong>Scroll</strong> under Practice Here and read
+                    out loud at that speed.
+                  </>,
+                  <>
+                    If it feels too fast, finish the pass first, then move the
+                    speed slider. Do not change speed mid-script. Practice a few
+                    times before you record.
+                  </>,
+                ]}
+              />
+
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -343,7 +356,7 @@ export function Teleprompter({
                       : "border-white/35 text-white hover:border-[var(--yellow)]",
                   )}
                 >
-                  Official script
+                  Official Script
                 </button>
                 <button
                   type="button"
@@ -355,7 +368,7 @@ export function Teleprompter({
                       : "border-white/35 text-white hover:border-[var(--yellow)]",
                   )}
                 >
-                  My script
+                  My Script
                 </button>
                 <button
                   type="button"
@@ -363,7 +376,7 @@ export function Teleprompter({
                   className="inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-white/35 px-3 py-1.5 text-[13px] font-semibold text-white hover:border-[var(--yellow)]"
                 >
                   <FileUp className="h-3.5 w-3.5" />
-                  Upload .txt
+                  Click Here to Upload .txt
                 </button>
                 <input
                   ref={fileRef}
@@ -377,18 +390,13 @@ export function Teleprompter({
                 />
               </div>
 
-              {source === "official" ? (
-                <p className="text-[12px] font-medium text-white/70">
-                  Matches your team size ({INTRO_SCRIPTS[teamMemberCount].title}
-                  ) with names from your roster. Edit the text if needed — that
-                  switches to My script.
-                </p>
-              ) : (
-                <p className="text-[12px] font-medium text-white/70">
-                  Paste below or upload a .txt / .md file.
-                  {uploadName ? ` Loaded: ${uploadName}` : ""}
-                </p>
-              )}
+              <p className="text-[12px] font-semibold text-[var(--yellow)]">
+                Edit Script Here
+              </p>
+              <p className="text-[12px] font-medium text-white/70">
+                You can change any wording in this box. Edits become your custom
+                script.
+              </p>
 
               <label className="block">
                 <span className="sr-only">Script text</span>
@@ -419,7 +427,8 @@ export function Teleprompter({
                   className="text-[12px] font-semibold text-[var(--yellow)] underline"
                   onClick={useOfficial}
                 >
-                  Back to official {INTRO_SCRIPTS[teamMemberCount].title} script
+                  Click Here for Official{" "}
+                  {INTRO_SCRIPTS[teamMemberCount].title} Script
                 </button>
               ) : null}
 
@@ -431,6 +440,24 @@ export function Teleprompter({
             </div>
           ) : null}
 
+          <div className="border-b border-white/15 px-4 py-2">
+            <p className="text-[15px] font-bold tracking-tight text-[var(--yellow)]">
+              Practice Here
+            </p>
+            <p className="mt-1 text-[12px] font-medium leading-snug text-white/80">
+              This is the scrolling teleprompter practice area. Click{" "}
+              <strong className="text-white">Scroll</strong> and try to read at
+              that speed out loud. If it feels too fast, finish the full pass,
+              then slow the slider — do not adjust midway. Practice several
+              times before you record a real video.
+            </p>
+            <p className="mt-1.5 text-[12px] font-medium leading-snug text-white/70">
+              Scroll speed is set for about a {TARGET_INTRO_SECONDS}-second
+              video. If you slow it down, your finished video will usually be
+              longer than {TARGET_INTRO_SECONDS} seconds.
+            </p>
+          </div>
+
           <div
             ref={scrollerRef}
             className={clsx(
@@ -439,9 +466,9 @@ export function Teleprompter({
             )}
             aria-live="polite"
           >
-            <div className="mx-auto max-w-xl whitespace-pre-wrap font-semibold tracking-wide">
+            <div className="mx-auto max-w-[14ch] whitespace-pre-wrap font-semibold tracking-wide">
               {displayScript.trim() ||
-                "Add a script above, then start recording."}
+                "Add a script above, then click Scroll to practice."}
             </div>
             <div className="h-40" aria-hidden />
           </div>
@@ -449,7 +476,7 @@ export function Teleprompter({
           <div className="space-y-2 border-t border-white/20 px-3 py-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/70">
-                Scroll speed
+                Scroll Speed
               </span>
               <span className="text-[12px] font-semibold text-[var(--yellow)]">
                 ~{paceSeconds}s · {speedPercent}%
@@ -470,8 +497,8 @@ export function Teleprompter({
             </div>
             <p className="text-[11px] font-medium text-white/65">
               {speedOverridden
-                ? "Custom speed — drag the slider to change."
-                : `Default paced for ~${TARGET_INTRO_SECONDS}s with this script.`}
+                ? "Custom speed — drag the slider after a full practice pass."
+                : `Auto-paced for about ${TARGET_INTRO_SECONDS} seconds.`}
               {speedOverridden ? (
                 <>
                   {" "}
@@ -480,7 +507,7 @@ export function Teleprompter({
                     onClick={restorePacedSpeed}
                     className="font-semibold text-[var(--yellow)] underline"
                   >
-                    Reset to ~{TARGET_INTRO_SECONDS}s pace
+                    Click Here to Reset to ~{TARGET_INTRO_SECONDS}s Pace
                   </button>
                 </>
               ) : null}
@@ -498,7 +525,8 @@ export function Teleprompter({
                   </>
                 ) : (
                   <>
-                    <Play className="h-3.5 w-3.5 fill-current" /> Scroll
+                    <Play className="h-3.5 w-3.5 fill-current" /> Click Here to
+                    Scroll
                   </>
                 )}
               </button>
@@ -507,14 +535,14 @@ export function Teleprompter({
                 onClick={resetScroll}
                 className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-white/40 px-3 py-1.5 text-[13px] font-semibold text-white"
               >
-                <RotateCcw className="h-3.5 w-3.5" /> Top
+                <RotateCcw className="h-3.5 w-3.5" /> Click Here for Top
               </button>
               <button
                 type="button"
                 onClick={() => setFontLarge((v) => !v)}
                 className="ml-auto rounded-[var(--radius-sm)] border border-white/35 px-2.5 py-1.5 text-[12px] font-semibold text-white"
               >
-                {fontLarge ? "Smaller text" : "Bigger text"}
+                {fontLarge ? "Smaller Text" : "Bigger Text"}
               </button>
             </div>
           </div>

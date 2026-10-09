@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { ImagePlus, PenLine, Trash2 } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { JobTitleField } from "@/components/JobTitleField";
+import { PanelSteps } from "@/components/PanelStep";
 import { defaultDutiesForTitle } from "@/lib/job-titles";
 import { useStudio } from "@/lib/studio-context";
 
@@ -64,35 +65,39 @@ export function ScriptFillIns() {
           />
           <div>
             <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              Your introduction
+              Your Introduction
             </h3>
-            <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
-              Fills the opening of the teleprompter script — you introduce
-              yourself here. Teammates are introduced separately below.
-            </p>
           </div>
         </div>
-        <HelpTip title="Your introduction">
+        <HelpTip title="Your Introduction">
           <p>
-            <strong>Customer name</strong> fills every “[Customer Name]” in the
-            script.
+            These blanks build the opening of your script. Change any field
+            anytime — the teleprompter updates to match.
           </p>
           <p>
-            <strong>Your name, title, and duties</strong> fill the opening
-            self-intro only — you are not listed again as a teammate in the
-            script.
-          </p>
-          <p>
-            <strong>Featured photo</strong> is for the Love&apos;s Team
-            thumbnail only. It does not create a PIP overlay of you in the
-            talking video — PIP photos are only for teammates you introduce.
+            Your featured photo is only for the optional team thumbnail. It does
+            not put a small photo of you over the talking video.
           </p>
         </HelpTip>
       </div>
 
+      <PanelSteps
+        steps={[
+          <>Type the <strong>customer name</strong> and <strong>your name</strong>.</>,
+          <>
+            Choose your <strong>job title</strong> and edit{" "}
+            <strong>job duties</strong> if you want.
+          </>,
+          <>
+            Optional: click <strong>Add Photo</strong> for your featured
+            thumbnail photo.
+          </>,
+        ]}
+      />
+
       <div className="grid gap-3 md:grid-cols-2">
         <label className="block">
-          <span className="field-label">Customer name</span>
+          <span className="field-label">Customer Name</span>
           <input
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}

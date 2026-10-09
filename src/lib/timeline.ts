@@ -31,13 +31,57 @@ export function formatClock(seconds: number): string {
 }
 
 /**
- * Place filled photos at the preferred Allego defaults (23s / 35s / 47s / 56s,
- * 10s each). On shorter clips, starts are clamped and durations shorten so
- * bars still fit without overlapping. Empty slots stay unused. Users can drag.
+ * Estimate when each teammate’s name is spoken from their place in the
+ * script text, then map that to the video timeline. Falls back to the
+ * Allego defaults (23 / 35 / 47 / 56s) when a name is missing from the script.
+ */
+export function cueStartsFromScript(
+  photos: TeamPhoto[],
+  script: string | undefined,
+  timelineDuration: number,
+): number[] {
+  const defaultStarts = VIDEO_TEMPLATE.defaultPhotoStartSeconds;
+  const filled = photos.filter((p) => p.url);
+  if (!script?.trim() || filled.length === 0 || timelineDuration <= 0) {
+    return filled.map(
+      (_, i) =>
+        defaultStarts[Math.min(i, defaultStarts.length - 1)] ??
+        defaultStarts[0],
+    );
+  }
+
+  const lower = script.toLowerCase();
+  let searchFrom = 0;
+  return filled.map((photo, index) => {
+    const name = photo.name.trim();
+    let charIndex = -1;
+    if (name.length >= 2) {
+      const needle = name.toLowerCase();
+      charIndex = lower.indexOf(needle, searchFrom);
+      if (charIndex === -1) charIndex = lower.indexOf(needle);
+      if (charIndex !== -1) searchFrom = charIndex + needle.length;
+    }
+    if (charIndex === -1) {
+      return (
+        defaultStarts[Math.min(index, defaultStarts.length - 1)] ??
+        defaultStarts[0]
+      );
+    }
+    // Leave a little lead-in so the face appears as the name is spoken.
+    const fraction = clamp(charIndex / Math.max(script.length, 1), 0.08, 0.92);
+    return fraction * timelineDuration;
+  });
+}
+
+/**
+ * Place filled photos when each name is cued in the script (preferred),
+ * or at Allego defaults. Durations default to 10s; bars are clamped so they
+ * fit without overlapping. Empty slots stay unused. Users can drag.
  */
 export function autoArrangePhotos(
   photos: TeamPhoto[],
   timelineDuration: number,
+  script?: string,
 ): TeamPhoto[] {
   if (photos.length === 0 || timelineDuration <= 0) return photos;
 
@@ -46,10 +90,10 @@ export function autoArrangePhotos(
   if (filled.length === 0) return photos;
 
   const defaultDur = VIDEO_TEMPLATE.defaultPhotoDurationSeconds;
-  const defaultStarts = VIDEO_TEMPLATE.defaultPhotoStartSeconds;
+  const cueStarts = cueStartsFromScript(filled, script, timelineDuration);
 
   // Very short videos: pack evenly from the start.
-  if (timelineDuration < defaultStarts[0] + MIN) {
+  if (timelineDuration < (cueStarts[0] ?? 23) + MIN) {
     const duration = Math.max(MIN, timelineDuration / filled.length);
     let cursor = 0;
     const packed = filled.map((photo) => {
@@ -67,10 +111,7 @@ export function autoArrangePhotos(
 
   let previousEnd = 0;
   const arranged = filled.map((photo, index) => {
-    const preferred =
-      defaultStarts[Math.min(index, defaultStarts.length - 1)] ??
-      defaultStarts[0];
-    // Honor the cue when possible; nudge forward only to avoid overlap.
+    const preferred = cueStarts[index] ?? VIDEO_TEMPLATE.defaultPhotoStartSeconds[0];
     let start = Math.max(preferred, previousEnd);
     start = clamp(start, 0, Math.max(0, timelineDuration - MIN));
     const duration = clamp(

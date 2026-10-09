@@ -121,31 +121,31 @@ export function WebcamTeleprompterOverlay({
         aria-hidden
       />
 
-      {/* Top reading band — near the webcam lens */}
-      <div className="relative z-20 mx-auto flex w-full max-w-4xl flex-col px-2 pt-2 md:px-4 md:pt-3">
+      {/* Narrow top band — eyes stay near the webcam, not sweeping left–right */}
+      <div className="relative z-20 mx-auto flex w-full max-w-[18rem] flex-col px-1 pt-2 md:max-w-[20rem] md:pt-3">
         {!recording ? (
-          <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2.5 py-1.5 text-center text-[11px] font-semibold leading-snug text-white md:text-[12px]">
-            Scroll speed matches Script teleprompter practice above. Pause keeps
-            your speed — use the dots on the Speed line as reference points.
+          <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
+            Keep this text near the top of your monitor, close to the webcam.
+            Scoot back so we see from about your waist to the top of your head.
           </p>
         ) : null}
 
-        <div className="relative h-36 overflow-hidden rounded-xl border border-white/30 bg-black/45 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:h-44">
-          {/* Reading guide near the top of the band (eye line → webcam) */}
+        <div className="relative h-40 overflow-hidden rounded-xl border border-white/30 bg-black/50 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:h-48">
           <div
-            className="pointer-events-none absolute inset-x-3 top-[28%] z-20 h-0.5 bg-[var(--yellow)]/85"
+            className="pointer-events-none absolute inset-x-2 top-[26%] z-20 h-0.5 bg-[var(--yellow)]/85"
             aria-hidden
           />
           <div
             ref={scrollerRef}
             className={clsx(
-              "h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none md:px-5 md:pt-4",
+              "h-full overflow-y-auto px-2 pb-16 pt-3 text-center scrollbar-none",
               !enabled && "opacity-40",
             )}
             style={{ scrollbarWidth: "none" }}
             aria-live="polite"
           >
-            <p className="whitespace-pre-wrap text-[1.25rem] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] md:text-[1.5rem] md:leading-relaxed">
+            {/* ~5 words wide so eyes move top-to-bottom, not left-to-right */}
+            <p className="mx-auto max-w-[11ch] whitespace-pre-wrap text-[1.05rem] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] md:text-[1.2rem]">
               {enabled
                 ? script.trim() || "Add your script above in the teleprompter."
                 : "Teleprompter off — tap On below to show your script."}

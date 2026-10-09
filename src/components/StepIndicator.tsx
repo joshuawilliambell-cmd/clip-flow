@@ -13,14 +13,14 @@ const STEPS: Array<{
   {
     id: 1,
     label: "1. Prepare Your Video",
-    hint: "Team, script, record or upload",
-    tip: "Add teammates, fill the script, optionally build a thumbnail, then record or upload your talking video.",
+    hint: "Team, Script, Record Or Upload",
+    tip: "Fill in the blanks, add teammates, optionally build a thumbnail, then record or upload your talking video.",
   },
   {
     id: 2,
     label: "2. Finish & Download",
-    hint: "Edit, music, and save as MP4",
-    tip: "Trim the clip, place and time teammate photos, pick music, preview, then export and download your finished video.",
+    hint: "Edit, Music, And Save As MP4",
+    tip: "Place teammate photos, trim, pick quiet music, preview, then export and download your finished video.",
   },
 ];
 

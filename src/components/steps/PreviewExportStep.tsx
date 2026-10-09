@@ -10,10 +10,8 @@ import {
   Music2,
   Pause,
   Play,
-  RotateCcw,
   Volume2,
   VolumeX,
-  Wand2,
 } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { MUSIC_TRACKS, VIDEO_TEMPLATE } from "@/lib/template";
@@ -22,8 +20,8 @@ import { exportIntroductionVideo } from "@/lib/export-video";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { PipSidePicker } from "@/components/PipSidePicker";
-import { TeamRosterFields } from "@/components/TeamRosterFields";
 import { HelpTip } from "@/components/HelpTip";
+import { PanelSteps } from "@/components/PanelStep";
 import { filledTeamPhotos } from "@/lib/team-slots";
 
 const MUSIC_SAMPLE_SECONDS = 30;
@@ -49,8 +47,6 @@ export function PreviewExportStep({
     setVideoVolume,
     setMusicTrackId,
     setStep,
-    autoArrange,
-    resetTimeline,
     photos,
     teamMemberCount,
   } = useStudio();
@@ -145,19 +141,18 @@ export function PreviewExportStep({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">Step 2: Finish and download</h2>
+          <h2 className="step-title">Step 2: Finish And Download</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Edit your video here — trim, place teammate photos, set music, then
-            export MP4.
+            Finish your video here — place teammate photos, trim, add quiet
+            music, then export an MP4.
           </p>
         </div>
-        <HelpTip title="What do I do on this page?" size="lg">
-          <p>Optional opening thumbnail ({THUMBNAIL_TEMPLATE.introDurationSeconds}s).</p>
+        <HelpTip title="What Do I Do On This Page?" size="lg">
+          <p>Work through each panel in order using the numbered steps.</p>
           <p>
-            Choose photo corner, trim the clip, and drag timeline bars to time
-            each teammate photo.
+            Teammate photos are timed to when their name appears in your script.
+            You can still drag the bars on the timeline if you need to fine-tune.
           </p>
-          <p>Pick music (or off), set voice louder than music, preview, export.</p>
         </HelpTip>
       </div>
 
@@ -166,7 +161,7 @@ export function PreviewExportStep({
           <div className="flex items-start gap-2">
             <div>
               <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-                Opening thumbnail
+                Opening Thumbnail
               </h3>
               <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
                 Optional · {THUMBNAIL_TEMPLATE.introDurationSeconds}s at start
@@ -257,61 +252,38 @@ export function PreviewExportStep({
         )}
       </section>
 
-      {/* All video / photo editing lives here in Finish & Download */}
       {teamMemberCount > 0 ? (
         <section className="space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-                Edit photos & video
-              </h3>
-              <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-                Replace or remove teammate photos, choose the corner, trim the
-                clip, and drag timeline bars for when each face appears (
-                {filledCount} of {teamMemberCount} photos filled)
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={autoArrange}
-                disabled={filledCount === 0 || !video}
-                className="btn-secondary"
-              >
-                <Wand2 className="h-5 w-5" /> Auto Arrange Photos
-              </button>
-              <button
-                type="button"
-                onClick={resetTimeline}
-                disabled={filledCount === 0 || !video}
-                className="btn-secondary"
-              >
-                <RotateCcw className="h-5 w-5" /> Reset Timeline
-              </button>
-              <HelpTip title="Photo timing">
-                <p>
-                  Defaults: teammate 1 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[0]}s, 2 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[1]}s, 3 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[2]}s, 4 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[3]}s — each{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s long. Drag bars
-                  (hand cursor) or their ends anytime to change.
-                </p>
-                <p>
-                  <strong>Auto Arrange Photos</strong> restores those default
-                  cue points (or packs them on shorter videos).
-                </p>
-              </HelpTip>
-            </div>
+          <div>
+            <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+              Place Teammate Photos
+            </h3>
+            <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+              {filledCount} of {teamMemberCount} teammate photos ready · photos
+              line up with when each name is said in your script
+            </p>
           </div>
-          <TeamRosterFields variant="review" />
+          <PanelSteps
+            steps={[
+              <>
+                Choose left or right for the small teammate photo in the corner.
+              </>,
+              <>
+                On the timeline below, colored bars show when each face appears.
+                Drag a bar (hand cursor) to move it; drag the ends to change how
+                long it stays.
+              </>,
+              <>
+                Preview your video, then continue to music and export.
+              </>,
+            ]}
+          />
           <PipSidePicker />
         </section>
       ) : (
         <div className="how-banner">
-          No teammate photo overlays for this project. Trim your video below,
-          add music if you like, then export.
+          No teammate corner photos for this project. Trim your video below, add
+          music if you like, then export.
         </div>
       )}
 
@@ -323,22 +295,19 @@ export function PreviewExportStep({
           <div className="flex items-start gap-2">
             <div>
               <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-                Background music
+                Background Music
               </h3>
               <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-                Select a track · use 30s to preview
+                Quiet under your voice · default{" "}
+                {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}% · max{" "}
+                {Math.round(VIDEO_TEMPLATE.maxMusicVolume * 100)}%
               </p>
             </div>
-            <HelpTip title="Background music">
-              <p>There are four Corporate Chill music choices.</p>
-              <p>Tap a card to select it. The yellow border means “selected.”</p>
+            <HelpTip title="Background Music">
+              <p>Pick a track or turn music off.</p>
               <p>
-                Tap the small Play button on a track for a {MUSIC_SAMPLE_SECONDS}
-                -second sample before you choose.
-              </p>
-              <p>
-                Tap Music off if you want only your voice with no background
-                music.
+                Music stays very quiet so customers hear your voice. Max is{" "}
+                {Math.round(VIDEO_TEMPLATE.maxMusicVolume * 100)}%.
               </p>
             </HelpTip>
           </div>
@@ -454,20 +423,31 @@ export function PreviewExportStep({
             <span className="flex items-center gap-2 text-lg font-bold text-[var(--ink)]">
               <Music2 className="h-5 w-5 text-[var(--primary)]" />
               Music volume: {Math.round(musicVolume * 100)}%
-              <HelpTip title="Music volume">
+              <HelpTip title="Music Volume">
                 <p>This controls how loud the background music is.</p>
-                <p>Keep it quieter than your voice so customers can hear you.</p>
-                <p>Default is 2% so your voice stays clear over the music.</p>
+                <p>
+                  Default is {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}%.
+                  You can raise it up to{" "}
+                  {Math.round(VIDEO_TEMPLATE.maxMusicVolume * 100)}% only — your
+                  voice should stay louder than the music.
+                </p>
               </HelpTip>
             </span>
             <input
               type="range"
               min={0}
-              max={1}
+              max={VIDEO_TEMPLATE.maxMusicVolume}
               step={0.01}
-              value={musicVolume}
+              value={Math.min(musicVolume, VIDEO_TEMPLATE.maxMusicVolume)}
               disabled={!musicEnabled}
-              onChange={(e) => setMusicVolume(Number(e.target.value))}
+              onChange={(e) =>
+                setMusicVolume(
+                  Math.min(
+                    VIDEO_TEMPLATE.maxMusicVolume,
+                    Number(e.target.value),
+                  ),
+                )
+              }
               className="mt-5 h-3 w-full accent-[var(--primary)] disabled:opacity-40"
               aria-label="Music volume"
             />
@@ -507,7 +487,7 @@ export function PreviewExportStep({
               <Loader2 className="h-6 w-6 animate-spin" /> Exporting MP4…
             </>
           ) : (
-            "Export to MP4"
+            "Click Here to Export To MP4"
           )}
         </button>
 
@@ -528,7 +508,7 @@ export function PreviewExportStep({
 
         {downloadUrl ? (
           <a href={downloadUrl} download="loves-team-introduction.mp4" className="btn-yellow mt-4 inline-flex">
-            <Download className="h-5 w-5" /> Download MP4
+            <Download className="h-5 w-5" /> Click Here to Download MP4
           </a>
         ) : null}
 
@@ -550,7 +530,7 @@ export function PreviewExportStep({
 
       <div className="flex justify-start border-t-2 border-[var(--border)] pt-4">
         <button type="button" onClick={() => setStep(1)} className="btn-secondary">
-          Back
+          Click Here to Go Back
         </button>
       </div>
     </div>

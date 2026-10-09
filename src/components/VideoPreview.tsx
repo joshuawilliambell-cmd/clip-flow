@@ -261,8 +261,9 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
           <p>Tap the big Play button to watch and listen.</p>
           <p>
             Background music starts at{" "}
-            {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}% so your voice
-            stays clear. Change volume with the music controls on this page.
+            {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}% (max{" "}
+            {Math.round(VIDEO_TEMPLATE.maxMusicVolume * 100)}%) so your voice
+            stays clear.
           </p>
           <p>
             Preview uses your browser&apos;s built-in video player so uploads

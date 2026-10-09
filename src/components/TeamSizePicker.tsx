@@ -36,10 +36,12 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
           </span>
           <div>
             <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
-              {compact ? "People on thumbnail" : "Teammates to introduce"}
+              {compact ? "People On Thumbnail" : "Teammates To Introduce"}
             </h3>
             <p className="mt-0.5 text-[14px] font-medium text-[var(--muted)]">
-              {compact ? "Choose 1–4." : "Choose 0–4 (not counting you on camera)."}
+              {compact
+                ? "Choose 1–4."
+                : "Choose how many teammates you will introduce (not counting you)."}
             </p>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { ImagePlus, Replace, Trash2, Users } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { JobTitleField } from "@/components/JobTitleField";
 import { PronounField } from "@/components/PronounField";
+import { PanelSteps } from "@/components/PanelStep";
 import { defaultDutiesForTitle } from "@/lib/job-titles";
 import { useStudio } from "@/lib/studio-context";
 
@@ -15,8 +16,6 @@ type TeamRosterFieldsProps = {
 
 /**
  * Photo + name + job title for each teammate slot.
- * Used early in Step 1 so the teleprompter can speak real names;
- * photos and titles carry into Step 2 for PIP placement and timing.
  */
 export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
   const {
@@ -81,72 +80,80 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
           />
           <div>
             <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              {variant === "setup" ? "Your teammates" : "Your team"}
+              Your Teammates
             </h3>
-            <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
-              {variant === "setup"
-                ? "These people get PIP photo overlays in the video and “This is…” lines in the script. You (the speaker) are not listed here — your photo is thumbnail-only in Your introduction."
-                : "Replace or remove teammate photos here, then set corner and timing below. You are not a PIP overlay."}
-            </p>
           </div>
         </div>
-        <HelpTip title="Teammate photos">
+        <HelpTip title="Your Teammates">
           <p>
-            These slots are for <strong>other teammates</strong> who appear as
-            picture-in-picture during the video. Your own featured photo stays
-            on the thumbnail only.
+            These are the people you introduce on camera. A small photo of each
+            person can show in a corner of the video while you talk about them
+            (sometimes called picture-in-picture).
           </p>
           <p>
-            Tap <strong>Replace photo</strong> (or the thumbnail) to pick a new
-            headshot. Tap <strong>Remove</strong> to clear that slot.
+            You are not listed here — your photo is only for the optional team
+            thumbnail.
           </p>
-          {variant === "setup" ? (
-            <>
-              <p>
-                Tap <strong>Select multiple photos</strong> and choose several
-                headshots (Ctrl/Cmd+click or Shift+click). They fill Teammate 1,
-                2, 3… in the order you selected.
-              </p>
-              <p>
-                You can also open one box and pick multiple files — they fill
-                that box and the ones after it.
-              </p>
-            </>
-          ) : null}
-          <p>Slot 1 is introduced first. Use ↑ ↓ to change order.</p>
         </HelpTip>
       </div>
 
       {variant === "setup" ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => multiRef.current?.click()}
-            className="btn-yellow"
-          >
-            <ImagePlus className="h-5 w-5" />
-            {busy
-              ? "Adding photos…"
-              : `Select multiple photos (${teamMemberCount} slots)`}
-          </button>
-          <p className="text-[13px] font-medium text-[var(--muted)]">
-            {emptySlots === 0
-              ? "All boxes have photos — selecting again replaces them in order."
-              : `${emptySlots} empty · pick up to ${teamMemberCount} images`}
-          </p>
-          <input
-            ref={multiRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              void handleMultiFiles(e.target.files);
-              e.currentTarget.value = "";
-            }}
+        <>
+          <PanelSteps
+            steps={[
+              <>
+                <strong>Add photos</strong> — either click the yellow button to
+                pick several headshots at once, or click{" "}
+                <strong>Add Photo</strong> on each teammate card one at a time.
+              </>,
+              <>
+                Fill in each person&apos;s <strong>name</strong>,{" "}
+                <strong>he/she</strong>, <strong>job title</strong>, and{" "}
+                <strong>job duties</strong> (these go into the script).
+              </>,
+              <>
+                Use ↑ ↓ if you need to change the order they are introduced.
+              </>,
+            ]}
           />
-        </div>
+          <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-3">
+            <p className="text-[13px] font-medium text-[var(--ink)]">
+              <strong>Option A — add all photos at once:</strong> click the
+              button below, then choose up to {teamMemberCount} headshots in the
+              order you will introduce them.
+            </p>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => multiRef.current?.click()}
+              className="btn-yellow"
+            >
+              <ImagePlus className="h-5 w-5" />
+              {busy
+                ? "Adding Photos…"
+                : "Click Here to Select Multiple Photos"}
+            </button>
+            <p className="text-[13px] font-medium text-[var(--muted)]">
+              <strong>Option B — one photo at a time:</strong> on each teammate
+              card below, click <strong>Add Photo</strong> (or Replace Photo)
+              and pick that person&apos;s headshot.
+              {emptySlots > 0
+                ? ` ${emptySlots} card${emptySlots === 1 ? "" : "s"} still need a photo.`
+                : " All cards have photos — you can replace any of them."}
+            </p>
+            <input
+              ref={multiRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                void handleMultiFiles(e.target.files);
+                e.currentTarget.value = "";
+              }}
+            />
+          </div>
+        </>
       ) : null}
 
       {error ? (
@@ -183,7 +190,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                 ) : (
                   <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center text-[11px] font-semibold text-[var(--ink)]">
                     <ImagePlus className="h-5 w-5 text-[var(--primary)]" />
-                    Add photo
+                    Add Photo
                   </span>
                 )}
               </button>
@@ -209,7 +216,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                     className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--ink)] bg-white px-1.5 py-1.5 text-[11px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)] disabled:opacity-50"
                   >
                     <Replace className="h-3.5 w-3.5 shrink-0" />
-                    Replace photo
+                    Replace Photo
                   </button>
                   <button
                     type="button"
@@ -229,7 +236,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                   className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--ink)] bg-[var(--yellow)] px-1.5 py-1.5 text-[11px] font-bold text-[var(--ink)] disabled:opacity-50"
                 >
                   <ImagePlus className="h-3.5 w-3.5 shrink-0" />
-                  Add photo
+                  Add Photo
                 </button>
               )}
             </div>
@@ -298,7 +305,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
               />
 
               <label className="block">
-                <span className="field-label">Job duties (for script)</span>
+                <span className="field-label">Job Duties (For Script)</span>
                 <input
                   value={photo.duties}
                   onChange={(e) =>

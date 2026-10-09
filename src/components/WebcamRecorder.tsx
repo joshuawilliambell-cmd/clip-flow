@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, Trash2, Check } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
+import { PanelSteps } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
 import { formatClock } from "@/lib/timeline";
 
@@ -304,50 +305,48 @@ export function WebcamRecorder({
           <div className="flex items-center gap-2">
             <Camera className="h-6 w-6 text-[var(--primary)]" aria-hidden />
             <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              Record with webcam
+              Record With Webcam
             </h3>
           </div>
-          <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-            Optional — uses the scroll speed from Script teleprompter practice
-            above; text stays at the top near the webcam (not saved into the
-            video)
-          </p>
         </div>
-        <HelpTip title="Webcam recording" size="lg">
+        <HelpTip title="Record With Webcam" size="lg">
           <p>
-            Tap <strong>Start webcam</strong>. Allow camera and microphone when
-            the browser asks.
+            Put the preview and teleprompter text near the <strong>very top</strong>{" "}
+            of your monitor, closest to your webcam, so your eyes look at the
+            lens — not left to right across the screen.
           </p>
           <p>
-            <strong>Sit back a little</strong> from the camera — about an
-            arm&apos;s length — so it does not look like you are reading from a
-            teleprompter. Looking slightly toward the lens (top of the monitor)
-            reads more natural on camera.
+            Scoot back so the camera sees from about your waist up to the top
+            of your head.
           </p>
           <p>
-            Your Fleet Hub script appears as a{" "}
-            <strong>top teleprompter</strong> over the live preview so your eyes
-            stay near the webcam at the top of the monitor. Do one or two
-            practice recordings and adjust Speed until the scroll matches how
-            you talk, then record your real take. Pause or turn the prompter
-            off anytime. The text is preview-only and will not appear in the
-            saved clip.
-          </p>
-          <p>
-            Prefer a phone on a tripod? Use the larger teleprompter above on
-            this computer screen, record on your phone, then upload the clip.
-          </p>
-          <p>
-            Tap <strong>Stop</strong>, review the clip, then{" "}
-            <strong>Use this recording</strong>.
+            Script text is preview-only and is not saved into the video file.
           </p>
         </HelpTip>
       </div>
 
+      <PanelSteps
+        className="mt-4"
+        steps={[
+          <>
+            Place this browser window so the preview sits at the{" "}
+            <strong>top of your monitor</strong>, near the webcam.
+          </>,
+          <>
+            <strong>Scoot back</strong> — frame from about your waist to the top
+            of your head so it does not look like you are reading a script.
+          </>,
+          <>
+            Click <strong>Start Webcam</strong>, practice, then record. Allow
+            camera and microphone when asked.
+          </>,
+        ]}
+      />
+
       <div className="how-banner mt-4">
-        <strong>Sit back a little</strong> from the camera (about an arm&apos;s
-        length) so it does not look like you are reading the teleprompter. Keep
-        your eyes near the webcam at the top of the monitor.
+        Keep the teleprompter near the top of the screen (closest to the
+        webcam). Scoot back so we see from about your waist to the top of your
+        head.
       </div>
 
       {phase === "idle" ? (
@@ -359,7 +358,7 @@ export function WebcamRecorder({
             className="btn-primary"
           >
             <Camera className="h-5 w-5" />
-            Start webcam
+            Click Here to Start Webcam
           </button>
         </div>
       ) : null}
@@ -367,10 +366,9 @@ export function WebcamRecorder({
       {live ? (
         <div className="mt-4 space-y-4">
           <div className="how-banner">
-            <strong>Practice first:</strong> record one or two short practice
-            takes and adjust the teleprompter Speed slider until it matches how
-            fast you talk. Then do your real take. Script text is preview-only
-            and is not saved into the video.
+            <strong>Practice first.</strong> Do one or two short takes and
+            adjust speed only after a full pass. Script text is not saved into
+            the video.
           </div>
 
           <div className="space-y-3">
@@ -407,14 +405,14 @@ export function WebcamRecorder({
                     className="btn-primary"
                   >
                     <Circle className="h-5 w-5 fill-current" />
-                    Start recording
+                    Click Here to Start Recording
                   </button>
                   <button
                     type="button"
                     onClick={closeCamera}
                     className="btn-secondary"
                   >
-                    Cancel webcam
+                    Click Here to Cancel Webcam
                   </button>
                 </>
               ) : (
@@ -425,7 +423,7 @@ export function WebcamRecorder({
                     className="btn-primary"
                   >
                     <Square className="h-5 w-5 fill-current" />
-                    Stop recording
+                    Click Here to Stop Recording
                   </button>
                   <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
                     Recording… {formatClock(seconds)}
@@ -445,17 +443,13 @@ export function WebcamRecorder({
       {phase === "review" && reviewUrl ? (
         <div className="mt-4 space-y-4">
           <div className="how-banner">
-            <strong>Next step:</strong> Watch your take below. If it looks and
-            sounds good, tap <strong>Use this recording</strong> to load it into
-            the studio. Want another try? Tap <strong>Record again</strong>.
+            <strong>Next:</strong> Watch your take. If it looks good, click{" "}
+            <strong>Use This Recording</strong>. Want another try? Click{" "}
+            <strong>Record Again</strong>.
           </div>
           <div>
             <p className="text-lg font-bold text-[var(--ink)]">
-              Review your recording ({formatClock(seconds)})
-            </p>
-            <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Your clip is not in the project yet — choose Use this recording to
-              continue with trim, photos, and export.
+              Review Your Recording ({formatClock(seconds)})
             </p>
           </div>
           <div className="overflow-hidden section-card bg-black">
@@ -474,11 +468,8 @@ export function WebcamRecorder({
               className="btn-primary min-w-[14rem]"
             >
               <Check className="h-5 w-5" />
-              {busy ? "Saving…" : "Use this recording"}
+              {busy ? "Saving…" : "Click Here to Use This Recording"}
             </button>
-            <p className="min-w-0 flex-1 text-[14px] font-semibold text-[var(--ink)]">
-              ← Tap here to keep this take and move on
-            </p>
             <button
               type="button"
               disabled={busy}
@@ -486,7 +477,7 @@ export function WebcamRecorder({
               className="btn-secondary"
             >
               <Trash2 className="h-5 w-5" />
-              Record again
+              Click Here to Record Again
             </button>
             <button
               type="button"

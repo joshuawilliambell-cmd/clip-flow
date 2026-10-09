@@ -3,19 +3,20 @@
 import { clsx } from "clsx";
 import { PanelLeft, PanelRight } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
+import { PanelSteps } from "@/components/PanelStep";
 import { useStudio } from "@/lib/studio-context";
 import type { PipSide } from "@/lib/template";
 
 const OPTIONS: Array<{ id: PipSide; label: string; hint: string }> = [
   {
     id: "left",
-    label: "Left",
-    hint: "Top-left corner",
+    label: "Left Side",
+    hint: "Small photo in the top-left corner",
   },
   {
     id: "right",
-    label: "Right",
-    hint: "Top-right corner",
+    label: "Right Side",
+    hint: "Small photo in the top-right corner",
   },
 ];
 
@@ -27,27 +28,33 @@ export function PipSidePicker() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-            Photo placement
+            Photo Corner Placement
           </h3>
-          <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-            Left or right corner · portrait frame is fixed
-          </p>
         </div>
-        <HelpTip title="Photo placement" size="lg">
+        <HelpTip title="Photo Corner Placement" size="lg">
           <p>
-            Every teammate photo uses the same portrait frame near the top
-            corner — with space from the edge so it never touches the border.
-          </p>
-          <p>
-            Choose <strong>Left side</strong> or <strong>Right side</strong>.
-            Pick the side that keeps your face clear in the main video.
-          </p>
-          <p>
-            You do not resize or drag the photo. Size and padding are fixed for
-            a professional look.
+            When you introduce a teammate, a small photo of them can appear in
+            one top corner of the video. Pick left or right so it does not cover
+            your face.
           </p>
         </HelpTip>
       </div>
+
+      <PanelSteps
+        className="mt-3"
+        steps={[
+          <>
+            Choose whether each teammate&apos;s small photo shows on the{" "}
+            <strong>left</strong> or <strong>right</strong> side of the video.
+          </>,
+          <>
+            Pick the side that keeps your face clear in the main video.
+          </>,
+          <>
+            You do not resize or drag the photo frame — only left or right.
+          </>,
+        ]}
+      />
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {OPTIONS.map((option) => {
@@ -73,7 +80,7 @@ export function PipSidePicker() {
               </span>
               <span>
                 <span className="block text-xl font-bold text-[var(--ink)]">
-                  {option.label}
+                  Click Here for {option.label}
                   {selected ? " ✓" : ""}
                 </span>
                 <span className="mt-1 block text-base text-[var(--muted)]">
@@ -85,7 +92,6 @@ export function PipSidePicker() {
         })}
       </div>
 
-      {/* Simple visual diagram */}
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {OPTIONS.map((option) => (
           <div
@@ -109,7 +115,7 @@ export function PipSidePicker() {
               }}
             />
             <p className="absolute bottom-2 left-0 right-0 text-center text-sm font-semibold text-white">
-              16:9 video · portrait photo · {option.label.toLowerCase()}
+              Example · {option.label.toLowerCase()}
             </p>
           </div>
         ))}

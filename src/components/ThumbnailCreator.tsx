@@ -223,47 +223,37 @@ export function ThumbnailCreator({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
           <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-            Love&apos;s Team thumbnail
+            Prepare Love&apos;s Team Thumbnail
           </h3>
-          <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
-            Optional · you first on the still image, then teammates ·{" "}
-            {THUMBNAIL_TEMPLATE.introDurationSeconds}s video opener or download
-            PNG. Your photo is for this thumbnail only — not a PIP overlay in
-            the talking video.
-          </p>
         </div>
-        <HelpTip title="Thumbnail help" size="lg">
+        <HelpTip title="Prepare Love's Team Thumbnail" size="lg">
           <p>
-            The first card is <strong>you</strong> (featured photo, name, and
-            title). Extra cards come from <strong>Your teammates</strong>.
+            <strong>Optional.</strong> This still image can play for one second
+            at the start of your video (or you can download it as a PNG for
+            Allego or email). It shows you and your teammates as a team card.
           </p>
           <p>
-            <strong>Thumbnail ≠ PIP:</strong> including your photo here does
-            not put a picture-in-picture of you over the video. Only teammate
-            slots become on-screen PIP photos.
-          </p>
-          <p>
-            Optional Allego opener: shows for{" "}
-            {THUMBNAIL_TEMPLATE.introDurationSeconds}s then your talking video
-            continues.
+            Your photo here is for this thumbnail only. It does not put a small
+            photo of you over the talking video. Only teammate photos can appear
+            in a corner while you speak.
           </p>
         </HelpTip>
       </div>
 
       <div className="how-banner">
-        <strong>You on the thumbnail, not as PIP.</strong> Your featured card
-        appears on this still image only. Teammate cards can also show as
-        picture-in-picture during the video.
+        <strong>Optional.</strong> Use this if you want a Love&apos;s team card
+        at the very start of the video. Skip it if you only want your talking
+        clip.
       </div>
 
       {filledCount === 0 ? (
         <div className="how-banner">
           Add your name, title, and featured photo in{" "}
-          <strong>Your introduction</strong>
+          <strong>Your Introduction</strong>
           {teamMemberCount > 0 ? (
             <>
               {" "}
-              and teammates in <strong>Your teammates</strong>
+              and teammates in <strong>Your Teammates</strong>
             </>
           ) : null}{" "}
           — they show up here for framing.
@@ -277,7 +267,7 @@ export function ThumbnailCreator({
             className="btn-secondary"
           >
             <RotateCcw className="h-5 w-5" />
-            Reset face framing
+            Click Here to Reset Face Framing
           </button>
         </div>
       )}
@@ -504,37 +494,13 @@ export function ThumbnailCreator({
       </div>
 
       <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--panel-soft)] p-4 md:p-5">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h4 className="text-lg font-bold text-[var(--ink)]">
-              Live thumbnail preview
-            </h4>
-            <p className="text-[13px] font-medium text-[var(--muted)]">
-              Love&apos;s red / yellow / orange frame · {filledCount || 0} of{" "}
-              {slotCount} people · {THUMBNAIL_TEMPLATE.width}×
-              {THUMBNAIL_TEMPLATE.height}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void addToVideo()}
-              className="btn-primary"
-            >
-              <Clapperboard className="h-5 w-5" />
-              {busy ? "Working…" : "Add to start of video"}
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void download()}
-              className="btn-secondary"
-            >
-              <Download className="h-5 w-5" />
-              Download PNG
-            </button>
-          </div>
+        <div className="mb-3">
+          <h4 className="text-lg font-bold text-[var(--ink)]">
+            Live Thumbnail Preview
+          </h4>
+          <p className="text-[13px] font-medium text-[var(--muted)]">
+            Love&apos;s frame · {filledCount || 0} of {slotCount} people
+          </p>
         </div>
 
         <div className="overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#f4f5f7]">
@@ -552,11 +518,37 @@ export function ThumbnailCreator({
           )}
         </div>
 
+        <p className="mt-4 text-[14px] font-medium text-[var(--ink)]">
+          If you want to add this to the start of your video, click here:
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void addToVideo()}
+            className="btn-primary"
+          >
+            <Clapperboard className="h-5 w-5" />
+            {busy
+              ? "Working…"
+              : "Click Here to Add to Start of Video"}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void download()}
+            className="btn-secondary"
+          >
+            <Download className="h-5 w-5" />
+            Click Here to Download PNG
+          </button>
+        </div>
+
         {introThumbnailUrl && introThumbnailEnabled ? (
           <p className="mt-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-4 py-3 text-lg font-medium text-[var(--ink)]">
-            This thumbnail is set to play for{" "}
-            {THUMBNAIL_TEMPLATE.introDurationSeconds} second at the start of your
-            intro video. You can turn that off in Step 2.
+            This thumbnail will play for{" "}
+            {THUMBNAIL_TEMPLATE.introDurationSeconds} second at the start of
+            your video. You can turn that off in Step 2.
             <button
               type="button"
               className="ml-2 underline"
@@ -565,7 +557,7 @@ export function ThumbnailCreator({
                 setStatus("Opening thumbnail removed from the video.");
               }}
             >
-              Remove from video
+              Click Here to Remove From Video
             </button>
           </p>
         ) : null}
@@ -581,12 +573,6 @@ export function ThumbnailCreator({
             {error}
           </p>
         ) : null}
-
-        <p className="mt-4 text-[13px] font-medium text-[var(--muted)] md:text-[14px]">
-          <strong>Add to start of video</strong> places this image as an optional
-          opening card ({THUMBNAIL_TEMPLATE.introDurationSeconds}s).{" "}
-          <strong>Download PNG</strong> saves a still image for Allego or email.
-        </p>
       </div>
     </section>
   );

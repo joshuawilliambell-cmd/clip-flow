@@ -17,6 +17,7 @@ import {
 } from "@/lib/template";
 import {
   clampTeleprompterSpeed,
+  scriptForTeam,
   suggestedPixelsPerTickForTeamCount,
 } from "@/lib/intro-script";
 import {
@@ -307,9 +308,17 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [teleprompterSpeedOverridden, setTeleprompterSpeedOverridden] =
     useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
-  const [musicVolume, setMusicVolume] = useState<number>(
+  const [musicVolume, setMusicVolumeState] = useState<number>(
     VIDEO_TEMPLATE.defaultMusicVolume,
   );
+  const setMusicVolume = useCallback((volume: number) => {
+    setMusicVolumeState(
+      Math.min(
+        VIDEO_TEMPLATE.maxMusicVolume,
+        Math.max(0, Number.isFinite(volume) ? volume : 0),
+      ),
+    );
+  }, []);
   const [videoVolume, setVideoVolume] = useState<number>(
     VIDEO_TEMPLATE.defaultVideoVolume,
   );
@@ -428,14 +437,32 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setTrimEnd(end);
       setCurrentTime(0);
       setIsPlaying(false);
-      // Keep Step 1 roster (names, titles, headshots); only retime PIP slots.
+      // Keep Step 1 roster; time photos to when each name is cued in the script.
       setPhotos((prev) => {
-        const arranged = autoArrangePhotos(prev, end);
+        const script = scriptForTeam(teamMemberCount, {
+          customerName,
+          speakerName,
+          speakerTitle,
+          speakerDuties,
+          people: prev.map((p) => ({
+            name: p.name,
+            title: p.title,
+            pronoun: p.pronoun,
+            duties: p.duties,
+          })),
+        });
+        const arranged = autoArrangePhotos(prev, end, script);
         baselineRef.current = arranged.map((p) => ({ ...p }));
         return arranged;
       });
     },
-    [teamMemberCount],
+    [
+      teamMemberCount,
+      customerName,
+      speakerName,
+      speakerTitle,
+      speakerDuties,
+    ],
   );
 
   const reconcileVideoDuration = useCallback((durationSeconds: number) => {
@@ -506,7 +533,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     );
     setTeleprompterSpeedOverridden(false);
     setMusicEnabled(true);
-    setMusicVolume(VIDEO_TEMPLATE.defaultMusicVolume);
+    setMusicVolumeState(VIDEO_TEMPLATE.defaultMusicVolume);
     setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);
     setMusicTrackId(MUSIC_TRACKS[0].id);
     setPipSide(VIDEO_TEMPLATE.pip.defaultSide);
@@ -850,13 +877,40 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [outputDuration],
   );
 
+  const buildScriptForCues = useCallback(
+    (roster: TeamPhoto[]) =>
+      scriptForTeam(teamMemberCount, {
+        customerName,
+        speakerName,
+        speakerTitle,
+        speakerDuties,
+        people: roster.map((p) => ({
+          name: p.name,
+          title: p.title,
+          pronoun: p.pronoun,
+          duties: p.duties,
+        })),
+      }),
+    [
+      teamMemberCount,
+      customerName,
+      speakerName,
+      speakerTitle,
+      speakerDuties,
+    ],
+  );
+
   const autoArrange = useCallback(() => {
     setPhotos((prev) => {
-      const arranged = autoArrangePhotos(prev, outputDuration);
+      const arranged = autoArrangePhotos(
+        prev,
+        outputDuration,
+        buildScriptForCues(prev),
+      );
       baselineRef.current = arranged.map((p) => ({ ...p }));
       return arranged;
     });
-  }, [outputDuration]);
+  }, [outputDuration, buildScriptForCues]);
 
   const resetTimeline = useCallback(() => {
     if (baselineRef.current.length === 0) {

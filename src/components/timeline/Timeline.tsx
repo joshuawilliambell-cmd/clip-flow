@@ -168,26 +168,28 @@ export function Timeline() {
               Timeline
             </h3>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Trim with red handles · hover a team photo for a hand cursor, then
-              drag · edges show ↔ to change length · drag playhead to scrub
+              Trim your talking video · move teammate photo bars to match when
+              you say each name
             </p>
           </div>
-          <HelpTip title="How to use the timeline" size="lg">
+          <HelpTip title="How To Use The Timeline" size="lg">
             <p>
-              <strong>Track 1</strong> shows your full recording. The dark
-              middle is what you keep — drag the <strong>red handles</strong>{" "}
-              (or use Cut start / Cut end) to remove time from the beginning or
-              end. Gray areas are discarded.
+              <strong>Track 1 — Your Video:</strong> the black bar is your
+              recording. Drag the <strong>red handles</strong> on the ends (or
+              use Cut Start / Cut End) to shorten the beginning or end. Gray
+              areas are cut out.
             </p>
             <p>
-              <strong>Track 2 (colored bars)</strong> are team photos. Defaults
-              are about 23s, 35s, 47s, and 56s (10s each). Drag one bar{" "}
-              <strong>onto another</strong> to reorder, or drag ends to resize.
+              <strong>Track 2 — Team Photos:</strong> each colored bar is one
+              teammate&apos;s small corner photo. Bars start near when that
+              person&apos;s name is said in your script. Hover for a hand
+              cursor, then drag the middle of a bar to move when the photo
+              shows. Drag the left or right edge (↔) to make it shorter or
+              longer. Drag one bar onto another to swap order.
             </p>
             <p>
               Drag the <strong>red play line</strong> (ball on top) to jump to
-              any moment. Use <strong>Play</strong> / <strong>Pause</strong> on
-              the timeline to preview from there.
+              any moment. Use Play / Pause to watch from there.
             </p>
           </HelpTip>
         </div>
@@ -221,7 +223,7 @@ export function Timeline() {
       <div className="section-card space-y-2 bg-[var(--panel-soft)] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-            Track 1 · Your video (trim)
+            Track 1 · Your Video (Trim)
           </div>
           <div className="flex flex-wrap gap-2">
             <button
@@ -231,7 +233,7 @@ export function Timeline() {
               disabled={outputDuration <= 3}
               title="Remove 1 second from the beginning"
             >
-              Cut start +1s
+              Cut Start +1s
             </button>
             <button
               type="button"
@@ -240,7 +242,7 @@ export function Timeline() {
               disabled={trimStart <= 0}
               title="Put 1 second back at the beginning"
             >
-              Undo start −1s
+              Undo Start −1s
             </button>
             <button
               type="button"
@@ -249,7 +251,7 @@ export function Timeline() {
               disabled={outputDuration <= 3}
               title="Remove 1 second from the end"
             >
-              Cut end +1s
+              Cut End +1s
             </button>
             <button
               type="button"
@@ -258,7 +260,7 @@ export function Timeline() {
               disabled={trimEnd >= sourceDuration}
               title="Put 1 second back at the end"
             >
-              Undo end −1s
+              Undo End −1s
             </button>
           </div>
         </div>
@@ -372,7 +374,7 @@ export function Timeline() {
 
           <div>
             <div className="mb-1 text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-              Track 2 · Team photos
+              Track 2 · Team Photos
             </div>
             <div
               className="relative h-16 touch-none rounded-lg bg-black/5"
