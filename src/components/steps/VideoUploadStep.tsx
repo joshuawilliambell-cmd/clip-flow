@@ -42,8 +42,8 @@ export function VideoUploadStep() {
           <h2 className="step-title">Step 1: Prepare your video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             Build your team roster and script, then record or upload. About 60
-            seconds is preferred; longer videos are fine. Trim, photo overlays,
-            and timing are in Step 2.
+            seconds is preferred; longer videos (2+ minutes) are fine. Trim,
+            photo overlays, and timing are in Step 2.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
@@ -171,9 +171,9 @@ export function VideoUploadStep() {
           </div>
 
           <WebcamRecorder
-            onCaptured={async (file) => {
+            onCaptured={async (file, options) => {
               setError(null);
-              await setVideoFromFile(file);
+              await setVideoFromFile(file, options);
             }}
             onError={setError}
           />

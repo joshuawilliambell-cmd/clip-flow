@@ -19,9 +19,12 @@ export const VIDEO_TEMPLATE = {
   fps: 30,
   /**
    * Preferred Allego intro length (guidance + teleprompter pacing default).
-   * Not a hard maximum — uploads and trims may be longer.
+   * Not a hard maximum — uploads, webcam takes, and trims may be longer
+   * (2+ minutes supported; keep under maxVideoBytes).
    */
   targetDurationSeconds: 60,
+  /** Soft upper guidance for copy only — not enforced as a hard cut. */
+  recommendedMaxDurationSeconds: 180,
   /** Max teammates for intro videos / thumbnails (user picks 1–4 at the start). */
   maxPhotos: 4,
   defaultTeamMemberCount: 2 as TeamMemberCount,

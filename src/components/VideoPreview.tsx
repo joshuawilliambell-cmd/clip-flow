@@ -37,6 +37,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     musicVolume,
     musicTrackId,
     compositionProps,
+    reconcileVideoDuration,
   } = useStudio();
 
   const shellRef = useRef<HTMLDivElement>(null);
@@ -243,6 +244,25 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
                 onLoadedMetadata={() => {
                   const el = videoRef.current;
                   if (el && el.videoWidth > 0) setHasFrame(true);
+                  // WebM duration may resolve after first load — extend past any
+                  // mistaken ~60s fallback so 2+ minute clips stay full length.
+                  if (
+                    el &&
+                    Number.isFinite(el.duration) &&
+                    el.duration > 0
+                  ) {
+                    reconcileVideoDuration(el.duration);
+                  }
+                }}
+                onDurationChange={() => {
+                  const el = videoRef.current;
+                  if (
+                    el &&
+                    Number.isFinite(el.duration) &&
+                    el.duration > 0
+                  ) {
+                    reconcileVideoDuration(el.duration);
+                  }
                 }}
                 onSeeked={() => setHasFrame(true)}
                 onTimeUpdate={onTimeUpdate}

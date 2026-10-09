@@ -13,7 +13,10 @@ export function RemotionRoot() {
     <Composition
       id={INTRO_COMPOSITION_ID}
       component={IntroductionVideo}
-      durationInFrames={VIDEO_TEMPLATE.targetDurationSeconds * VIDEO_TEMPLATE.fps}
+      // Default for Remotion Studio only; calculateMetadata uses real props.
+      durationInFrames={
+        VIDEO_TEMPLATE.recommendedMaxDurationSeconds * VIDEO_TEMPLATE.fps
+      }
       fps={VIDEO_TEMPLATE.fps}
       width={VIDEO_TEMPLATE.width}
       height={VIDEO_TEMPLATE.height}

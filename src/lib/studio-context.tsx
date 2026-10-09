@@ -95,7 +95,12 @@ type StudioContextValue = {
   compositionProps: CompositionProps | null;
   setCurrentTime: (t: number) => void;
   setIsPlaying: (playing: boolean) => void;
-  setVideoFromFile: (file: File) => Promise<void>;
+  setVideoFromFile: (
+    file: File,
+    options?: { durationHintSeconds?: number },
+  ) => Promise<void>;
+  /** Grow trim/source length if the browser later reports a longer duration. */
+  reconcileVideoDuration: (durationSeconds: number) => void;
   clearVideo: () => void;
   setTrim: (edge: "start" | "end", value: number) => void;
   setTeamMemberCount: (count: TeamMemberCount) => void;
@@ -153,7 +158,24 @@ function revokePhotoUrl(url: string | null) {
 
 const StudioContext = createContext<StudioContextValue | null>(null);
 
-function loadVideoMetadata(file: File): Promise<SourceVideo> {
+type LoadVideoOptions = {
+  /**
+   * Known length (e.g. webcam timer). Used when the browser reports
+   * Infinity/NaN for MediaRecorder WebM duration.
+   */
+  durationHintSeconds?: number;
+};
+
+/**
+ * Read width/height/duration for an uploaded or webcam-captured file.
+ * MediaRecorder WebM often reports duration as Infinity until we seek to the
+ * end — never fall back to the ~60s guidance target (that was a hard-looking
+ * cap in preview/timeline).
+ */
+function loadVideoMetadata(
+  file: File,
+  options: LoadVideoOptions = {},
+): Promise<SourceVideo> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const el = document.createElement("video");
@@ -161,23 +183,42 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
     el.muted = true;
     el.playsInline = true;
     let settled = false;
+    let seekAttempted = false;
+    let estimatedFromSeek = 0;
 
-    const finish = () => {
-      if (settled) return;
+    const hint =
+      typeof options.durationHintSeconds === "number" &&
+      Number.isFinite(options.durationHintSeconds) &&
+      options.durationHintSeconds > 0
+        ? options.durationHintSeconds
+        : 0;
+
+    const resolveDuration = (): number | null => {
       const raw = el.duration;
-      const durationSeconds =
-        Number.isFinite(raw) && raw > 0
-          ? raw
-          : VIDEO_TEMPLATE.targetDurationSeconds;
-      // Reject clearly broken files with no dimensions and no duration.
-      if (
-        (!el.videoWidth || !el.videoHeight) &&
-        !(Number.isFinite(raw) && raw > 0)
-      ) {
+      if (Number.isFinite(raw) && raw > 0) return raw;
+      if (estimatedFromSeek > 0.25) return estimatedFromSeek;
+      if (hint > 0) return hint;
+      return null;
+    };
+
+    const finish = (force = false) => {
+      if (settled) return;
+      const durationSeconds = resolveDuration();
+      const hasDims = Boolean(el.videoWidth && el.videoHeight);
+
+      if (!hasDims && durationSeconds === null) {
+        if (!force) return;
+        settled = true;
+        URL.revokeObjectURL(url);
+        reject(
+          new Error(
+            "Could not read that video in this browser. Try another MP4 (H.264) or record with the webcam option.",
+          ),
+        );
         return;
       }
-      // No video track dimensions usually means HEVC/unsupported in this browser.
-      if (!el.videoWidth || !el.videoHeight) {
+
+      if (!hasDims) {
         settled = true;
         URL.revokeObjectURL(url);
         reject(
@@ -187,31 +228,58 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
         );
         return;
       }
+
+      // Wait for a real duration when possible (WebM seek still in flight).
+      if (durationSeconds === null && !force) return;
+
       settled = true;
+      // Prefer the longer of browser duration vs webcam timer — never clamp to 60.
+      const seconds = Math.max(durationSeconds ?? hint, hint, 0.5);
       resolve({
         url,
         fileName: file.name,
-        durationSeconds,
+        durationSeconds: seconds,
         width: el.videoWidth || VIDEO_TEMPLATE.width,
         height: el.videoHeight || VIDEO_TEMPLATE.height,
       });
     };
 
-    el.onloadedmetadata = () => {
-      // WebM/Chrome sometimes needs a tiny seek before duration is finite.
-      if (!Number.isFinite(el.duration) || el.duration === Infinity) {
-        try {
-          el.currentTime = Number.MAX_SAFE_INTEGER;
-        } catch {
-          /* ignore */
-        }
-      } else {
-        finish();
+    const seekForDuration = () => {
+      if (seekAttempted) return;
+      seekAttempted = true;
+      try {
+        // Classic Chrome/WebM trick: seek far past the end; browser clamps to
+        // the real last frame, then duration (or currentTime) becomes usable.
+        el.currentTime = 1e101;
+      } catch {
+        finish(false);
       }
     };
-    el.ondurationchange = finish;
-    el.onloadeddata = finish;
-    el.onseeked = finish;
+
+    el.onloadedmetadata = () => {
+      if (Number.isFinite(el.duration) && el.duration > 0) {
+        finish();
+      } else {
+        seekForDuration();
+      }
+    };
+    el.ondurationchange = () => {
+      if (Number.isFinite(el.duration) && el.duration > 0) finish();
+    };
+    el.onseeked = () => {
+      if (!Number.isFinite(el.duration) || el.duration === Infinity) {
+        if (el.currentTime > estimatedFromSeek) {
+          estimatedFromSeek = el.currentTime;
+        }
+      }
+      // Reset playhead after the duration probe.
+      try {
+        el.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+      finish();
+    };
     el.onerror = () => {
       if (settled) return;
       settled = true;
@@ -223,20 +291,10 @@ function loadVideoMetadata(file: File): Promise<SourceVideo> {
       );
     };
     window.setTimeout(() => {
-      if (!settled) {
-        if (el.videoWidth || (Number.isFinite(el.duration) && el.duration > 0)) {
-          finish();
-        } else {
-          settled = true;
-          URL.revokeObjectURL(url);
-          reject(
-            new Error(
-              "Timed out reading that video. Try an H.264 MP4 file or the webcam recorder.",
-            ),
-          );
-        }
-      }
-    }, 8000);
+      if (settled) return;
+      if (!seekAttempted) seekForDuration();
+      window.setTimeout(() => finish(true), 1500);
+    }, 6000);
     el.src = url;
   });
 }
@@ -371,42 +429,74 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [outputDuration],
   );
 
-  const setVideoFromFile = useCallback(async (file: File) => {
-    const typeOk =
-      VIDEO_TEMPLATE.uploads.videoAccept.includes(file.type) ||
-      /^video\//i.test(file.type) ||
-      /\.(mp4|mov|webm)$/i.test(file.name);
-    if (!typeOk) {
-      throw new Error("Please upload an MP4, MOV, or WebM video.");
-    }
-    if (file.size > VIDEO_TEMPLATE.uploads.maxVideoBytes) {
-      const maxGb = VIDEO_TEMPLATE.uploads.maxVideoBytes / (1024 * 1024 * 1024);
-      throw new Error(
-        `Video is too large. Please use a file under ${maxGb} GB, or trim/export a shorter clip first.`,
-      );
-    }
+  const setVideoFromFile = useCallback(
+    async (
+      file: File,
+      options?: { durationHintSeconds?: number },
+    ) => {
+      const typeOk =
+        VIDEO_TEMPLATE.uploads.videoAccept.includes(file.type) ||
+        /^video\//i.test(file.type) ||
+        /\.(mp4|mov|webm)$/i.test(file.name);
+      if (!typeOk) {
+        throw new Error("Please upload an MP4, MOV, or WebM video.");
+      }
+      if (file.size > VIDEO_TEMPLATE.uploads.maxVideoBytes) {
+        const maxGb =
+          VIDEO_TEMPLATE.uploads.maxVideoBytes / (1024 * 1024 * 1024);
+        throw new Error(
+          `Video is too large. Please use a file under ${maxGb} GB, or trim/export a shorter clip first.`,
+        );
+      }
 
-    const meta = await loadVideoMetadata(file);
-    // Use the full source length — ~60s is preferred guidance, not a hard cap.
-    const end =
-      meta.durationSeconds > 0
-        ? meta.durationSeconds
-        : VIDEO_TEMPLATE.targetDurationSeconds;
+      const meta = await loadVideoMetadata(file, {
+        durationHintSeconds: options?.durationHintSeconds,
+      });
+      // Full source length — ~60s is preferred guidance only, not a hard cap.
+      // Clips of 2+ minutes are supported.
+      const end = Math.max(0.5, meta.durationSeconds);
+      setVideo((prev) => {
+        if (prev) URL.revokeObjectURL(prev.url);
+        return meta;
+      });
+      setTrimStart(0);
+      setTrimEnd(end);
+      setCurrentTime(0);
+      setIsPlaying(false);
+      // Keep Step 1 roster (names, titles, headshots); only retime PIP slots.
+      setPhotos((prev) => {
+        const arranged = autoArrangePhotos(prev, end);
+        baselineRef.current = arranged.map((p) => ({ ...p }));
+        return arranged;
+      });
+    },
+    [teamMemberCount],
+  );
+
+  const reconcileVideoDuration = useCallback((durationSeconds: number) => {
+    if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) return;
+
     setVideo((prev) => {
-      if (prev) URL.revokeObjectURL(prev.url);
-      return meta;
+      if (!prev) return prev;
+      if (durationSeconds <= prev.durationSeconds + 0.15) return prev;
+
+      const previousSource = prev.durationSeconds;
+      setTrimEnd((prevEnd) => {
+        const wasFullLength = Math.abs(prevEnd - previousSource) < 0.25;
+        const nextEnd = wasFullLength ? durationSeconds : prevEnd;
+        if (wasFullLength) {
+          setPhotos((photosPrev) => {
+            const arranged = autoArrangePhotos(photosPrev, nextEnd);
+            baselineRef.current = arranged.map((p) => ({ ...p }));
+            return arranged;
+          });
+        }
+        return nextEnd;
+      });
+
+      return { ...prev, durationSeconds };
     });
-    setTrimStart(0);
-    setTrimEnd(end);
-    setCurrentTime(0);
-    setIsPlaying(false);
-    // Keep Step 1 roster (names, titles, headshots); only retime PIP slots.
-    setPhotos((prev) => {
-      const arranged = autoArrangePhotos(prev, end);
-      baselineRef.current = arranged.map((p) => ({ ...p }));
-      return arranged;
-    });
-  }, [teamMemberCount]);
+  }, []);
 
   const clearVideo = useCallback(() => {
     setVideo((prev) => {
@@ -887,6 +977,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setCurrentTime,
       setIsPlaying,
       setVideoFromFile,
+      reconcileVideoDuration,
       clearVideo,
       setTrim,
       setTeamMemberCount,
@@ -953,6 +1044,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       clearSpeakerPhoto,
       setTeleprompterPixelsPerTick,
       setVideoFromFile,
+      reconcileVideoDuration,
       clearVideo,
       setTrim,
       addPhotosFromFiles,

@@ -7,7 +7,10 @@ import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverla
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
-  onCaptured: (file: File) => Promise<void> | void;
+  onCaptured: (
+    file: File,
+    options?: { durationHintSeconds?: number },
+  ) => Promise<void> | void;
   onError?: (message: string) => void;
   disabled?: boolean;
 };
@@ -263,7 +266,10 @@ export function WebcamRecorder({
         `webcam-intro-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${ext}`,
         { type: reviewBlob.type || mimeType || "video/webm" },
       );
-      await onCaptured(file);
+      // MediaRecorder WebM often reports Infinity duration — pass the timer.
+      await onCaptured(file, {
+        durationHintSeconds: Math.max(1, seconds),
+      });
       resetReview();
       setPhase("idle");
       setSeconds(0);
