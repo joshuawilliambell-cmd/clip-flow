@@ -1,5 +1,5 @@
 /**
- * Fixed "Love's Team" thumbnail template.
+ * Fixed Love's Enterprise Sales Team thumbnail template.
  * Colors follow the Love's heart logo: red, yellow, and orange.
  */
 
@@ -28,13 +28,13 @@ export const THUMBNAIL_TEMPLATE = {
     ink: "#1A1A1A",
   },
   header: {
-    title: "Love's Team",
+    title: "Your Love's Enterprise Sales Team",
     y: 118,
-    fontSize: 92,
+    fontSize: 56,
     fontFamily: "Arial, Helvetica, sans-serif",
     fontWeight: "800",
-    lineWidth: 160,
-    lineGap: 36,
+    lineWidth: 100,
+    lineGap: 28,
   },
   card: {
     width: 360,
