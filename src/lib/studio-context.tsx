@@ -83,6 +83,15 @@ type StudioContextValue = {
   teleprompterSpeedOverridden: boolean;
   setTeleprompterPixelsPerTick: (pixelsPerTick: number) => void;
   setTeleprompterSpeedOverridden: (overridden: boolean) => void;
+  /**
+   * Active script text from Script Teleprompter Practice (including edits).
+   * Webcam overlay reads the same string so practice pace matches recording.
+   */
+  activeTeleprompterScript: string;
+  setActiveTeleprompterScript: (script: string) => void;
+  /** Shared type size flag for practice + webcam teleprompters. */
+  teleprompterFontLarge: boolean;
+  setTeleprompterFontLarge: (large: boolean) => void;
   musicEnabled: boolean;
   musicVolume: number;
   videoVolume: number;
@@ -307,6 +316,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     );
   const [teleprompterSpeedOverridden, setTeleprompterSpeedOverridden] =
     useState(false);
+  const [activeTeleprompterScript, setActiveTeleprompterScript] = useState("");
+  const [teleprompterFontLarge, setTeleprompterFontLarge] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolumeState] = useState<number>(
     VIDEO_TEMPLATE.defaultMusicVolume,
@@ -982,6 +993,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       teleprompterSpeedOverridden,
       setTeleprompterPixelsPerTick,
       setTeleprompterSpeedOverridden,
+      activeTeleprompterScript,
+      setActiveTeleprompterScript,
+      teleprompterFontLarge,
+      setTeleprompterFontLarge,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -1040,6 +1055,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       speakerPhotoUrl,
       teleprompterPixelsPerTick,
       teleprompterSpeedOverridden,
+      activeTeleprompterScript,
+      teleprompterFontLarge,
       musicEnabled,
       musicVolume,
       videoVolume,

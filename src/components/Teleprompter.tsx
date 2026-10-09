@@ -24,6 +24,13 @@ import {
 } from "@/lib/intro-script";
 import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import { PanelSteps } from "@/components/PanelStep";
+import { useTeleprompterVoiceFollow } from "@/hooks/useTeleprompterVoiceFollow";
+import {
+  TELEPROMPTER_COLUMN_CLASS,
+  TELEPROMPTER_TEXT_CLASS_COMPACT,
+  TELEPROMPTER_TEXT_CLASS_LARGE,
+  formatScriptForNaturalReading,
+} from "@/lib/teleprompter-layout";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 
@@ -50,6 +57,9 @@ export function Teleprompter({
     teleprompterSpeedOverridden: speedOverridden,
     setTeleprompterPixelsPerTick,
     setTeleprompterSpeedOverridden,
+    setActiveTeleprompterScript,
+    teleprompterFontLarge: fontLarge,
+    setTeleprompterFontLarge: setFontLarge,
   } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -82,7 +92,6 @@ export function Teleprompter({
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [scrolling, setScrolling] = useState(false);
-  const [fontLarge, setFontLarge] = useState(true);
   const [scrollDistancePx, setScrollDistancePx] = useState(0);
 
   speedOverriddenRef.current = speedOverridden;
@@ -101,6 +110,14 @@ export function Teleprompter({
 
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
+  const practiceScript = formatScriptForNaturalReading(displayScript);
+
+  const voiceFollow = useTeleprompterVoiceFollow(practiceScript, scrollerRef);
+
+  // Keep webcam overlay on the same script text (including edits).
+  useEffect(() => {
+    setActiveTeleprompterScript(displayScript);
+  }, [displayScript, setActiveTeleprompterScript]);
 
   // Default scroll speed ~60s for the active script (unless user overrode).
   // Never re-apply the default while the user has chosen a custom speed — Pause
@@ -108,7 +125,7 @@ export function Teleprompter({
   useEffect(() => {
     if (speedOverriddenRef.current) return;
     setTeleprompterPixelsPerTick(
-      suggestedPixelsPerTickForScript(displayScript, fontLarge),
+      suggestedPixelsPerTickForScript(practiceScript, fontLarge),
     );
 
     // Refine from real layout once the scroller has overflow.
@@ -125,7 +142,7 @@ export function Teleprompter({
     });
     return () => window.cancelAnimationFrame(id);
   }, [
-    displayScript,
+    practiceScript,
     fontLarge,
     teamMemberCount,
     source,
@@ -142,7 +159,7 @@ export function Teleprompter({
       setScrollDistancePx(Math.max(0, el.scrollHeight - el.clientHeight));
     });
     return () => window.cancelAnimationFrame(id);
-  }, [displayScript, fontLarge, enabled]);
+  }, [practiceScript, fontLarge, enabled]);
 
   // Auto-start scroll when recording begins; allow manual scroll while preparing.
   useEffect(() => {
@@ -155,10 +172,17 @@ export function Teleprompter({
     return () => window.clearTimeout(delay);
   }, [recording, enabled]);
 
+  // Timer scroll pauses while Follow My Voice is driving the scroll.
+  useEffect(() => {
+    if (voiceFollow.listening && scrolling) {
+      setScrolling(false);
+    }
+  }, [voiceFollow.listening, scrolling]);
+
   // Accumulate sub-pixel scroll — browsers often truncate scrollTop fractions,
   // which made slow slider speeds appear stuck until reset to a faster default.
   useEffect(() => {
-    if (!scrolling || !enabled) {
+    if (!scrolling || !enabled || voiceFollow.listening) {
       scrollCarryRef.current = 0;
       return;
     }
@@ -176,11 +200,12 @@ export function Teleprompter({
       }
     }, TELEPROMPTER_TICK_MS);
     return () => window.clearInterval(id);
-  }, [scrolling, enabled]);
+  }, [scrolling, enabled, voiceFollow.listening]);
 
   const resetScroll = () => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     setScrolling(false);
+    voiceFollow.stop();
   };
 
   const useOfficial = () => {
@@ -334,13 +359,14 @@ export function Teleprompter({
                     <strong>My Script</strong> / <strong>Upload .txt</strong>).
                   </>,
                   <>
-                    Click <strong>Play / Scroll</strong> under Practice Here
-                    and read out loud at that speed.
+                    Under Practice Here, click <strong>Play / Scroll</strong>{" "}
+                    for a steady pace, or <strong>Follow My Voice</strong> so
+                    it scrolls as you speak (Chrome/Edge).
                   </>,
                   <>
-                    If it feels too fast, finish the pass first, then move the
-                    speed slider. Do not change speed mid-script. Practice a few
-                    times before you record.
+                    If fixed scroll feels too fast, finish the pass first, then
+                    move the speed slider. Do not change speed mid-script.
+                    Practice a few times before you record.
                   </>,
                 ]}
               />
@@ -445,7 +471,9 @@ export function Teleprompter({
               Practice Here
             </p>
             <p className="mt-1 text-[12px] font-medium leading-snug text-white/80">
-              This is the scrolling teleprompter practice area. Click{" "}
+              This is the scrolling teleprompter practice area. The column width
+              and text size match the webcam teleprompter, so the speed you
+              practice is the same when you record. Click{" "}
               <strong className="text-white">Play / Scroll</strong> and try to
               read at that speed out loud. If it feels too fast, finish the
               full pass, then slow the slider — do not adjust midway. Practice
@@ -454,23 +482,37 @@ export function Teleprompter({
             <p className="mt-1.5 text-[12px] font-medium leading-snug text-white/70">
               Scroll speed is set for about a {TARGET_INTRO_SECONDS}-second
               video. If you slow it down, your finished video will usually be
-              longer than {TARGET_INTRO_SECONDS} seconds.
+              longer than {TARGET_INTRO_SECONDS} seconds. Optional:{" "}
+              <strong className="text-white">Follow My Voice</strong> uses your
+              mic (Chrome/Edge) and scrolls as you speak — often feels more
+              natural than a fixed scroll.
             </p>
           </div>
 
-          <div
-            ref={scrollerRef}
-            className={clsx(
-              "min-h-0 flex-1 overflow-y-auto px-5 py-6 text-center leading-snug",
-              fontLarge ? "text-2xl md:text-3xl" : "text-xl md:text-2xl",
-            )}
-            aria-live="polite"
-          >
-            <div className="mx-auto max-w-[28ch] whitespace-pre-wrap font-semibold tracking-wide">
-              {displayScript.trim() ||
-                "Add a script above, then click Play / Scroll to practice."}
+          <div className="relative min-h-0 flex-1">
+            <div
+              className="pointer-events-none absolute inset-x-0 top-[28%] z-10 h-0.5 bg-[var(--yellow)]/85"
+              aria-hidden
+            />
+            <div
+              ref={scrollerRef}
+              className="h-full min-h-[12rem] overflow-y-auto px-5 py-6 text-center"
+              aria-live="polite"
+            >
+              <div
+                className={clsx(
+                  "mx-auto whitespace-pre-wrap text-white",
+                  TELEPROMPTER_COLUMN_CLASS,
+                  fontLarge
+                    ? TELEPROMPTER_TEXT_CLASS_LARGE
+                    : TELEPROMPTER_TEXT_CLASS_COMPACT,
+                )}
+              >
+                {practiceScript.trim() ||
+                  "Add a script above, then click Play / Scroll to practice."}
+              </div>
+              <div className="h-40" aria-hidden />
             </div>
-            <div className="h-40" aria-hidden />
           </div>
 
           <div className="space-y-2 border-t border-white/20 px-3 py-3">
@@ -516,7 +558,10 @@ export function Teleprompter({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => setScrolling((v) => !v)}
+                onClick={() => {
+                  voiceFollow.stop();
+                  setScrolling((v) => !v);
+                }}
                 className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-[var(--yellow)] bg-[var(--yellow)] px-3 py-1.5 text-[13px] font-semibold text-[var(--ink)]"
               >
                 {scrolling ? (
@@ -532,6 +577,28 @@ export function Teleprompter({
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  setScrolling(false);
+                  voiceFollow.toggle();
+                }}
+                className={clsx(
+                  "inline-flex items-center gap-1 rounded-[var(--radius-sm)] border px-3 py-1.5 text-[13px] font-semibold",
+                  voiceFollow.listening
+                    ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                    : "border-white/40 text-white",
+                )}
+                title={
+                  voiceFollow.supported
+                    ? "Scroll as you speak (Chrome/Edge)"
+                    : "Needs Chrome or Edge speech recognition"
+                }
+              >
+                {voiceFollow.listening
+                  ? "Click Here to Stop Voice Follow"
+                  : "Click Here to Follow My Voice"}
+              </button>
+              <button
+                type="button"
                 onClick={resetScroll}
                 className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-white/40 px-3 py-1.5 text-[13px] font-semibold text-white"
               >
@@ -539,7 +606,7 @@ export function Teleprompter({
               </button>
               <button
                 type="button"
-                onClick={() => setFontLarge((v) => !v)}
+                onClick={() => setFontLarge(!fontLarge)}
                 className="ml-auto rounded-[var(--radius-sm)] border border-white/35 px-2.5 py-1.5 text-[12px] font-semibold text-white"
               >
                 {fontLarge
@@ -547,6 +614,14 @@ export function Teleprompter({
                   : "Click Here for Bigger Text"}
               </button>
             </div>
+            {voiceFollow.status ? (
+              <p className="text-[11px] font-medium text-[var(--yellow)]">
+                {voiceFollow.status}
+                {voiceFollow.listening && voiceFollow.totalWords > 0
+                  ? ` · ${voiceFollow.matchedWords}/${voiceFollow.totalWords} words`
+                  : ""}
+              </p>
+            ) : null}
           </div>
         </>
       )}

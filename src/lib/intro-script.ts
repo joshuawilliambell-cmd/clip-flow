@@ -196,6 +196,7 @@ export function clampTeleprompterSpeed(pixelsPerTick: number): number {
 /**
  * Rough scroll distance for a script before layout (large teleprompter type).
  * Used to pick a default speed that finishes near TARGET_INTRO_SECONDS.
+ * Column width matches practice + webcam (see teleprompter-layout.ts).
  */
 export function estimateScrollDistancePx(
   script: string,
@@ -204,14 +205,14 @@ export function estimateScrollDistancePx(
   const text = script.trim();
   if (!text) return 0;
   const lines = text.split("\n");
-  // Large centered type wraps earlier than body copy.
-  const charsPerLine = fontLarge ? 28 : 38;
+  // Must match TELEPROMPTER_COLUMN_CH (~5 words) used in both teleprompters.
+  const charsPerLine = fontLarge ? 28 : 32;
   let visualLines = 0;
   for (const line of lines) {
     const len = line.trim().length || 1;
     visualLines += Math.max(1, Math.ceil(len / charsPerLine));
   }
-  const linePx = fontLarge ? 48 : 36;
+  const linePx = fontLarge ? 40 : 34;
   const bottomSpacerPx = 160;
   const viewportPx = 280;
   return Math.max(120, visualLines * linePx + bottomSpacerPx - viewportPx);

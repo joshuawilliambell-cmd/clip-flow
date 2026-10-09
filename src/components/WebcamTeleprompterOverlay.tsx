@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { TELEPROMPTER_TICK_MS, scriptForTeam } from "@/lib/intro-script";
 import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
+import {
+  TELEPROMPTER_COLUMN_CLASS,
+  TELEPROMPTER_TEXT_CLASS_COMPACT,
+  TELEPROMPTER_TEXT_CLASS_LARGE,
+  formatScriptForNaturalReading,
+} from "@/lib/teleprompter-layout";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 
@@ -19,7 +25,7 @@ type WebcamTeleprompterOverlayProps = {
  * Script sits near the top of the frame so eyes stay toward the webcam
  * (usually above the monitor) instead of the screen center. Overlay is
  * DOM-only and is never burned into MediaRecorder.
- * Scroll speed matches the Script teleprompter practice area.
+ * Column width, type size, and script text match Script Teleprompter Practice.
  */
 export function WebcamTeleprompterOverlay({
   active,
@@ -32,6 +38,8 @@ export function WebcamTeleprompterOverlay({
     speakerName,
     speakerTitle,
     speakerDuties,
+    activeTeleprompterScript,
+    teleprompterFontLarge: fontLarge,
     teleprompterPixelsPerTick: pixelsPerTick,
     setTeleprompterPixelsPerTick,
     setTeleprompterSpeedOverridden,
@@ -45,7 +53,7 @@ export function WebcamTeleprompterOverlay({
     .join("|");
   const fillKey = `${customerName}\0${speakerName}\0${speakerTitle}\0${speakerDuties}\0${rosterKey}\0${teamMemberCount}`;
 
-  const script = scriptForTeam(teamMemberCount, {
+  const fallbackScript = scriptForTeam(teamMemberCount, {
     customerName,
     speakerName,
     speakerTitle,
@@ -58,6 +66,10 @@ export function WebcamTeleprompterOverlay({
     })),
   });
 
+  const script = formatScriptForNaturalReading(
+    activeTeleprompterScript.trim() || fallbackScript,
+  );
+
   const [enabled, setEnabled] = useState(true);
   const [scrolling, setScrolling] = useState(false);
 
@@ -67,7 +79,7 @@ export function WebcamTeleprompterOverlay({
   useEffect(() => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     scrollCarryRef.current = 0;
-  }, [fillKey]);
+  }, [fillKey, script]);
 
   // Auto-scroll shortly after recording begins.
   useEffect(() => {
@@ -121,16 +133,17 @@ export function WebcamTeleprompterOverlay({
         aria-hidden
       />
 
-      {/* Narrow top band — eyes stay near the webcam, not sweeping left–right */}
-      <div className="relative z-20 mx-auto flex w-full max-w-[18rem] flex-col px-1 pt-2 md:max-w-[20rem] md:pt-3">
+      {/* Same ~5-word column as practice — container must not clip 28ch */}
+      <div className="relative z-20 mx-auto flex w-full max-w-[min(100%,36rem)] flex-col px-2 pt-2 md:pt-3">
         {!recording ? (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
-            Keep this text near the top of your monitor, close to the webcam.
-            Scoot back so we see from about your waist to the top of your head.
+            Same width and speed as Practice Here. Keep this text near the top
+            of your monitor, close to the webcam. Scoot back so we see from
+            about your waist to the top of your head.
           </p>
         ) : null}
 
-        <div className="relative h-40 overflow-hidden rounded-xl border border-white/30 bg-black/50 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:h-48">
+        <div className="relative h-44 overflow-hidden rounded-xl border border-white/30 bg-black/50 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:h-52">
           <div
             className="pointer-events-none absolute inset-x-2 top-[26%] z-20 h-0.5 bg-[var(--yellow)]/85"
             aria-hidden
@@ -138,14 +151,21 @@ export function WebcamTeleprompterOverlay({
           <div
             ref={scrollerRef}
             className={clsx(
-              "h-full overflow-y-auto px-2 pb-16 pt-3 text-center scrollbar-none",
+              "h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none",
               !enabled && "opacity-40",
             )}
             style={{ scrollbarWidth: "none" }}
             aria-live="polite"
           >
-            {/* ~5 words wide so eyes move top-to-bottom, not left-to-right */}
-            <p className="mx-auto max-w-[28ch] whitespace-pre-wrap text-[1.05rem] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] md:text-[1.2rem]">
+            <p
+              className={clsx(
+                "mx-auto whitespace-pre-wrap text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]",
+                TELEPROMPTER_COLUMN_CLASS,
+                fontLarge
+                  ? TELEPROMPTER_TEXT_CLASS_LARGE
+                  : TELEPROMPTER_TEXT_CLASS_COMPACT,
+              )}
+            >
               {enabled
                 ? script.trim() || "Add your script above in the teleprompter."
                 : "Teleprompter off — tap On below to show your script."}
