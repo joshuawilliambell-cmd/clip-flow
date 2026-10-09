@@ -7,7 +7,7 @@ const OPENING =
   "Hey, [Customer Name], [Your Name] with Love's here. Welcome to your Fleet Hub. This is a portal where you can learn all about what Love's can do for your fleet.";
 
 const TEAMMATE_LINE =
-  "This is [Team Member Name], and [he/she] [is/are] [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";
+  "This is [Team Member Name], and [he/she] is [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";
 
 function scriptWithTeammates(count: 1 | 2 | 3 | 4): string {
   if (count === 1) {
@@ -47,7 +47,7 @@ export function scriptForTeamCount(count: TeamMemberCount): string {
   return INTRO_SCRIPTS[count].script;
 }
 
-export type TeamIntroPronoun = "he" | "she" | "they" | "";
+export type TeamIntroPronoun = "he" | "she" | "";
 
 export type TeamIntroPerson = {
   name: string;
@@ -105,18 +105,13 @@ export function personalizeScript(
       "[Job Duties]";
     const pronounRaw = (person?.pronoun ?? "").trim().toLowerCase();
     const pronoun =
-      pronounRaw === "he" || pronounRaw === "she" || pronounRaw === "they"
-        ? pronounRaw
-        : "[he/she]";
-    const beVerb =
-      pronoun === "they" ? "are" : pronoun === "[he/she]" ? "[is/are]" : "is";
+      pronounRaw === "he" || pronounRaw === "she" ? pronounRaw : "[he/she]";
     const article =
       title === "[Job Title]" ? "[a/an]" : indefiniteArticle(title);
 
     // Order matches TEAMMATE_LINE placeholders left-to-right.
     text = replaceFirst(text, "[Team Member Name]", name);
     text = replaceFirst(text, "[he/she]", pronoun);
-    text = replaceFirst(text, "[is/are]", beVerb);
     text = replaceFirst(text, "[a/an]", article);
     text = replaceFirst(text, "[Job Title]", title);
     text = replaceFirst(text, "[he/she]", pronoun);

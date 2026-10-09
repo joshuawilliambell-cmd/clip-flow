@@ -7,7 +7,6 @@ const OPTIONS: Array<{ value: Exclude<TeamPhotoPronoun, "">; label: string }> =
   [
     { value: "he", label: "he" },
     { value: "she", label: "she" },
-    { value: "they", label: "they" },
   ];
 
 type PronounFieldProps = {
@@ -16,7 +15,7 @@ type PronounFieldProps = {
   id?: string;
 };
 
-/** he / she / they picker for the teleprompter script. */
+/** he / she picker for the teleprompter script. */
 export function PronounField({ value, onChange, id }: PronounFieldProps) {
   return (
     <div className="block">
@@ -26,7 +25,7 @@ export function PronounField({ value, onChange, id }: PronounFieldProps) {
       <div
         role="group"
         aria-labelledby={id ? `${id}-label` : undefined}
-        className="grid grid-cols-3 gap-1.5"
+        className="grid grid-cols-2 gap-1.5"
       >
         {OPTIONS.map((option) => {
           const selected = value === option.value;

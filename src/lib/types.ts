@@ -1,4 +1,4 @@
-export type TeamPhotoPronoun = "he" | "she" | "they" | "";
+export type TeamPhotoPronoun = "he" | "she" | "";
 
 export type TeamPhoto = {
   id: string;
@@ -7,7 +7,7 @@ export type TeamPhoto = {
   fileName: string;
   name: string;
   title: string;
-  /** he / she / they for the teleprompter script. */
+  /** he / she for the teleprompter script. */
   pronoun: TeamPhotoPronoun;
   /** Short “things like…” phrase for the teleprompter script. */
   duties: string;
