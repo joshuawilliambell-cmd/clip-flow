@@ -128,6 +128,16 @@ export function WebcamTeleprompterOverlay({
         aria-hidden
       />
 
+      {/* Practice tip — visible while previewing, tucked away once recording */}
+      {!recording ? (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center px-3 pt-12 md:pt-14">
+          <p className="max-w-xl rounded-lg border border-[var(--yellow)]/70 bg-black/70 px-3 py-2 text-center text-[12px] font-semibold leading-snug text-white shadow-lg md:text-[13px]">
+            Tip: do 1–2 practice recordings and tweak Speed below until the
+            scroll matches your pace before your final take.
+          </p>
+        </div>
+      ) : null}
+
       {/* Center reading band */}
       <div className="relative mx-auto flex h-full w-full max-w-3xl flex-1 flex-col justify-center px-3 py-10 md:px-8">
         <div className="relative max-h-[52%] min-h-[9rem] overflow-hidden rounded-xl border border-white/25 bg-black/35 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-[2px]">

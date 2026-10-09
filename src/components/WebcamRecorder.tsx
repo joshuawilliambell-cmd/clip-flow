@@ -300,10 +300,11 @@ export function WebcamRecorder({
           </p>
           <p>
             Your Fleet Hub script appears as a{" "}
-            <strong>center teleprompter</strong> over the live preview. It
-            starts scrolling when you hit Record — adjust speed, pause, or turn
-            it off. The text is preview-only and will not appear in the saved
-            clip.
+            <strong>center teleprompter</strong> over the live preview. Do one
+            or two practice recordings and adjust Speed until the scroll matches
+            how you talk, then record your real take. Pause or turn the
+            prompter off anytime. The text is preview-only and will not appear
+            in the saved clip.
           </p>
           <p>
             Prefer a phone on a tripod? Use the larger teleprompter above on
@@ -333,8 +334,10 @@ export function WebcamRecorder({
       {live ? (
         <div className="mt-4 space-y-4">
           <div className="how-banner">
-            Script scrolls across the center of the preview when you record —
-            eyes stay near the camera. Text is not saved into the video.
+            <strong>Practice first:</strong> record one or two short practice
+            takes and adjust the teleprompter Speed slider until it matches how
+            fast you talk. Then do your real take. Script text is preview-only
+            and is not saved into the video.
           </div>
 
           <div className="space-y-3">
