@@ -50,6 +50,12 @@ type StudioContextValue = {
   trimEnd: number;
   photos: TeamPhoto[];
   teamMemberCount: TeamMemberCount;
+  /** Fills [Customer Name] in the teleprompter script. */
+  customerName: string;
+  setCustomerName: (name: string) => void;
+  /** Fills [Your Name] in the teleprompter script. */
+  speakerName: string;
+  setSpeakerName: (name: string) => void;
   musicEnabled: boolean;
   musicVolume: number;
   videoVolume: number;
@@ -228,6 +234,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     ),
   );
   const baselineRef = useRef<TeamPhoto[]>([]);
+  const [customerName, setCustomerName] = useState("");
+  const [speakerName, setSpeakerName] = useState("");
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState<number>(
     VIDEO_TEMPLATE.defaultMusicVolume,
@@ -351,6 +359,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       baselineRef.current = slots.map((p) => ({ ...p }));
       return slots;
     });
+    setCustomerName("");
+    setSpeakerName("");
     setMusicEnabled(true);
     setMusicVolume(VIDEO_TEMPLATE.defaultMusicVolume);
     setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);
@@ -691,6 +701,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       trimEnd,
       photos,
       teamMemberCount,
+      customerName,
+      setCustomerName,
+      speakerName,
+      setSpeakerName,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -740,6 +754,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       trimEnd,
       photos,
       teamMemberCount,
+      customerName,
+      speakerName,
       musicEnabled,
       musicVolume,
       videoVolume,

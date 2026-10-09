@@ -9,6 +9,7 @@ import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
 import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { TeamRosterFields } from "@/components/TeamRosterFields";
+import { ScriptFillIns } from "@/components/ScriptFillIns";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
 
@@ -91,6 +92,8 @@ export function VideoUploadStep() {
       )}
 
       <RecordingGuide />
+
+      <ScriptFillIns />
 
       <section className="section-card space-y-3 bg-white p-4 md:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">

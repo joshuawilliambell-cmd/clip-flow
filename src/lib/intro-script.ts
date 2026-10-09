@@ -83,13 +83,33 @@ export type TeamIntroPerson = {
   title?: string;
 };
 
-/** Fill each [Team Member Name] with "Name, Title" (title optional). */
+export type ScriptFillIns = {
+  customerName?: string;
+  speakerName?: string;
+  people?: TeamIntroPerson[];
+};
+
+/** Fill [Customer Name], [Your Name], and each [Team Member Name]. */
 export function personalizeScript(
   template: string,
-  people: TeamIntroPerson[],
+  peopleOrFillIns: TeamIntroPerson[] | ScriptFillIns = [],
 ): string {
+  const fillIns: ScriptFillIns = Array.isArray(peopleOrFillIns)
+    ? { people: peopleOrFillIns }
+    : peopleOrFillIns;
+  const people = fillIns.people ?? [];
+  const customer = fillIns.customerName?.trim();
+  const speaker = fillIns.speakerName?.trim();
+
   let index = 0;
-  return template.replace(/\[Team Member Name\]/g, () => {
+  let text = template;
+  if (customer) {
+    text = text.replace(/\[Customer Name\]/g, customer);
+  }
+  if (speaker) {
+    text = text.replace(/\[Your Name\]/g, speaker);
+  }
+  return text.replace(/\[Team Member Name\]/g, () => {
     const person = people[index];
     index += 1;
     const name = person?.name?.trim();
@@ -99,12 +119,12 @@ export function personalizeScript(
   });
 }
 
-/** Official script for team size, with roster names/titles filled in. */
+/** Official script for team size, with fill-ins and roster names. */
 export function scriptForTeam(
   count: TeamMemberCount,
-  people: TeamIntroPerson[] = [],
+  peopleOrFillIns: TeamIntroPerson[] | ScriptFillIns = [],
 ): string {
-  return personalizeScript(INTRO_SCRIPTS[count].script, people);
+  return personalizeScript(INTRO_SCRIPTS[count].script, peopleOrFillIns);
 }
 
 /** @deprecated use INTRO_SCRIPTS / scriptForTeamCount */

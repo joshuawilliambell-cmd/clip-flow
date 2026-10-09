@@ -36,22 +36,21 @@ export function Teleprompter({
   recording = false,
   className,
 }: TeleprompterProps) {
-  const { teamMemberCount, photos } = useStudio();
+  const { teamMemberCount, photos, customerName, speakerName } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const rosterKey = photos.map((p) => `${p.name}\0${p.title}`).join("|");
   const rosterPeople = photos.map((p) => ({ name: p.name, title: p.title }));
-  const officialScript = scriptForTeam(teamMemberCount, rosterPeople);
+  const officialScript = scriptForTeam(teamMemberCount, {
+    customerName,
+    speakerName,
+    people: rosterPeople,
+  });
 
   const [enabled, setEnabled] = useState(true);
   const [source, setSource] = useState<ScriptSource>("official");
-  const [script, setScript] = useState(() =>
-    scriptForTeam(
-      teamMemberCount,
-      photos.map((p) => ({ name: p.name, title: p.title })),
-    ),
-  );
+  const [script, setScript] = useState(() => officialScript);
   const [customScript, setCustomScript] = useState("");
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -67,7 +66,7 @@ export function Teleprompter({
     if (source !== "official") return;
     setScript(officialScript);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
-  }, [teamMemberCount, source, rosterKey, officialScript]);
+  }, [teamMemberCount, source, rosterKey, customerName, speakerName, officialScript]);
 
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
