@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, Trash2, Check } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
+import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
@@ -288,8 +289,8 @@ export function WebcamRecorder({
             </h3>
           </div>
           <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-            Optional — use the teleprompter above with a phone on a tripod, or
-            record here
+            Optional — script scrolls across the center of your live preview
+            while you record (not saved into the video)
           </p>
         </div>
         <HelpTip title="Webcam recording" size="lg">
@@ -298,13 +299,15 @@ export function WebcamRecorder({
             the browser asks.
           </p>
           <p>
-            You will see a <strong>live preview</strong> before and during
-            recording. Aim for about 60 seconds.
+            Your Fleet Hub script appears as a{" "}
+            <strong>center teleprompter</strong> over the live preview. It
+            starts scrolling when you hit Record — adjust speed, pause, or turn
+            it off. The text is preview-only and will not appear in the saved
+            clip.
           </p>
           <p>
-            Prefer a phone on a tripod? Skip this and use the{" "}
-            <strong>teleprompter</strong> on this screen while you record on
-            your phone, then upload the clip.
+            Prefer a phone on a tripod? Use the larger teleprompter above on
+            this computer screen, record on your phone, then upload the clip.
           </p>
           <p>
             Tap <strong>Stop</strong>, review the clip, then{" "}
@@ -330,8 +333,8 @@ export function WebcamRecorder({
       {live ? (
         <div className="mt-4 space-y-4">
           <div className="how-banner">
-            Live preview stays on · keep the teleprompter above in view while
-            you talk
+            Script scrolls across the center of the preview when you record —
+            eyes stay near the camera. Text is not saved into the video.
           </div>
 
           <div className="space-y-3">
@@ -343,13 +346,17 @@ export function WebcamRecorder({
                 autoPlay
                 className="aspect-video w-full object-cover scale-x-[-1]"
               />
+              <WebcamTeleprompterOverlay
+                active={live}
+                recording={phase === "recording"}
+              />
               {phase === "recording" ? (
-                <div className="absolute left-3 top-3 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
+                <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
                   <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
                   Live · Rec {formatClock(seconds)}
                 </div>
               ) : (
-                <div className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
+                <div className="absolute left-3 top-3 z-20 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
                   Live preview — not recording yet
                 </div>
               )}
@@ -391,9 +398,9 @@ export function WebcamRecorder({
               )}
             </div>
             <p className="text-base text-[var(--muted)]">
-              Aim for about 60 seconds. Start the teleprompter scroll above,
-              then record. You can trim the clip on the timeline after you save
-              it.
+              Aim for about 60 seconds. Frame yourself, check the first lines of
+              the script, then record — scroll starts automatically. Trim on the
+              timeline after you save.
             </p>
           </div>
         </div>
