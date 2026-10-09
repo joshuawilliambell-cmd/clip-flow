@@ -1,23 +1,23 @@
 /** Preset Fleet Sales job titles (Title Case). */
 
 export const PRESET_JOB_TITLES = [
-  "Regional Account Manager",
-  "Area Account Manager",
-  "National Account Manager",
-  "TTC National Account Manager",
-  "Total Truck Care Account Manager",
   "Account Manager",
-  "Enterprise Sales Manager",
+  "Area Account Manager",
   "Business Development Specialist",
-  "Regional Marketer",
-  "National Fuel Marketer",
-  "General Manager of Fuel Sales",
-  "Fleet Sales Administrative Coordinator",
-  "Senior Manager of Fleet Sales",
+  "Enterprise Sales Manager",
   "Fleet Account Specialist",
+  "Fleet Sales Administrative Coordinator",
+  "General Manager of Fuel Sales",
   "Inside Sales Account Manager",
   "Inside Sales Account Manager Fleet Sales",
   "Manager of Inside Sales",
+  "National Account Manager",
+  "National Fuel Marketer",
+  "Regional Account Manager",
+  "Regional Marketer",
+  "Senior Manager of Fleet Sales",
+  "Total Truck Care Account Manager",
+  "TTC National Account Manager",
 ] as const;
 
 export type PresetJobTitle = (typeof PRESET_JOB_TITLES)[number];
