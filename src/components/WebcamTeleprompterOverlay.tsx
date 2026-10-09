@@ -134,7 +134,7 @@ export function WebcamTeleprompterOverlay({
           </p>
         ) : null}
 
-        <div className="relative h-[min(38%,11.5rem)] min-h-[7.5rem] overflow-hidden rounded-xl border border-white/30 bg-black/45 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:min-h-[9rem]">
+        <div className="relative h-36 overflow-hidden rounded-xl border border-white/30 bg-black/45 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:h-44">
           {/* Reading guide near the top of the band (eye line → webcam) */}
           <div
             className="pointer-events-none absolute inset-x-3 top-[28%] z-20 h-0.5 bg-[var(--yellow)]/85"
