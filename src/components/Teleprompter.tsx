@@ -12,6 +12,8 @@ import { HelpTip } from "@/components/HelpTip";
 import {
   INTRO_SCRIPTS,
   TARGET_INTRO_SECONDS,
+  TELEPROMPTER_SPEED_MAX,
+  TELEPROMPTER_SPEED_MIN,
   TELEPROMPTER_TICK_MS,
   clampTeleprompterSpeed,
   estimatedScrollSeconds,
