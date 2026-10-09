@@ -5,7 +5,7 @@ import { defaultDutiesForTitle } from "@/lib/job-titles";
 
 /** Speaker self-intro first — you are not repeated later as a “team member.” */
 const OPENING =
-  "Hey, [Customer Name], [Your Name] with Love's here. I'm [Your A/An] [Your Job Title], and I can help you with things like [Your Job Duties]. Welcome to your Fleet Hub. This is a portal where you can learn all about what Love's can do for your fleet.";
+  "Hey, [Customer Name], [Your Name] with Love's here. Welcome to your Fleet Hub. I'm [Your A/An] [Your Job Title], and I can help you with things like [Your Job Duties]. This is a portal where you can learn all about what Love's can do for your fleet.";
 
 const TEAMMATE_LINE =
   "This is [Team Member Name], and [he/she] is [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";

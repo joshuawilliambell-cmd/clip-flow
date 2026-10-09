@@ -81,9 +81,6 @@ function StudioShell() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-5 md:px-6 md:py-7">
-        <div className="animate-fade-up-delay">
-          <PurposeGuide />
-        </div>
         <div className="mb-5">
           <StepIndicator step={step} onChange={setStep} />
         </div>
