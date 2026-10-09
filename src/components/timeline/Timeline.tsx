@@ -4,15 +4,20 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { VIDEO_TEMPLATE } from "@/lib/template";
-import { formatClock, formatTime, sortPhotosByStart } from "@/lib/timeline";
+import {
+  formatClock,
+  formatTime,
+  roundToSecond,
+  sortPhotosByStart,
+} from "@/lib/timeline";
 import { filledTeamPhotos } from "@/lib/team-slots";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
 
 function useTimelineMetrics(duration: number, width: number) {
   const pxPerSecond = Math.max(
-    12,
-    width > 0 && duration > 0 ? (width - 24) / Math.max(duration, 1) : 12,
+    8,
+    width > 0 && duration > 0 ? (width - 24) / Math.max(duration, 1) : 8,
   );
   return { pxPerSecond };
 }
@@ -55,26 +60,43 @@ export function Timeline() {
     ro.observe(node);
   }, []);
 
-  const { pxPerSecond } = useTimelineMetrics(outputDuration || 60, trackWidth);
+  const sourceDuration = video?.durationSeconds ?? 0;
+  // Scale the full source file so trim handles move visibly along the bar.
+  const { pxPerSecond } = useTimelineMetrics(
+    Math.max(sourceDuration, outputDuration, 1),
+    trackWidth,
+  );
 
-  const secondsFromClientX = useCallback(
+  const sourceSecondsFromClientX = useCallback(
     (clientX: number) => {
       const content = contentRef.current;
       const scroll = scrollRef.current;
       if (!content || !scroll) return 0;
       const rect = content.getBoundingClientRect();
       const x = clientX - rect.left + scroll.scrollLeft;
-      return Math.max(0, Math.min(outputDuration, x / pxPerSecond));
+      return Math.max(0, Math.min(sourceDuration, x / pxPerSecond));
     },
-    [outputDuration, pxPerSecond],
+    [sourceDuration, pxPerSecond],
   );
 
   const scrubTo = useCallback(
     (clientX: number) => {
       setIsPlaying(false);
-      setCurrentTime(secondsFromClientX(clientX));
+      const sourceSec = sourceSecondsFromClientX(clientX);
+      // Playhead lives in output time (0 = trim start).
+      const outputSec = Math.max(
+        0,
+        Math.min(outputDuration, sourceSec - trimStart),
+      );
+      setCurrentTime(outputSec);
     },
-    [secondsFromClientX, setCurrentTime, setIsPlaying],
+    [
+      sourceSecondsFromClientX,
+      outputDuration,
+      trimStart,
+      setCurrentTime,
+      setIsPlaying,
+    ],
   );
 
   const beginScrub = (e: React.PointerEvent) => {
@@ -117,10 +139,20 @@ export function Timeline() {
     );
   }
 
-  const sourceDuration = video.durationSeconds;
-  const videoBarWidth = Math.max(48, outputDuration * pxPerSecond);
-  const trackInnerWidth = Math.max(trackWidth - 8, outputDuration * pxPerSecond);
-  const playheadLeft = currentTime * pxPerSecond;
+  const trackInnerWidth = Math.max(
+    trackWidth - 8,
+    Math.max(sourceDuration, 1) * pxPerSecond,
+  );
+  const keptLeft = trimStart * pxPerSecond;
+  const keptWidth = Math.max(40, outputDuration * pxPerSecond);
+  const playheadLeft = (trimStart + currentTime) * pxPerSecond;
+  const cutStartSec = roundToSecond(trimStart);
+  const cutEndSec = roundToSecond(Math.max(0, sourceDuration - trimEnd));
+
+  const nudgeTrim = (edge: "start" | "end", delta: number) => {
+    if (edge === "start") setTrim("start", trimStart + delta);
+    else setTrim("end", trimEnd + delta);
+  };
 
   return (
     <div className="space-y-3">
@@ -131,14 +163,16 @@ export function Timeline() {
               Timeline
             </h3>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Drag a photo onto another to reorder · drag ends to resize · drag
-              the red playhead to scrub
+              Drag the red trim handles to shorten · drag a photo onto another
+              to reorder · drag the playhead to scrub
             </p>
           </div>
           <HelpTip title="How to use the timeline" size="lg">
             <p>
-              <strong>Track 1 (dark bar)</strong> is your main video. Drag the
-              red left or right ends to cut time off the start or end.
+              <strong>Track 1</strong> shows your full recording. The dark
+              middle is what you keep — drag the <strong>red handles</strong>{" "}
+              (or use Cut start / Cut end) to remove time from the beginning or
+              end. Gray areas are discarded.
             </p>
             <p>
               <strong>Track 2 (colored bars)</strong> are team photos. Drag one
@@ -196,7 +230,9 @@ export function Timeline() {
             aria-valuemax={outputDuration}
             aria-valuenow={currentTime}
           >
-            {Array.from({ length: Math.floor(outputDuration) + 1 }).map((_, s) => (
+            {Array.from({
+              length: Math.floor(sourceDuration) + 1,
+            }).map((_, s) => (
               <div
                 key={s}
                 className="pointer-events-none absolute top-0 text-[10px] text-[var(--muted)]"
@@ -209,27 +245,89 @@ export function Timeline() {
           </div>
 
           <div className="mb-3">
-            <div className="mb-1 text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-              Track 1 · Your video
+            <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+              <div className="text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+                Track 1 · Your video (trim)
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+                  onClick={() => nudgeTrim("start", 1)}
+                  disabled={outputDuration <= 3}
+                  title="Remove 1 second from the beginning"
+                >
+                  Cut start +1s
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+                  onClick={() => nudgeTrim("start", -1)}
+                  disabled={trimStart <= 0}
+                  title="Put 1 second back at the beginning"
+                >
+                  Undo start −1s
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+                  onClick={() => nudgeTrim("end", -1)}
+                  disabled={outputDuration <= 3}
+                  title="Remove 1 second from the end"
+                >
+                  Cut end +1s
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+                  onClick={() => nudgeTrim("end", 1)}
+                  disabled={trimEnd >= sourceDuration}
+                  title="Put 1 second back at the end"
+                >
+                  Undo end −1s
+                </button>
+              </div>
             </div>
             <div
-              className="relative h-14 cursor-ew-resize touch-none rounded-lg bg-black/5"
+              className="relative h-16 touch-none rounded-lg bg-[#d9d4c4]"
               style={{ width: trackInnerWidth }}
               onPointerDown={(e) => {
                 if ((e.target as HTMLElement).dataset.handle) return;
                 beginScrub(e);
               }}
             >
-              <div
-                className="absolute top-1 bottom-1 rounded-md bg-[var(--track-video)] text-white shadow-sm"
-                style={{ left: 0, width: videoBarWidth }}
-              >
-                <div className="flex h-full items-center justify-between px-3 text-xs font-medium">
-                  <span className="truncate pr-2">
-                    {video.fileName} · {formatTime(trimStart)}–
-                    {formatTime(trimEnd)}
+              {/* Discarded regions */}
+              {cutStartSec > 0 ? (
+                <div
+                  className="pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center bg-black/25"
+                  style={{ width: keptLeft }}
+                >
+                  <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-white/90">
+                    Cut {formatClock(cutStartSec)}
                   </span>
-                  <span className="shrink-0 opacity-80">
+                </div>
+              ) : null}
+              {cutEndSec > 0 ? (
+                <div
+                  className="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center bg-black/25"
+                  style={{ width: cutEndSec * pxPerSecond }}
+                >
+                  <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-white/90">
+                    Cut {formatClock(cutEndSec)}
+                  </span>
+                </div>
+              ) : null}
+
+              {/* Kept selection — moves when you drag the red handles */}
+              <div
+                className="absolute top-1 bottom-1 rounded-md bg-[var(--track-video)] text-white shadow-md ring-2 ring-[var(--primary)]"
+                style={{ left: keptLeft, width: keptWidth }}
+              >
+                <div className="flex h-full items-center justify-between gap-2 px-4 text-xs font-medium">
+                  <span className="min-w-0 truncate">
+                    Keep {formatTime(trimStart)}–{formatTime(trimEnd)}
+                  </span>
+                  <span className="shrink-0 font-bold text-[var(--yellow)]">
                     {formatClock(outputDuration)}
                   </span>
                 </div>
@@ -256,8 +354,11 @@ export function Timeline() {
               </div>
             </div>
             <p className="mt-2 text-base text-[var(--muted)]">
-              Original length {formatClock(sourceDuration)}. Drag the red ends to
-              keep only the part you want. Drag the red play line to scrub.
+              Original {formatClock(sourceDuration)}
+              {cutStartSec > 0 || cutEndSec > 0
+                ? ` · keeping ${formatClock(outputDuration)} (cut ${formatClock(cutStartSec)} from start, ${formatClock(cutEndSec)} from end)`
+                : " · drag the red handles inward to shorten"}
+              . Photos below line up with the kept section.
             </p>
           </div>
 
@@ -290,7 +391,7 @@ export function Timeline() {
                       name={photo.name || "Teammate"}
                       thumb={photo.url ?? ""}
                       color={color}
-                      left={photo.startSeconds * pxPerSecond}
+                      left={(trimStart + photo.startSeconds) * pxPerSecond}
                       width={Math.max(36, photo.durationSeconds * pxPerSecond)}
                       start={photo.startSeconds}
                       duration={photo.durationSeconds}
@@ -309,11 +410,14 @@ export function Timeline() {
                         .filter((p) => p.id !== photo.id)
                         .map((p) => ({
                           id: p.id,
-                          left: p.startSeconds * pxPerSecond,
+                          left: (trimStart + p.startSeconds) * pxPerSecond,
                           right:
-                            (p.startSeconds + p.durationSeconds) * pxPerSecond,
+                            (trimStart + p.startSeconds + p.durationSeconds) *
+                            pxPerSecond,
                           mid:
-                            (p.startSeconds + p.durationSeconds / 2) *
+                            (trimStart +
+                              p.startSeconds +
+                              p.durationSeconds / 2) *
                             pxPerSecond,
                         }))}
                     />
@@ -369,9 +473,16 @@ function EdgeDrag({
       type="button"
       data-handle={side}
       aria-label={side === "left" ? "Trim start" : "Trim end"}
+      title={
+        side === "left"
+          ? "Drag to cut or restore time at the start"
+          : "Drag to cut or restore time at the end"
+      }
       className={clsx(
-        "absolute top-0 z-10 h-full w-4 cursor-ew-resize touch-none bg-[var(--primary)]",
-        side === "left" ? "left-0 rounded-l-md" : "right-0 rounded-r-md",
+        "absolute top-0 z-40 h-full w-7 cursor-ew-resize touch-none bg-[var(--primary)] shadow-md",
+        side === "left"
+          ? "left-0 rounded-l-md"
+          : "right-0 rounded-r-md",
       )}
       onPointerDown={(e) => {
         e.preventDefault();
@@ -391,7 +502,9 @@ function EdgeDrag({
         window.addEventListener("pointermove", onMove);
         window.addEventListener("pointerup", onUp);
       }}
-    />
+    >
+      <span className="pointer-events-none absolute inset-y-2 left-1/2 w-0.5 -translate-x-1/2 rounded bg-white/80" />
+    </button>
   );
 }
 

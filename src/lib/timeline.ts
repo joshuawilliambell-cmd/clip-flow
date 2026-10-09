@@ -206,6 +206,13 @@ export function reorderPhotos(
   });
 }
 
+/** Minimum kept length after trim (seconds). */
+export const MIN_TRIM_DURATION_SECONDS = 3;
+
+/**
+ * Clamp a trim edge. Uses 0.1s steps so short drags still shorten the clip
+ * (whole-second snapping made the red handles feel broken).
+ */
 export function trimBounds(
   trimStart: number,
   trimEnd: number,
@@ -213,16 +220,13 @@ export function trimBounds(
   edge: "start" | "end",
   nextValue: number,
 ): { trimStart: number; trimEnd: number } {
-  const minLen = 3;
+  const minLen = MIN_TRIM_DURATION_SECONDS;
+  const source = Math.max(minLen, sourceDuration);
   if (edge === "start") {
-    const start = clamp(snapToSecond(nextValue), 0, trimEnd - minLen);
+    const start = clamp(roundToSecond(nextValue), 0, trimEnd - minLen);
     return { trimStart: start, trimEnd };
   }
-  const end = clamp(
-    snapToSecond(nextValue),
-    trimStart + minLen,
-    sourceDuration,
-  );
+  const end = clamp(roundToSecond(nextValue), trimStart + minLen, source);
   return { trimStart, trimEnd: end };
 }
 
