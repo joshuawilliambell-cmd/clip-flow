@@ -31,8 +31,13 @@ import {
   TELEPROMPTER_TEXT_CLASS_LARGE,
   formatScriptForNaturalReading,
 } from "@/lib/teleprompter-layout";
+import {
+  estimateWpm,
+  punctuationEaseMultiplier,
+} from "@/lib/teleprompter-pace";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
+import { formatClock } from "@/lib/timeline";
 
 type ScriptSource = "official" | "custom";
 
@@ -93,9 +98,12 @@ export function Teleprompter({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [scrolling, setScrolling] = useState(false);
   const [scrollDistancePx, setScrollDistancePx] = useState(0);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   speedOverriddenRef.current = speedOverridden;
   pixelsPerTickRef.current = pixelsPerTick;
+  const practiceScriptRef = useRef("");
 
   // Official script tracks team size and roster names/titles.
   // Depend on content keys (not a fresh string each render) so Pause / re-renders
@@ -111,6 +119,7 @@ export function Teleprompter({
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
   const practiceScript = formatScriptForNaturalReading(displayScript);
+  practiceScriptRef.current = practiceScript;
 
   const voiceFollow = useTeleprompterVoiceFollow(practiceScript, scrollerRef);
 
@@ -179,8 +188,33 @@ export function Teleprompter({
     }
   }, [voiceFollow.listening, scrolling]);
 
+  // 3-2-1 countdown before auto-scroll (BIGVU-style start cue).
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown <= 0) {
+      setCountdown(null);
+      setElapsedSeconds(0);
+      setScrolling(true);
+      return;
+    }
+    const t = window.setTimeout(() => setCountdown((c) => (c == null ? null : c - 1)), 700);
+    return () => window.clearTimeout(t);
+  }, [countdown]);
+
+  // Elapsed practice time while scrolling.
+  useEffect(() => {
+    if (!scrolling) return;
+    const started = performance.now() - elapsedSeconds * 1000;
+    const id = window.setInterval(() => {
+      setElapsedSeconds(Math.max(0, (performance.now() - started) / 1000));
+    }, 250);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- freeze start offset when scroll begins
+  }, [scrolling]);
+
   // Accumulate sub-pixel scroll — browsers often truncate scrollTop fractions,
   // which made slow slider speeds appear stuck until reset to a faster default.
+  // Ease near punctuation so delivery can breathe (PromptSmart-style pacing).
   useEffect(() => {
     if (!scrolling || !enabled || voiceFollow.listening) {
       scrollCarryRef.current = 0;
@@ -190,7 +224,13 @@ export function Teleprompter({
       const el = scrollerRef.current;
       if (!el) return;
       if (el.scrollHeight <= el.clientHeight + 2) return;
-      scrollCarryRef.current += pixelsPerTickRef.current;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      const ease = punctuationEaseMultiplier(
+        practiceScriptRef.current,
+        el.scrollTop,
+        maxScroll,
+      );
+      scrollCarryRef.current += pixelsPerTickRef.current * ease;
       const step = Math.floor(scrollCarryRef.current);
       if (step < 1) return;
       scrollCarryRef.current -= step;
@@ -205,8 +245,52 @@ export function Teleprompter({
   const resetScroll = () => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     setScrolling(false);
+    setCountdown(null);
+    setElapsedSeconds(0);
     voiceFollow.stop();
   };
+
+  const toggleScrollWithCountdown = () => {
+    voiceFollow.stop();
+    if (countdown !== null) {
+      setCountdown(null);
+      return;
+    }
+    if (scrolling) {
+      setScrolling(false);
+      return;
+    }
+    if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
+    scrollCarryRef.current = 0;
+    setElapsedSeconds(0);
+    setCountdown(3);
+  };
+
+  // Space = play/pause with countdown; R / Home = back to top (common prompter shortcuts).
+  useEffect(() => {
+    if (!enabled || recording) return;
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "TEXTAREA" ||
+          target.tagName === "INPUT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleScrollWithCountdown();
+      } else if (e.key === "Home" || e.key.toLowerCase() === "r") {
+        e.preventDefault();
+        resetScroll();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, recording, scrolling, countdown, voiceFollow.listening]);
 
   const useOfficial = () => {
     setSource("official");
@@ -269,6 +353,14 @@ export function Teleprompter({
       (TELEPROMPTER_SPEED_MAX - TELEPROMPTER_SPEED_MIN)) *
       100,
   );
+  const scrolledFraction =
+    scrollDistancePx > 0 && scrollerRef.current
+      ? Math.min(1, scrollerRef.current.scrollTop / scrollDistancePx)
+      : scrolling
+        ? Math.min(1, elapsedSeconds / Math.max(paceSeconds, 1))
+        : 0;
+  const remainingSeconds = Math.max(0, paceSeconds - elapsedSeconds);
+  const liveWpm = estimateWpm(practiceScript, scrolledFraction, elapsedSeconds);
 
   return (
     <div
@@ -482,10 +574,14 @@ export function Teleprompter({
             <p className="mt-1.5 text-[12px] font-medium leading-snug text-white/70">
               Scroll speed is set for about a {TARGET_INTRO_SECONDS}-second
               video. If you slow it down, your finished video will usually be
-              longer than {TARGET_INTRO_SECONDS} seconds. Optional:{" "}
-              <strong className="text-white">Follow My Voice</strong> uses your
-              mic (Chrome/Edge) and scrolls as you speak — often feels more
-              natural than a fixed scroll.
+              longer than {TARGET_INTRO_SECONDS} seconds. Play starts with a
+              3-2-1 countdown. Keyboard:{" "}
+              <strong className="text-white">Space</strong> play/pause,{" "}
+              <strong className="text-white">R</strong> or Home back to top.
+              Optional: <strong className="text-white">Follow My Voice</strong>{" "}
+              uses your mic (Chrome/Edge) and scrolls as you speak. Tip: spell
+              out numbers in the script (&quot;sixty&quot; not &quot;60&quot;)
+              for better voice matching.
             </p>
           </div>
 
@@ -494,6 +590,16 @@ export function Teleprompter({
               className="pointer-events-none absolute inset-x-0 top-[28%] z-10 h-0.5 bg-[var(--yellow)]/85"
               aria-hidden
             />
+            {countdown !== null && countdown > 0 ? (
+              <div
+                className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/55"
+                aria-live="assertive"
+              >
+                <span className="font-display text-7xl font-bold text-[var(--yellow)] drop-shadow-lg md:text-8xl">
+                  {countdown}
+                </span>
+              </div>
+            ) : null}
             <div
               ref={scrollerRef}
               className="h-full min-h-[12rem] overflow-y-auto px-5 py-6 text-center"
@@ -522,6 +628,10 @@ export function Teleprompter({
               </span>
               <span className="text-[12px] font-semibold text-[var(--yellow)]">
                 ~{paceSeconds}s · {speedPercent}%
+                {scrolling || elapsedSeconds > 0
+                  ? ` · ${formatClock(elapsedSeconds)} elapsed · ~${formatClock(remainingSeconds)} left`
+                  : ""}
+                {liveWpm > 0 ? ` · ~${liveWpm} wpm` : ""}
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -558,13 +668,10 @@ export function Teleprompter({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  voiceFollow.stop();
-                  setScrolling((v) => !v);
-                }}
+                onClick={toggleScrollWithCountdown}
                 className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-[var(--yellow)] bg-[var(--yellow)] px-3 py-1.5 text-[13px] font-semibold text-[var(--ink)]"
               >
-                {scrolling ? (
+                {scrolling || countdown !== null ? (
                   <>
                     <Pause className="h-3.5 w-3.5" /> Click Here to Pause
                   </>

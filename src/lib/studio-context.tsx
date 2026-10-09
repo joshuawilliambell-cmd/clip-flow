@@ -543,6 +543,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       ),
     );
     setTeleprompterSpeedOverridden(false);
+    setActiveTeleprompterScript("");
+    setTeleprompterFontLarge(true);
     setMusicEnabled(true);
     setMusicVolumeState(VIDEO_TEMPLATE.defaultMusicVolume);
     setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);

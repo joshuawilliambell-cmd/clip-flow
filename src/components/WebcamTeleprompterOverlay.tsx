@@ -10,6 +10,7 @@ import {
   TELEPROMPTER_TEXT_CLASS_LARGE,
   formatScriptForNaturalReading,
 } from "@/lib/teleprompter-layout";
+import { punctuationEaseMultiplier } from "@/lib/teleprompter-pace";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 
@@ -47,6 +48,7 @@ export function WebcamTeleprompterOverlay({
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pixelsPerTickRef = useRef(0);
   const scrollCarryRef = useRef(0);
+  const scriptRef = useRef("");
 
   const rosterKey = photos
     .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
@@ -69,9 +71,11 @@ export function WebcamTeleprompterOverlay({
   const script = formatScriptForNaturalReading(
     activeTeleprompterScript.trim() || fallbackScript,
   );
+  scriptRef.current = script;
 
   const [enabled, setEnabled] = useState(true);
   const [scrolling, setScrolling] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   pixelsPerTickRef.current = pixelsPerTick;
 
@@ -81,21 +85,36 @@ export function WebcamTeleprompterOverlay({
     scrollCarryRef.current = 0;
   }, [fillKey, script]);
 
-  // Auto-scroll shortly after recording begins.
+  // Auto-scroll shortly after recording begins (with a short countdown cue).
   useEffect(() => {
     if (!active || !enabled) {
       setScrolling(false);
+      setCountdown(null);
       return;
     }
     if (!recording) {
       setScrolling(false);
+      setCountdown(null);
       return;
     }
-    const delay = window.setTimeout(() => setScrolling(true), 600);
-    return () => window.clearTimeout(delay);
+    setCountdown(3);
   }, [recording, active, enabled]);
 
-  // Accumulate sub-pixel scroll so slow speeds still move.
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown <= 0) {
+      setCountdown(null);
+      setScrolling(true);
+      return;
+    }
+    const t = window.setTimeout(
+      () => setCountdown((c) => (c == null ? null : c - 1)),
+      600,
+    );
+    return () => window.clearTimeout(t);
+  }, [countdown]);
+
+  // Accumulate sub-pixel scroll; ease near punctuation for natural pauses.
   useEffect(() => {
     if (!scrolling || !enabled || !active) {
       scrollCarryRef.current = 0;
@@ -105,7 +124,13 @@ export function WebcamTeleprompterOverlay({
       const el = scrollerRef.current;
       if (!el) return;
       if (el.scrollHeight <= el.clientHeight + 2) return;
-      scrollCarryRef.current += pixelsPerTickRef.current;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      const ease = punctuationEaseMultiplier(
+        scriptRef.current,
+        el.scrollTop,
+        maxScroll,
+      );
+      scrollCarryRef.current += pixelsPerTickRef.current * ease;
       const step = Math.floor(scrollCarryRef.current);
       if (step < 1) return;
       scrollCarryRef.current -= step;
@@ -123,6 +148,7 @@ export function WebcamTeleprompterOverlay({
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     scrollCarryRef.current = 0;
     setScrolling(false);
+    setCountdown(null);
   };
 
   return (
@@ -148,6 +174,16 @@ export function WebcamTeleprompterOverlay({
             className="pointer-events-none absolute inset-x-2 top-[26%] z-20 h-0.5 bg-[var(--yellow)]/85"
             aria-hidden
           />
+          {countdown !== null && countdown > 0 ? (
+            <div
+              className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/50"
+              aria-live="assertive"
+            >
+              <span className="text-5xl font-bold text-[var(--yellow)] md:text-6xl">
+                {countdown}
+              </span>
+            </div>
+          ) : null}
           <div
             ref={scrollerRef}
             className={clsx(
