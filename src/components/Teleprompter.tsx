@@ -133,7 +133,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
   return (
     <div
       className={clsx(
-        "flex h-full min-h-[22rem] max-h-[36rem] flex-col section-card bg-[var(--olive)] text-white",
+        "flex h-full min-h-[22rem] max-h-[36rem] flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--olive)] text-white",
         className,
       )}
     >
