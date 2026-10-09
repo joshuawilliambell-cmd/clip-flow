@@ -41,6 +41,9 @@ export function Teleprompter({
   const { teamMemberCount, photos, customerName, speakerName } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const speedOverriddenRef = useRef(false);
+  const pixelsPerTickRef = useRef(0);
+  const scrollCarryRef = useRef(0);
 
   const rosterKey = photos
     .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
@@ -71,6 +74,9 @@ export function Teleprompter({
   const [fontLarge, setFontLarge] = useState(true);
   const [scrollDistancePx, setScrollDistancePx] = useState(0);
 
+  speedOverriddenRef.current = speedOverridden;
+  pixelsPerTickRef.current = pixelsPerTick;
+
   // Official script tracks team size and roster names/titles.
   useEffect(() => {
     if (source !== "official") return;
@@ -83,13 +89,14 @@ export function Teleprompter({
 
   // Default scroll speed ~60s for the active script (unless user overrode).
   useEffect(() => {
-    if (speedOverridden) return;
+    if (speedOverriddenRef.current) return;
     setPixelsPerTick(suggestedPixelsPerTickForScript(displayScript, fontLarge));
 
     // Refine from real layout once the scroller has overflow.
     const id = window.requestAnimationFrame(() => {
       const el = scrollerRef.current;
-      if (!el || speedOverridden) return;
+      // Read the ref so a mid-flight slider change is not overwritten.
+      if (!el || speedOverriddenRef.current) return;
       const distance = el.scrollHeight - el.clientHeight;
       setScrollDistancePx(Math.max(0, distance));
       if (distance <= 2) return;
@@ -121,20 +128,28 @@ export function Teleprompter({
     return () => window.clearTimeout(delay);
   }, [recording, enabled]);
 
+  // Accumulate sub-pixel scroll — browsers often truncate scrollTop fractions,
+  // which made slow slider speeds appear stuck until reset to a faster default.
   useEffect(() => {
-    if (!scrolling || !enabled) return;
-    const speed = pixelsPerTick;
+    if (!scrolling || !enabled) {
+      scrollCarryRef.current = 0;
+      return;
+    }
     const id = window.setInterval(() => {
       const el = scrollerRef.current;
       if (!el) return;
       if (el.scrollHeight <= el.clientHeight + 2) return;
-      el.scrollTop += speed;
+      scrollCarryRef.current += pixelsPerTickRef.current;
+      const step = Math.floor(scrollCarryRef.current);
+      if (step < 1) return;
+      scrollCarryRef.current -= step;
+      el.scrollTop += step;
       if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
         setScrolling(false);
       }
     }, TELEPROMPTER_TICK_MS);
     return () => window.clearInterval(id);
-  }, [scrolling, pixelsPerTick, enabled]);
+  }, [scrolling, enabled]);
 
   const resetScroll = () => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
