@@ -161,12 +161,17 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             key={photo.id}
             className="flex gap-3 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-3"
           >
-            <div className="flex shrink-0 flex-col items-center gap-2">
+            <div className="flex w-[5.75rem] shrink-0 flex-col items-stretch gap-1.5">
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => fileRefs.current[index]?.click()}
-                className="relative h-24 w-20 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-white disabled:opacity-60"
+                aria-label={
+                  photo.url
+                    ? `Replace photo for teammate ${index + 1}`
+                    : `Add photo for teammate ${index + 1}`
+                }
+                className="relative h-24 w-full overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-white disabled:opacity-60"
               >
                 {photo.url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -196,25 +201,37 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                 }}
               />
               {photo.url ? (
-                <div className="flex w-full flex-col gap-1">
+                <>
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => fileRefs.current[index]?.click()}
-                    className="inline-flex items-center justify-center gap-1 rounded-md border border-[var(--ink)] bg-white px-1.5 py-1 text-[11px] font-semibold text-[var(--ink)] disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--ink)] bg-white px-1.5 py-1.5 text-[11px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)] disabled:opacity-50"
                   >
-                    <Replace className="h-3 w-3" /> Replace
+                    <Replace className="h-3.5 w-3.5 shrink-0" />
+                    Replace photo
                   </button>
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => clearPhotoSlot(photo.id)}
-                    className="inline-flex items-center justify-center gap-1 rounded-md border border-[var(--primary)] bg-white px-1.5 py-1 text-[11px] font-semibold text-[var(--primary)] disabled:opacity-50"
+                    className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--primary)] bg-white px-1.5 py-1.5 text-[11px] font-bold text-[var(--primary)] hover:bg-red-50 disabled:opacity-50"
                   >
-                    <Trash2 className="h-3 w-3" /> Remove
+                    <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                    Remove
                   </button>
-                </div>
-              ) : null}
+                </>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => fileRefs.current[index]?.click()}
+                  className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--ink)] bg-[var(--yellow)] px-1.5 py-1.5 text-[11px] font-bold text-[var(--ink)] disabled:opacity-50"
+                >
+                  <ImagePlus className="h-3.5 w-3.5 shrink-0" />
+                  Add photo
+                </button>
+              )}
             </div>
 
             <div className="min-w-0 flex-1 space-y-2">
