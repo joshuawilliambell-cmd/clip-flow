@@ -62,30 +62,33 @@ export function VideoUploadStep() {
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
-          <p>1. Choose how many teammates and add photo, name, and title.</p>
-          <p>2. Optional: build the Love&apos;s Team thumbnail opener.</p>
-          <p>3. Fill in customer name and your name for the teleprompter.</p>
+          <p>
+            1. Fill in customer name and your introduction (name, title,
+            duties).
+          </p>
+          <p>2. Choose how many teammates and add their photo, name, and title.</p>
+          <p>3. Optional: build the Love&apos;s Team thumbnail opener.</p>
           <p>4. Record or upload your talking video, then trim and time photos.</p>
         </HelpTip>
       </div>
 
-      {/* 1. Team size + roster */}
+      {/* 1. Your intro (script opening) + team size */}
+      <ScriptFillIns />
+
       <TeamSizePicker />
 
       {teamMemberCount === 0 ? (
         <div className="how-banner">
-          Just me — no photo overlays. Matching Fleet Hub script in the
-          teleprompter.
+          Just me — no photo overlays. Your introduction fills the opening of
+          the Fleet Hub script; optional thumbnail can still use your featured
+          photo.
         </div>
       ) : (
-        <>
-          <TeamRosterFields variant="setup" />
-          <ThumbnailCreator />
-        </>
+        <TeamRosterFields variant="setup" />
       )}
 
-      {/* 2. Script fill-ins + teleprompter */}
-      <ScriptFillIns />
+      {/* 2. Thumbnail (you featured + teammates) then teleprompter */}
+      <ThumbnailCreator />
 
       <section className="section-card space-y-3 bg-white p-4 md:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">

@@ -17,6 +17,7 @@ import {
 } from "@/lib/render-thumbnail";
 import { useStudio } from "@/lib/studio-context";
 import {
+  SPEAKER_THUMBNAIL_ID,
   THUMBNAIL_TEMPLATE,
   defaultPhotoFit,
   type ThumbnailMember,
@@ -33,6 +34,9 @@ export function ThumbnailCreator({
     teamMemberCount,
     photos: rosterPhotos,
     reorderTeamSlots,
+    speakerName,
+    speakerTitle,
+    speakerPhotoUrl,
     setIntroThumbnail,
     clearIntroThumbnail,
     introThumbnailEnabled,
@@ -41,17 +45,28 @@ export function ThumbnailCreator({
     setThumbnailMembers: setMembers,
   } = useStudio();
 
-  const slotCount = Math.max(1, teamMemberCount) as 1 | 2 | 3 | 4;
+  const slotCount = Math.min(
+    THUMBNAIL_TEMPLATE.maxMembers,
+    1 + teamMemberCount,
+  );
   const rosterKey = rosterPhotos
     .map((p) => `${p.id}\0${p.url ?? ""}\0${p.name}\0${p.title}`)
     .join("|");
+  const speakerKey = `${speakerPhotoUrl ?? ""}\0${speakerName}\0${speakerTitle}`;
 
-  // Keep thumbnail cards in roster order with matching name/title/photo per id.
-  // Only face framing (photoFit) is preserved independently per teammate id.
+  // Speaker first (featured), then roster teammates by id. Speaker is never a
+  // script teammate line — only appears on the thumbnail + opening self-intro.
   useEffect(() => {
     setMembers((prev) => {
       const fitById = new Map(prev.map((m) => [m.id, m.photoFit]));
-      return rosterPhotos.map(
+      const speaker: ThumbnailMember = {
+        id: SPEAKER_THUMBNAIL_ID,
+        photoUrl: speakerPhotoUrl,
+        name: speakerName,
+        title: speakerTitle,
+        photoFit: fitById.get(SPEAKER_THUMBNAIL_ID) ?? defaultPhotoFit(),
+      };
+      const teammates = rosterPhotos.map(
         (photo) =>
           ({
             id: photo.id,
@@ -61,10 +76,10 @@ export function ThumbnailCreator({
             photoFit: fitById.get(photo.id) ?? defaultPhotoFit(),
           }) satisfies ThumbnailMember,
       );
+      return [speaker, ...teammates];
     });
-    // rosterKey encodes roster identity + fields + order; rosterPhotos is current.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync only when rosterKey changes
-  }, [rosterKey, setMembers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync on roster/speaker keys
+  }, [rosterKey, speakerKey, setMembers]);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -111,7 +126,6 @@ export function ThumbnailCreator({
       cancelled = true;
       window.clearTimeout(timer);
     };
-    // membersKey tracks framing + roster fields without stale closures.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [membersKey]);
 
@@ -126,9 +140,13 @@ export function ThumbnailCreator({
     setDropTargetIndex(null);
   };
 
-  /** Reorder both thumbnail and Your teammates so names stay with photos. */
+  /**
+   * Reorder teammate cards only (indices 1+). Speaker stays featured first and
+   * is never moved into the script teammate roster.
+   */
   const reorderMembers = (fromIndex: number, toIndex: number) => {
-    reorderTeamSlots(fromIndex, toIndex);
+    if (fromIndex === 0 || toIndex === 0) return;
+    reorderTeamSlots(fromIndex - 1, toIndex - 1);
   };
 
   const resetFraming = () => {
@@ -149,7 +167,7 @@ export function ThumbnailCreator({
     try {
       if (!hasContent()) {
         throw new Error(
-          "Add teammate photos and names above in Your teammates first.",
+          "Add your photo and name above, and teammate photos if you have them.",
         );
       }
       const blob = await exportTeamThumbnailPng(members);
@@ -176,7 +194,7 @@ export function ThumbnailCreator({
     try {
       if (!hasContent()) {
         throw new Error(
-          "Add teammate photos and names above in Your teammates first.",
+          "Add your photo and name above, and teammate photos if you have them.",
         );
       }
       const blob = await exportTeamThumbnailPng(members);
@@ -195,8 +213,6 @@ export function ThumbnailCreator({
     }
   };
 
-  if (teamMemberCount === 0) return null;
-
   return (
     <section className="section-card space-y-4 bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -205,17 +221,21 @@ export function ThumbnailCreator({
             Love&apos;s Team thumbnail
           </h3>
           <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
-            Optional · uses Your teammates above ·{" "}
+            Optional · you first, then teammates ·{" "}
             {THUMBNAIL_TEMPLATE.introDurationSeconds}s video opener or download
-            PNG. Frame faces here — reordering also updates Your teammates.
+            PNG. Your card uses Your introduction above — not a script teammate
+            line.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
           <p>
-            Photos, names, and titles come from <strong>Your teammates</strong>{" "}
-            above. Edit them there — this section frames faces. Dragging to
-            reorder keeps each person&apos;s name and photo together in both
-            places.
+            The first card is <strong>you</strong> (featured photo, name, and
+            title from Your introduction). Extra cards come from{" "}
+            <strong>Your teammates</strong>.
+          </p>
+          <p>
+            You are only introduced once in the script opening — the thumbnail
+            can still show your photo with the team.
           </p>
           <p>
             Optional Allego opener: shows for{" "}
@@ -227,8 +247,15 @@ export function ThumbnailCreator({
 
       {filledCount === 0 ? (
         <div className="how-banner">
-          Add photos and names in <strong>Your teammates</strong> above — they
-          show up here automatically for framing.
+          Add your name, title, and featured photo in{" "}
+          <strong>Your introduction</strong>
+          {teamMemberCount > 0 ? (
+            <>
+              {" "}
+              and teammates in <strong>Your teammates</strong>
+            </>
+          ) : null}{" "}
+          — they show up here for framing.
         </div>
       ) : (
         <div className="flex flex-wrap gap-3">
@@ -246,17 +273,21 @@ export function ThumbnailCreator({
 
       <div className="grid gap-4 lg:grid-cols-2">
         {members.map((member, index) => {
+          const isSpeaker = member.id === SPEAKER_THUMBNAIL_ID;
           const isDragging = dragFromIndex === index;
           const isDropTarget =
             dropTargetIndex === index &&
             dragFromIndex !== null &&
-            dragFromIndex !== index;
+            dragFromIndex !== index &&
+            !isSpeaker;
           const label =
-            member.name.trim() || `Teammate ${index + 1}`;
+            member.name.trim() ||
+            (isSpeaker ? "You (featured)" : `Teammate ${index}`);
           return (
             <article
               key={member.id}
               onDragOver={(e) => {
+                if (isSpeaker) return;
                 if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = "move";
@@ -269,6 +300,7 @@ export function ThumbnailCreator({
                 );
               }}
               onDrop={(e) => {
+                if (isSpeaker) return;
                 if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
                 e.preventDefault();
                 const raw = e.dataTransfer.getData(SLOT_DRAG_TYPE);
@@ -283,61 +315,91 @@ export function ThumbnailCreator({
                   ? "border-[var(--primary)] opacity-60"
                   : isDropTarget
                     ? "border-[var(--primary)] bg-[var(--yellow)]/30 ring-2 ring-[var(--primary)]"
-                    : "border-[var(--ink)]"
+                    : isSpeaker
+                      ? "border-[var(--primary)]"
+                      : "border-[var(--ink)]"
               }`}
             >
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
-                  <button
-                    type="button"
-                    draggable
-                    aria-label={`Drag to reorder ${label}`}
-                    title="Drag to reorder"
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData(SLOT_DRAG_TYPE, String(index));
-                      e.dataTransfer.effectAllowed = "move";
-                      setDragFromIndex(index);
-                    }}
-                    onDragEnd={clearSlotDrag}
-                    className="flex h-10 w-10 shrink-0 cursor-grab items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-white text-[var(--ink)] active:cursor-grabbing"
-                  >
-                    <GripVertical className="h-5 w-5" />
-                  </button>
-                  <div className="flex flex-col gap-1">
-                    <button
-                      type="button"
-                      aria-label={`Move ${label} up`}
-                      disabled={index === 0}
-                      onClick={() => reorderMembers(index, index - 1)}
-                      className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Move ${label} down`}
-                      disabled={index >= members.length - 1}
-                      onClick={() => reorderMembers(index, index + 1)}
-                      className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </button>
-                  </div>
+                  {isSpeaker ? (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-[var(--primary)] bg-[var(--yellow)] text-[11px] font-bold text-[var(--ink)]">
+                      You
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        draggable
+                        aria-label={`Drag to reorder ${label}`}
+                        title="Drag to reorder"
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData(SLOT_DRAG_TYPE, String(index));
+                          e.dataTransfer.effectAllowed = "move";
+                          setDragFromIndex(index);
+                        }}
+                        onDragEnd={clearSlotDrag}
+                        className="flex h-10 w-10 shrink-0 cursor-grab items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-white text-[var(--ink)] active:cursor-grabbing"
+                      >
+                        <GripVertical className="h-5 w-5" />
+                      </button>
+                      <div className="flex flex-col gap-1">
+                        <button
+                          type="button"
+                          aria-label={`Move ${label} up`}
+                          disabled={index <= 1}
+                          onClick={() => reorderMembers(index, index - 1)}
+                          className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Move ${label} down`}
+                          disabled={index >= members.length - 1}
+                          onClick={() => reorderMembers(index, index + 1)}
+                          className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </>
+                  )}
                   <div className="min-w-0">
                     <p className="truncate text-[15px] font-bold text-[var(--ink)]">
                       {label}
                     </p>
                     <p className="truncate text-[13px] font-medium text-[var(--muted)]">
-                      {member.title.trim() || "Job title from Your teammates"}
+                      {member.title.trim() ||
+                        (isSpeaker
+                          ? "Job title from Your introduction"
+                          : "Job title from Your teammates")}
                     </p>
                   </div>
                 </div>
                 <HelpTip title={label}>
-                  <p>
-                    Name and title come from Your teammates. Drag or zoom the
-                    face so it fills the tall frame.
-                  </p>
-                  <p>Use the grip or ↑ ↓ for left-to-right thumbnail order.</p>
+                  {isSpeaker ? (
+                    <>
+                      <p>
+                        Your featured card for the thumbnail. Name, title, and
+                        photo come from Your introduction.
+                      </p>
+                      <p>
+                        This does not add a second intro line in the script —
+                        you already introduce yourself at the start.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        Name and title come from Your teammates. Drag or zoom
+                        the face so it fills the tall frame.
+                      </p>
+                      <p>
+                        Use the grip or ↑ ↓ for left-to-right thumbnail order.
+                      </p>
+                    </>
+                  )}
                 </HelpTip>
               </div>
 
@@ -349,9 +411,23 @@ export function ThumbnailCreator({
                 />
               ) : (
                 <div className="rounded-xl border-2 border-dashed border-[var(--ink)] bg-white px-3 py-6 text-center text-[14px] font-medium text-[var(--muted)]">
-                  Add a headshot for this person in{" "}
-                  <strong className="text-[var(--ink)]">Your teammates</strong>{" "}
-                  above.
+                  {isSpeaker ? (
+                    <>
+                      Add your featured photo in{" "}
+                      <strong className="text-[var(--ink)]">
+                        Your introduction
+                      </strong>{" "}
+                      above.
+                    </>
+                  ) : (
+                    <>
+                      Add a headshot for this person in{" "}
+                      <strong className="text-[var(--ink)]">
+                        Your teammates
+                      </strong>{" "}
+                      above.
+                    </>
+                  )}
                 </div>
               )}
             </article>

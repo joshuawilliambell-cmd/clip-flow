@@ -38,7 +38,14 @@ export function Teleprompter({
   recording = false,
   className,
 }: TeleprompterProps) {
-  const { teamMemberCount, photos, customerName, speakerName } = useStudio();
+  const {
+    teamMemberCount,
+    photos,
+    customerName,
+    speakerName,
+    speakerTitle,
+    speakerDuties,
+  } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const speedOverriddenRef = useRef(false);
@@ -48,6 +55,7 @@ export function Teleprompter({
   const rosterKey = photos
     .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
     .join("|");
+  const speakerKey = `${speakerName}\0${speakerTitle}\0${speakerDuties}`;
   const rosterPeople = photos.map((p) => ({
     name: p.name,
     title: p.title,
@@ -57,6 +65,8 @@ export function Teleprompter({
   const officialScript = scriptForTeam(teamMemberCount, {
     customerName,
     speakerName,
+    speakerTitle,
+    speakerDuties,
     people: rosterPeople,
   });
 
@@ -82,7 +92,14 @@ export function Teleprompter({
     if (source !== "official") return;
     setScript(officialScript);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
-  }, [teamMemberCount, source, rosterKey, customerName, speakerName, officialScript]);
+  }, [
+    teamMemberCount,
+    source,
+    rosterKey,
+    speakerKey,
+    customerName,
+    officialScript,
+  ]);
 
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
@@ -251,8 +268,8 @@ export function Teleprompter({
             </p>
             <p>
               Use the <strong>official</strong> Fleet Hub script for your team
-              size — names, pronouns, titles, and duties from above are filled
-              in — or{" "}
+              size — your opening intro plus teammate names, pronouns, titles,
+              and duties from above are filled in — or{" "}
               <strong>upload / paste</strong> your own.
             </p>
             <p>

@@ -7,7 +7,8 @@ export const THUMBNAIL_TEMPLATE = {
   id: "loves-team-thumbnail-v2",
   width: 1920,
   height: 1080,
-  maxMembers: 4,
+  /** Speaker + up to four teammates. */
+  maxMembers: 5,
   /** How long the optional intro thumbnail covers the video (seconds). */
   introDurationSeconds: 1,
   colors: {
@@ -58,6 +59,9 @@ export const THUMBNAIL_TEMPLATE = {
     defaultFocusY: 0.28,
   },
 } as const;
+
+/** Stable id for the recording speaker’s thumbnail card (not a PIP teammate). */
+export const SPEAKER_THUMBNAIL_ID = "speaker-self";
 
 export type ThumbnailPhotoFit = {
   /** Zoom multiplier on cover-fit (1–2.5). */

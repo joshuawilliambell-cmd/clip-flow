@@ -3,8 +3,9 @@ import { defaultDutiesForTitle } from "@/lib/job-titles";
 
 /** Official Fleet Hub teleprompter scripts by how many teammates you introduce. */
 
+/** Speaker self-intro first — you are not repeated later as a “team member.” */
 const OPENING =
-  "Hey, [Customer Name], [Your Name] with Love's here. Welcome to your Fleet Hub. This is a portal where you can learn all about what Love's can do for your fleet.";
+  "Hey, [Customer Name], [Your Name] with Love's here. I'm [Your A/An] [Your Job Title], and I can help you with things like [Your Job Duties]. Welcome to your Fleet Hub. This is a portal where you can learn all about what Love's can do for your fleet.";
 
 const TEAMMATE_LINE =
   "This is [Team Member Name], and [he/she] is [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";
@@ -59,6 +60,9 @@ export type TeamIntroPerson = {
 export type ScriptFillIns = {
   customerName?: string;
   speakerName?: string;
+  speakerTitle?: string;
+  speakerDuties?: string;
+  /** Other teammates only — never include the speaker here. */
   people?: TeamIntroPerson[];
 };
 
@@ -74,7 +78,7 @@ function replaceFirst(text: string, needle: string, value: string): string {
   return text.slice(0, index) + value + text.slice(index + needle.length);
 }
 
-/** Fill customer, speaker, and each teammate's name / pronoun / title / duties. */
+/** Fill customer, speaker self-intro, and each teammate's name / pronoun / title / duties. */
 export function personalizeScript(
   template: string,
   peopleOrFillIns: TeamIntroPerson[] | ScriptFillIns = [],
@@ -85,6 +89,11 @@ export function personalizeScript(
   const people = fillIns.people ?? [];
   const customer = fillIns.customerName?.trim();
   const speaker = fillIns.speakerName?.trim();
+  const speakerTitle = fillIns.speakerTitle?.trim() || "";
+  const speakerDuties =
+    fillIns.speakerDuties?.trim() ||
+    defaultDutiesForTitle(speakerTitle) ||
+    "";
 
   let text = template;
   if (customer) {
@@ -93,6 +102,15 @@ export function personalizeScript(
   if (speaker) {
     text = text.replace(/\[Your Name\]/g, speaker);
   }
+
+  // Speaker self-intro placeholders (opening only — not teammate lines).
+  const yourTitle = speakerTitle || "[Your Job Title]";
+  const yourDuties = speakerDuties || "[Your Job Duties]";
+  const yourArticle =
+    yourTitle === "[Your Job Title]" ? "[Your A/An]" : indefiniteArticle(yourTitle);
+  text = text.replace(/\[Your A\/An\]/g, yourArticle);
+  text = text.replace(/\[Your Job Title\]/g, yourTitle);
+  text = text.replace(/\[Your Job Duties\]/g, yourDuties);
 
   const teammateSlots = (text.match(/\[Team Member Name\]/g) ?? []).length;
   for (let i = 0; i < teammateSlots; i += 1) {

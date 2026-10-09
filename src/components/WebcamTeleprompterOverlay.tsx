@@ -31,7 +31,14 @@ export function WebcamTeleprompterOverlay({
   active,
   recording,
 }: WebcamTeleprompterOverlayProps) {
-  const { teamMemberCount, photos, customerName, speakerName } = useStudio();
+  const {
+    teamMemberCount,
+    photos,
+    customerName,
+    speakerName,
+    speakerTitle,
+    speakerDuties,
+  } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pixelsPerTickRef = useRef(0);
   const scrollCarryRef = useRef(0);
@@ -39,6 +46,8 @@ export function WebcamTeleprompterOverlay({
   const script = scriptForTeam(teamMemberCount, {
     customerName,
     speakerName,
+    speakerTitle,
+    speakerDuties,
     people: photos.map((p) => ({
       name: p.name,
       title: p.title,

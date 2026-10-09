@@ -36,6 +36,7 @@ import type {
   TeamPhoto,
 } from "@/lib/types";
 import {
+  SPEAKER_THUMBNAIL_ID,
   defaultPhotoFit,
   type ThumbnailMember,
 } from "@/lib/thumbnail-template";
@@ -56,9 +57,19 @@ type StudioContextValue = {
   /** Fills [Customer Name] in the teleprompter script. */
   customerName: string;
   setCustomerName: (name: string) => void;
-  /** Fills [Your Name] in the teleprompter script. */
+  /** Fills [Your Name] in the opening self-intro only. */
   speakerName: string;
   setSpeakerName: (name: string) => void;
+  /** Fills [Your Job Title] in the opening self-intro only. */
+  speakerTitle: string;
+  setSpeakerTitle: (title: string) => void;
+  /** Fills [Your Job Duties] in the opening self-intro only. */
+  speakerDuties: string;
+  setSpeakerDuties: (duties: string) => void;
+  /** Featured headshot for the team thumbnail (not a PIP teammate). */
+  speakerPhotoUrl: string | null;
+  setSpeakerPhotoFromFile: (file: File) => Promise<void>;
+  clearSpeakerPhoto: () => void;
   musicEnabled: boolean;
   musicVolume: number;
   videoVolume: number;
@@ -249,6 +260,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const baselineRef = useRef<TeamPhoto[]>([]);
   const [customerName, setCustomerName] = useState("");
   const [speakerName, setSpeakerName] = useState("");
+  const [speakerTitle, setSpeakerTitle] = useState("");
+  const [speakerDuties, setSpeakerDuties] = useState("");
+  const [speakerPhotoUrl, setSpeakerPhotoUrl] = useState<string | null>(null);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState<number>(
     VIDEO_TEMPLATE.defaultMusicVolume,
@@ -287,6 +301,32 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       return null;
     });
     setIntroThumbnailEnabled(false);
+  }, []);
+
+  const setSpeakerPhotoFromFile = useCallback(async (file: File) => {
+    const typeOk =
+      VIDEO_TEMPLATE.uploads.photoAccept.includes(file.type) ||
+      /\.(jpe?g|png|webp)$/i.test(file.name);
+    if (!typeOk) {
+      throw new Error("Please upload a JPG, PNG, or WebP headshot.");
+    }
+    if (file.size > VIDEO_TEMPLATE.uploads.maxPhotoBytes) {
+      throw new Error("That photo is too large. Please use a smaller image.");
+    }
+    const url = await loadImageUrl(file);
+    setSpeakerPhotoUrl((prev) => {
+      if (prev?.startsWith("blob:") && prev !== url) {
+        URL.revokeObjectURL(prev);
+      }
+      return url;
+    });
+  }, []);
+
+  const clearSpeakerPhoto = useCallback(() => {
+    setSpeakerPhotoUrl((prev) => {
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return null;
+    });
   }, []);
 
   const outputDuration = getOutputDuration(trimStart, trimEnd);
@@ -374,6 +414,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     });
     setCustomerName("");
     setSpeakerName("");
+    setSpeakerTitle("");
+    setSpeakerDuties("");
+    setSpeakerPhotoUrl((prev) => {
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return null;
+    });
     setMusicEnabled(true);
     setMusicVolume(VIDEO_TEMPLATE.defaultMusicVolume);
     setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);
@@ -684,13 +730,21 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         const arranged = autoArrangePhotos(next, outputDuration);
         baselineRef.current = arranged.map((p) => ({ ...p }));
 
-        // Keep thumbnail left-to-right order aligned with the roster reorder
-        // while preserving each person's face framing (matched by id).
+        // Keep teammate thumbnail cards (after the speaker) aligned with roster
+        // order while preserving face framing (matched by id).
         const orderIds = arranged.map((p) => p.id);
         queueMicrotask(() => {
           setThumbnailMembers((thumbs) => {
+            const speaker =
+              thumbs.find((t) => t.id === SPEAKER_THUMBNAIL_ID) ?? {
+                id: SPEAKER_THUMBNAIL_ID,
+                photoUrl: null,
+                name: "",
+                title: "",
+                photoFit: defaultPhotoFit(),
+              };
             const byId = new Map(thumbs.map((t) => [t.id, t]));
-            return orderIds.map((id) => {
+            const teammates = orderIds.map((id) => {
               const photo = arranged.find((p) => p.id === id)!;
               const existing = byId.get(id);
               return {
@@ -701,6 +755,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
                 photoFit: existing?.photoFit ?? defaultPhotoFit(),
               };
             });
+            return [speaker, ...teammates];
           });
         });
 
@@ -777,6 +832,13 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setCustomerName,
       speakerName,
       setSpeakerName,
+      speakerTitle,
+      setSpeakerTitle,
+      speakerDuties,
+      setSpeakerDuties,
+      speakerPhotoUrl,
+      setSpeakerPhotoFromFile,
+      clearSpeakerPhoto,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -829,6 +891,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       teamMemberCount,
       customerName,
       speakerName,
+      speakerTitle,
+      speakerDuties,
+      speakerPhotoUrl,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -848,6 +913,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       clearPhotoSlot,
       setIntroThumbnail,
       clearIntroThumbnail,
+      setSpeakerPhotoFromFile,
+      clearSpeakerPhoto,
       setVideoFromFile,
       clearVideo,
       setTrim,
