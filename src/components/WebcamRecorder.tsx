@@ -167,15 +167,19 @@ export function WebcamRecorder({
       const name = e instanceof DOMException ? e.name : "";
       if (name === "NotAllowedError" || name === "PermissionDeniedError") {
         reportError(
-          "Camera or microphone permission was blocked. Allow access in your browser settings, then try again — or upload a video file instead.",
+          "Camera or microphone permission was blocked. Allow access in Chrome or Edge on your computer, then try again — or upload a video file instead. Cursor’s in-app preview often cannot use a mic or camera.",
         );
-      } else if (name === "NotFoundError") {
+      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
         reportError(
-          "No camera or microphone was found. Plug one in, or upload a video file from a folder.",
+          "No camera or microphone was found. Plug one in, open this site in a normal browser tab (not Cursor’s preview), or upload a video file from a folder.",
+        );
+      } else if (name === "NotReadableError" || name === "TrackStartError") {
+        reportError(
+          "Camera or microphone is busy in another app. Close that app and try again, or upload a video file instead.",
         );
       } else {
         reportError(
-          "Could not start the webcam. Check that no other app is using it, or upload a video file instead.",
+          "Could not start the webcam here. Open the site in Chrome or Edge on your computer, or upload a video file instead.",
         );
       }
     }

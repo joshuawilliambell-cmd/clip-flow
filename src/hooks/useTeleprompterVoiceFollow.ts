@@ -148,7 +148,13 @@ export function useTeleprompterVoiceFollow(
 
     rec.onerror = (event) => {
       if (event.error === "not-allowed") {
-        setStatus("Microphone blocked. Allow mic access to follow your voice.");
+        setStatus(
+          "Microphone blocked or unavailable. Allow mic access in your browser (Chrome/Edge on your computer). Cursor’s preview often has no mic — open the site in a normal browser tab instead.",
+        );
+      } else if (event.error === "audio-capture") {
+        setStatus(
+          "No microphone found. Plug one in, or open this site in Chrome/Edge on your computer (not an embedded preview).",
+        );
       } else if (event.error === "no-speech") {
         setStatus("No speech heard yet — keep reading.");
         return;
@@ -178,7 +184,9 @@ export function useTeleprompterVoiceFollow(
         "Listening… read out loud. The script scrolls as it hears your words.",
       );
     } catch {
-      setStatus("Could not start the microphone. Check browser permissions.");
+      setStatus(
+        "Could not start the microphone. Use Chrome or Edge on your computer with mic permission allowed — Cursor’s in-app preview usually cannot access a mic.",
+      );
       wantListenRef.current = false;
       setListening(false);
     }

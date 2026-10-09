@@ -26,9 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: browser extensions (e.g. Scribe recorder)
+    // often inject attributes onto <html>/<body> before React hydrates.
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${sourceSans.variable} ${sora.variable} antialiased`}
+        suppressHydrationWarning
       >
         {children}
       </body>
