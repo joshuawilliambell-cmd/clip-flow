@@ -60,7 +60,7 @@ export function VideoUploadStep() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">Step 1: Add your video</h2>
+          <h2 className="step-title">Step 1: Prepare your video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             Add teammate photos, names, and titles, set the teleprompter, then
             upload or record — trim to ~60s.

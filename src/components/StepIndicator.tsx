@@ -12,7 +12,7 @@ const STEPS: Array<{
 }> = [
   {
     id: 1,
-    label: "1. Add Your Video",
+    label: "1. Prepare Your Video",
     hint: "Upload your talking video",
     tip: "Start here. Upload the video of you speaking, then shorten it if it is longer than about one minute.",
   },
