@@ -43,6 +43,8 @@ export function Timeline() {
   );
   const trimOrigin = useRef({ start: 0, end: 0 });
   const scrubbingRef = useRef(false);
+  const [dragPhotoId, setDragPhotoId] = useState<string | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
 
   const measure = useCallback((node: HTMLDivElement | null) => {
     if (!node) return;
@@ -129,8 +131,8 @@ export function Timeline() {
               Timeline
             </h3>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Drag bars to move · drag ends to resize · drag the red playhead to
-              scrub
+              Drag a photo onto another to reorder · drag ends to resize · drag
+              the red playhead to scrub
             </p>
           </div>
           <HelpTip title="How to use the timeline" size="lg">
@@ -139,17 +141,15 @@ export function Timeline() {
               red left or right ends to cut time off the start or end.
             </p>
             <p>
-              <strong>Track 2 (colored bars)</strong> are team photos. Each one
-              starts at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds so
-              short videos are easy. Drag a whole bar to move it. Drag a
-              bar&apos;s ends to make it shorter or longer.
+              <strong>Track 2 (colored bars)</strong> are team photos. Drag one
+              photo bar <strong>onto another</strong> to change the order they
+              appear. Drag a bar&apos;s ends to make it shorter or longer.
             </p>
             <p>
               Drag the <strong>red play line</strong> (ball on top) to jump to
               any moment. Use <strong>Play</strong> / <strong>Pause</strong> on
               the timeline to preview from there.
             </p>
-            <p>Photos cannot overlap in this version.</p>
           </HelpTip>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -275,7 +275,7 @@ export function Timeline() {
             >
               {sorted.length === 0 ? (
                 <div className="flex h-full items-center px-3 text-base text-[var(--muted)]">
-                  Add team photos in Step 2. They will show up here as colored bars.
+                  Add team photos above. They will show up here as colored bars.
                 </div>
               ) : (
                 sorted.map((photo, index) => {
@@ -295,6 +295,12 @@ export function Timeline() {
                       start={photo.startSeconds}
                       duration={photo.durationSeconds}
                       pxPerSecond={pxPerSecond}
+                      dragging={dragPhotoId === photo.id}
+                      dropTarget={dropTargetId === photo.id}
+                      onDragState={(dragging, targetId) => {
+                        setDragPhotoId(dragging ? photo.id : null);
+                        setDropTargetId(targetId);
+                      }}
                       onMove={(start) => movePhoto(photo.id, start)}
                       onResizeStart={(v) => resizePhoto(photo.id, "start", v)}
                       onResizeEnd={(v) => resizePhoto(photo.id, "end", v)}
@@ -303,6 +309,9 @@ export function Timeline() {
                         .filter((p) => p.id !== photo.id)
                         .map((p) => ({
                           id: p.id,
+                          left: p.startSeconds * pxPerSecond,
+                          right:
+                            (p.startSeconds + p.durationSeconds) * pxPerSecond,
                           mid:
                             (p.startSeconds + p.durationSeconds / 2) *
                             pxPerSecond,
@@ -312,6 +321,12 @@ export function Timeline() {
                 })
               )}
             </div>
+            {sorted.length > 1 ? (
+              <p className="mt-2 text-base text-[var(--muted)]">
+                Drag one photo bar onto another to change the order they appear
+                in the video.
+              </p>
+            ) : null}
           </div>
 
           <div
@@ -380,6 +395,20 @@ function EdgeDrag({
   );
 }
 
+function hitPhotoAt(
+  pointerXInTrack: number,
+  others: Array<{ id: string; left: number; right: number; mid: number }>,
+): string | null {
+  // Prefer the bar whose center is closest while the pointer is over it.
+  let best: { id: string; dist: number } | null = null;
+  for (const o of others) {
+    if (pointerXInTrack < o.left - 8 || pointerXInTrack > o.right + 8) continue;
+    const dist = Math.abs(pointerXInTrack - o.mid);
+    if (!best || dist < best.dist) best = { id: o.id, dist };
+  }
+  return best?.id ?? null;
+}
+
 function PhotoBlock({
   id,
   name,
@@ -390,6 +419,9 @@ function PhotoBlock({
   start,
   duration,
   pxPerSecond,
+  dragging,
+  dropTarget,
+  onDragState,
   onMove,
   onResizeStart,
   onResizeEnd,
@@ -405,40 +437,78 @@ function PhotoBlock({
   start: number;
   duration: number;
   pxPerSecond: number;
+  dragging: boolean;
+  dropTarget: boolean;
+  onDragState: (dragging: boolean, dropTargetId: string | null) => void;
   onMove: (start: number) => void;
   onResizeStart: (start: number) => void;
   onResizeEnd: (end: number) => void;
   onReorder: (toId: string) => void;
-  others: Array<{ id: string; mid: number }>;
+  others: Array<{ id: string; left: number; right: number; mid: number }>;
 }) {
-  const origin = useRef({ x: 0, start: 0 });
+  const origin = useRef({ x: 0, start: 0, left: 0 });
+  const [dragDx, setDragDx] = useState(0);
+  const trackLeftRef = useRef(0);
 
   return (
     <div
       data-photo-block
       data-photo-id={id}
-      className="absolute top-1 bottom-1 z-10 flex touch-none overflow-hidden rounded-md text-white shadow"
-      style={{ left, width, backgroundColor: color }}
-      title={`${name}: ${formatTime(start)}–${formatTime(start + duration)}`}
+      className={clsx(
+        "absolute top-1 bottom-1 flex touch-none overflow-hidden rounded-md text-white shadow transition-[box-shadow,outline] cursor-grab active:cursor-grabbing",
+        dragging ? "z-30 opacity-90 ring-2 ring-[var(--yellow)]" : "z-10",
+        dropTarget && "z-20 ring-2 ring-white outline outline-2 outline-offset-2 outline-[var(--yellow)]",
+      )}
+      style={{
+        left,
+        width,
+        backgroundColor: color,
+        transform: dragging ? `translateX(${dragDx}px)` : undefined,
+      }}
+      title={`${name}: ${formatTime(start)}–${formatTime(start + duration)}. Drag onto another photo to reorder.`}
       onPointerDown={(e) => {
         if ((e.target as HTMLElement).dataset.handle) return;
         e.preventDefault();
         e.stopPropagation();
-        origin.current = { x: e.clientX, start };
-        const target = e.currentTarget;
-        target.setPointerCapture(e.pointerId);
+        const block = e.currentTarget;
+        const track = block.parentElement;
+        trackLeftRef.current = track?.getBoundingClientRect().left ?? 0;
+        origin.current = { x: e.clientX, start, left };
+        setDragDx(0);
+        onDragState(true, null);
+        block.setPointerCapture(e.pointerId);
+
         const onMovePtr = (ev: PointerEvent) => {
           const dx = ev.clientX - origin.current.x;
-          onMove(origin.current.start + dx / pxPerSecond);
+          setDragDx(dx);
+          const scrollEl = track?.closest(".overflow-x-auto");
+          const scrollLeft =
+            scrollEl instanceof HTMLElement ? scrollEl.scrollLeft : 0;
+          const x = ev.clientX - trackLeftRef.current + scrollLeft;
+          onDragState(true, hitPhotoAt(x, others));
         };
+
         const onUp = (ev: PointerEvent) => {
-          const mid = left + width / 2 + (ev.clientX - origin.current.x);
-          const hit = others.find((o) => Math.abs(o.mid - mid) < 28);
-          if (hit) onReorder(hit.id);
-          target.releasePointerCapture(e.pointerId);
+          const scrollEl = track?.closest(".overflow-x-auto");
+          const scrollLeft = scrollEl instanceof HTMLElement ? scrollEl.scrollLeft : 0;
+          const x = ev.clientX - trackLeftRef.current + scrollLeft;
+          const hitId = hitPhotoAt(x, others);
+          if (hitId) {
+            onReorder(hitId);
+          } else {
+            const dx = ev.clientX - origin.current.x;
+            // Small nudge without a drop target = slide within neighbor gap.
+            if (Math.abs(dx) > 4) {
+              onMove(origin.current.start + dx / pxPerSecond);
+            }
+          }
+          setDragDx(0);
+          onDragState(false, null);
+          block.releasePointerCapture(e.pointerId);
           window.removeEventListener("pointermove", onMovePtr);
           window.removeEventListener("pointerup", onUp);
         };
+
         window.addEventListener("pointermove", onMovePtr);
         window.addEventListener("pointerup", onUp);
       }}
@@ -447,7 +517,7 @@ function PhotoBlock({
         type="button"
         data-handle="start"
         aria-label="Adjust photo start"
-        className="h-full w-2.5 shrink-0 cursor-ew-resize bg-black/25"
+        className="h-full w-3 shrink-0 cursor-ew-resize bg-black/25 hover:bg-black/40"
         onPointerDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -472,6 +542,7 @@ function PhotoBlock({
         <img
           src={thumb}
           alt=""
+          draggable={false}
           className="h-10 w-10 shrink-0 rounded object-cover object-[center_28%] ring-1 ring-white/40"
         />
         <div className="min-w-0 leading-tight">
@@ -485,7 +556,7 @@ function PhotoBlock({
         type="button"
         data-handle="end"
         aria-label="Adjust photo end"
-        className="h-full w-2.5 shrink-0 cursor-ew-resize bg-black/25"
+        className="h-full w-3 shrink-0 cursor-ew-resize bg-black/25 hover:bg-black/40"
         onPointerDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
