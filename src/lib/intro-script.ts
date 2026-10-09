@@ -168,6 +168,21 @@ export const TELEPROMPTER_SPEED_MIN = 0.1;
 export const TELEPROMPTER_SPEED_MAX = 3.5;
 export const TELEPROMPTER_SPEED_STEP = 0.05;
 
+/**
+ * Snap reference points along the speed slider (slow → fast).
+ * Shown as dots so users can park the thumb on a familiar pace.
+ */
+export const TELEPROMPTER_SPEED_MARKERS = [0.35, 0.7, 1.15, 1.8, 2.6] as const;
+
+export function teleprompterSpeedMarkerPercent(pixelsPerTick: number): number {
+  const span = TELEPROMPTER_SPEED_MAX - TELEPROMPTER_SPEED_MIN;
+  if (span <= 0) return 0;
+  return (
+    ((clampTeleprompterSpeed(pixelsPerTick) - TELEPROMPTER_SPEED_MIN) / span) *
+    100
+  );
+}
+
 export function clampTeleprompterSpeed(pixelsPerTick: number): number {
   const stepped =
     Math.round(pixelsPerTick / TELEPROMPTER_SPEED_STEP) *

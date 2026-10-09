@@ -12,9 +12,6 @@ import { HelpTip } from "@/components/HelpTip";
 import {
   INTRO_SCRIPTS,
   TARGET_INTRO_SECONDS,
-  TELEPROMPTER_SPEED_MAX,
-  TELEPROMPTER_SPEED_MIN,
-  TELEPROMPTER_SPEED_STEP,
   TELEPROMPTER_TICK_MS,
   clampTeleprompterSpeed,
   estimatedScrollSeconds,
@@ -23,6 +20,7 @@ import {
   scriptForTeam,
   suggestedPixelsPerTickForScript,
 } from "@/lib/intro-script";
+import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 
@@ -88,24 +86,22 @@ export function Teleprompter({
   pixelsPerTickRef.current = pixelsPerTick;
 
   // Official script tracks team size and roster names/titles.
+  // Depend on content keys (not a fresh string each render) so Pause / re-renders
+  // do not jump the script to the top or thrash auto speed.
   useEffect(() => {
     if (source !== "official") return;
     setScript(officialScript);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
-  }, [
-    teamMemberCount,
-    source,
-    rosterKey,
-    speakerKey,
-    customerName,
-    officialScript,
-  ]);
+    scrollCarryRef.current = 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by roster/speaker content
+  }, [teamMemberCount, source, rosterKey, speakerKey, customerName]);
 
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
 
   // Default scroll speed ~60s for the active script (unless user overrode).
-  // Writes into shared studio speed so the webcam overlay matches practice.
+  // Never re-apply the default while the user has chosen a custom speed — Pause
+  // must not change the slider.
   useEffect(() => {
     if (speedOverriddenRef.current) return;
     setTeleprompterPixelsPerTick(
@@ -130,6 +126,7 @@ export function Teleprompter({
     fontLarge,
     teamMemberCount,
     source,
+    // Re-run only when leaving custom mode (restore paced), not on Pause.
     speedOverridden,
     setTeleprompterPixelsPerTick,
   ]);
@@ -460,15 +457,10 @@ export function Teleprompter({
               <span className="shrink-0 text-[12px] font-semibold text-white/80">
                 Slower
               </span>
-              <input
-                type="range"
-                min={TELEPROMPTER_SPEED_MIN}
-                max={TELEPROMPTER_SPEED_MAX}
-                step={TELEPROMPTER_SPEED_STEP}
+              <TeleprompterSpeedSlider
                 value={pixelsPerTick}
-                onChange={(e) => onSpeedSlider(Number(e.target.value))}
+                onChange={onSpeedSlider}
                 aria-label="Teleprompter scroll speed"
-                className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/25 accent-[var(--yellow)]"
               />
               <span className="shrink-0 text-[12px] font-semibold text-white/80">
                 Faster

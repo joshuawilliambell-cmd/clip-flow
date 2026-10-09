@@ -2,14 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
-import {
-  TELEPROMPTER_SPEED_MAX,
-  TELEPROMPTER_SPEED_MIN,
-  TELEPROMPTER_SPEED_STEP,
-  TELEPROMPTER_TICK_MS,
-  clampTeleprompterSpeed,
-  scriptForTeam,
-} from "@/lib/intro-script";
+import { TELEPROMPTER_TICK_MS, scriptForTeam } from "@/lib/intro-script";
+import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 
@@ -46,6 +40,11 @@ export function WebcamTeleprompterOverlay({
   const pixelsPerTickRef = useRef(0);
   const scrollCarryRef = useRef(0);
 
+  const rosterKey = photos
+    .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
+    .join("|");
+  const fillKey = `${customerName}\0${speakerName}\0${speakerTitle}\0${speakerDuties}\0${rosterKey}\0${teamMemberCount}`;
+
   const script = scriptForTeam(teamMemberCount, {
     customerName,
     speakerName,
@@ -64,12 +63,11 @@ export function WebcamTeleprompterOverlay({
 
   pixelsPerTickRef.current = pixelsPerTick;
 
-  // Reset scroll position when the official script text changes.
+  // Reset to top only when the script content changes — never on Pause.
   useEffect(() => {
-    if (scrolling) return;
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     scrollCarryRef.current = 0;
-  }, [script, scrolling]);
+  }, [fillKey]);
 
   // Auto-scroll shortly after recording begins.
   useEffect(() => {
@@ -127,8 +125,8 @@ export function WebcamTeleprompterOverlay({
       <div className="relative z-20 mx-auto flex w-full max-w-4xl flex-col px-2 pt-2 md:px-4 md:pt-3">
         {!recording ? (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2.5 py-1.5 text-center text-[11px] font-semibold leading-snug text-white md:text-[12px]">
-            Scroll speed matches Script teleprompter practice above. Do 1–2
-            practice takes if you still need to tweak Speed.
+            Scroll speed matches Script teleprompter practice above. Pause keeps
+            your speed — use the dots on the Speed line as reference points.
           </p>
         ) : null}
 
@@ -203,27 +201,21 @@ export function WebcamTeleprompterOverlay({
           <RotateCcw className="h-3.5 w-3.5" /> Top
         </button>
 
-        <label className="flex min-w-[10rem] max-w-[14rem] flex-1 items-center gap-2 rounded-full border border-white/40 bg-black/50 px-3 py-1 text-white">
+        <div className="flex min-w-[12rem] max-w-[16rem] flex-1 items-center gap-2 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-white">
           <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-white/80">
             Speed
           </span>
-          <input
-            type="range"
-            min={TELEPROMPTER_SPEED_MIN}
-            max={TELEPROMPTER_SPEED_MAX}
-            step={TELEPROMPTER_SPEED_STEP}
+          <TeleprompterSpeedSlider
             value={pixelsPerTick}
             disabled={!enabled}
-            onChange={(e) => {
-              setTeleprompterPixelsPerTick(
-                clampTeleprompterSpeed(Number(e.target.value)),
-              );
+            variant="overlay"
+            aria-label="Webcam teleprompter scroll speed"
+            onChange={(next) => {
+              setTeleprompterPixelsPerTick(next);
               setTeleprompterSpeedOverridden(true);
             }}
-            aria-label="Webcam teleprompter scroll speed"
-            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/30 accent-[var(--yellow)] disabled:opacity-40"
           />
-        </label>
+        </div>
       </div>
     </div>
   );
