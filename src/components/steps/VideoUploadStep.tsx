@@ -8,6 +8,7 @@ import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
 import { TeamSizePicker } from "@/components/TeamSizePicker";
+import { TeamRosterFields } from "@/components/TeamRosterFields";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
 
@@ -61,16 +62,18 @@ export function VideoUploadStep() {
         <div className="max-w-3xl">
           <h2 className="step-title">Step 1: Add your video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Upload, record, or try a practice clip — then trim to ~60s.
+            Name your teammates, set the teleprompter, then upload or record —
+            trim to ~60s.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
-          <p>Pick teammate count, then add your talking video.</p>
+          <p>Pick teammate count and enter each name and job title.</p>
           <p>
-            <strong>Upload</strong> an MP4/MOV/WebM, <strong>record</strong>{" "}
-            with the webcam, or load a practice video.
+            Those names fill the teleprompter. Then{" "}
+            <strong>upload</strong>, <strong>record</strong>, or load a practice
+            video.
           </p>
-          <p>Trim with the red timeline handles, then continue.</p>
+          <p>Trim with the red timeline handles, then continue to add photos.</p>
         </HelpTip>
       </div>
 
@@ -81,7 +84,9 @@ export function VideoUploadStep() {
           Just me — no photo overlays. Matching Fleet Hub script in the
           teleprompter.
         </div>
-      ) : null}
+      ) : (
+        <TeamRosterFields variant="setup" />
+      )}
 
       <RecordingGuide />
 

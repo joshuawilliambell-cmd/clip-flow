@@ -78,6 +78,35 @@ export function scriptForTeamCount(count: TeamMemberCount): string {
   return INTRO_SCRIPTS[count].script;
 }
 
+export type TeamIntroPerson = {
+  name: string;
+  title?: string;
+};
+
+/** Fill each [Team Member Name] with "Name, Title" (title optional). */
+export function personalizeScript(
+  template: string,
+  people: TeamIntroPerson[],
+): string {
+  let index = 0;
+  return template.replace(/\[Team Member Name\]/g, () => {
+    const person = people[index];
+    index += 1;
+    const name = person?.name?.trim();
+    if (!name) return "[Team Member Name]";
+    const title = person?.title?.trim();
+    return title ? `${name}, ${title}` : name;
+  });
+}
+
+/** Official script for team size, with roster names/titles filled in. */
+export function scriptForTeam(
+  count: TeamMemberCount,
+  people: TeamIntroPerson[] = [],
+): string {
+  return personalizeScript(INTRO_SCRIPTS[count].script, people);
+}
+
 /** @deprecated use INTRO_SCRIPTS / scriptForTeamCount */
 export const SAMPLE_INTRO_SCRIPT = INTRO_SCRIPTS[2].script;
 

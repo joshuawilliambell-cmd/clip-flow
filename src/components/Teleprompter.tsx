@@ -17,7 +17,7 @@ import {
   isScriptUploadFile,
   nearestSpeedForPixelsPerTick,
   pixelsPerTickForSpeed,
-  scriptForTeamCount,
+  scriptForTeam,
   suggestedSpeedForScript,
   type TeleprompterSpeedId,
 } from "@/lib/intro-script";
@@ -36,29 +36,38 @@ export function Teleprompter({
   recording = false,
   className,
 }: TeleprompterProps) {
-  const { teamMemberCount } = useStudio();
+  const { teamMemberCount, photos } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const rosterKey = photos.map((p) => `${p.name}\0${p.title}`).join("|");
+  const rosterPeople = photos.map((p) => ({ name: p.name, title: p.title }));
+  const officialScript = scriptForTeam(teamMemberCount, rosterPeople);
+
   const [enabled, setEnabled] = useState(true);
   const [source, setSource] = useState<ScriptSource>("official");
-  const [script, setScript] = useState(() => scriptForTeamCount(teamMemberCount));
+  const [script, setScript] = useState(() =>
+    scriptForTeam(
+      teamMemberCount,
+      photos.map((p) => ({ name: p.name, title: p.title })),
+    ),
+  );
   const [customScript, setCustomScript] = useState("");
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [speedId, setSpeedId] = useState<TeleprompterSpeedId>(() =>
-    suggestedSpeedForScript(scriptForTeamCount(teamMemberCount)),
+    suggestedSpeedForScript(officialScript),
   );
   const [speedOverridden, setSpeedOverridden] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [fontLarge, setFontLarge] = useState(true);
 
-  // Official script tracks team size.
+  // Official script tracks team size and roster names/titles.
   useEffect(() => {
     if (source !== "official") return;
-    setScript(scriptForTeamCount(teamMemberCount));
+    setScript(officialScript);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
-  }, [teamMemberCount, source]);
+  }, [teamMemberCount, source, rosterKey, officialScript]);
 
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
@@ -117,7 +126,7 @@ export function Teleprompter({
 
   const useOfficial = () => {
     setSource("official");
-    setScript(scriptForTeamCount(teamMemberCount));
+    setScript(officialScript);
     setUploadError(null);
     setSpeedOverridden(false);
     resetScroll();
@@ -126,7 +135,7 @@ export function Teleprompter({
   const useCustom = () => {
     setSource("custom");
     if (!customScript.trim()) {
-      setCustomScript(scriptForTeamCount(teamMemberCount));
+      setCustomScript(officialScript);
     }
     setUploadError(null);
     resetScroll();
@@ -203,7 +212,8 @@ export function Teleprompter({
             </p>
             <p>
               Use the <strong>official</strong> Fleet Hub script for your team
-              size, or <strong>upload / paste</strong> your own.
+              size — teammate names and titles from above are filled in — or{" "}
+              <strong>upload / paste</strong> your own.
             </p>
             <p>
               Default <strong>scroll speed</strong> is paced for about{" "}
@@ -304,8 +314,8 @@ export function Teleprompter({
               {source === "official" ? (
                 <p className="text-[12px] font-medium text-white/70">
                   Matches your team size ({INTRO_SCRIPTS[teamMemberCount].title}
-                  ). Edit names in the box if needed — that switches to My
-                  script.
+                  ) with names from your roster. Edit the text if needed — that
+                  switches to My script.
                 </p>
               ) : (
                 <p className="text-[12px] font-medium text-white/70">

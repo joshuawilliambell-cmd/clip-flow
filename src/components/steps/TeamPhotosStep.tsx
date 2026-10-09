@@ -136,15 +136,15 @@ export function TeamPhotosStep() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">Step 2: Add your team</h2>
+          <h2 className="step-title">Step 2: Add team photos</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             {teamMemberCount === 0
               ? "Just me — no teammate photos. Continue when ready."
-              : `${filledCount} of ${teamMemberCount} filled · drag the grip to reorder`}
+              : `${filledCount} of ${teamMemberCount} photos · names came from Step 1 · drag the grip to reorder`}
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
-          <p>Add a headshot, name, and job title in each slot.</p>
+          <p>Add a headshot for each teammate. Names and titles are already set.</p>
           <p>Drag the grip (or ↑ ↓) to change who appears first.</p>
           <p>
             Photos default to {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s —
@@ -158,6 +158,13 @@ export function TeamPhotosStep() {
       {!video ? (
         <p className="rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-4 py-3 text-lg font-medium text-[var(--ink)]">
           Please go back to Step 1 and add your video first.
+        </p>
+      ) : null}
+
+      {teamMemberCount > 0 ? (
+        <p className="text-[14px] font-medium text-[var(--muted)]">
+          Add a photo for each person below. You can still tweak a name or title
+          if needed.
         </p>
       ) : null}
 
@@ -364,25 +371,25 @@ export function TeamPhotosStep() {
                     Teammate {index + 1} of {teamMemberCount}
                   </p>
                   <label className="block">
-                    <span className="field-label">Name</span>
+                    <span className="field-label">Name (from Step 1)</span>
                     <input
                       value={photo.name}
                       onChange={(e) =>
                         updatePhotoMeta(photo.id, { name: e.target.value })
                       }
                       className="field-input"
-                      placeholder="Example: Jared"
+                      placeholder="Add in Step 1"
                     />
                   </label>
                   <label className="block">
-                    <span className="field-label">Job title</span>
+                    <span className="field-label">Job title (from Step 1)</span>
                     <input
                       value={photo.title}
                       onChange={(e) =>
                         updatePhotoMeta(photo.id, { title: e.target.value })
                       }
                       className="field-input"
-                      placeholder="Example: Total Truck Care"
+                      placeholder="Add in Step 1"
                     />
                   </label>
                   {photo.url ? (
@@ -412,8 +419,8 @@ export function TeamPhotosStep() {
         <div className="flex items-center gap-2">
           <HelpTip title="Ready for the next step?">
             <p>
-              When your photos and names look good, tap Continue to next step
-              for Finish & Download.
+              When each teammate has a photo, tap Continue to next step for
+              Finish & Download.
             </p>
           </HelpTip>
           <button

@@ -314,13 +314,21 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setTrimEnd(end > 0 ? end : VIDEO_TEMPLATE.targetDurationSeconds);
     setCurrentTime(0);
     setIsPlaying(false);
+    // Keep roster names/titles; clear headshots so Step 2 can re-attach photos.
     setPhotos((prev) => {
       prev.forEach((p) => revokePhotoUrl(p.url));
-      const slots = Array.from({ length: teamMemberCount }, () =>
-        createEmptyTeamPhoto(),
-      );
-      baselineRef.current = slots.map((p) => ({ ...p }));
-      return slots;
+      const slots = Array.from({ length: teamMemberCount }, (_, i) => {
+        const prior = prev[i];
+        return {
+          ...createEmptyTeamPhoto(),
+          name: prior?.name ?? "",
+          title: prior?.title ?? "",
+          department: prior?.department ?? "",
+        };
+      });
+      const arranged = autoArrangePhotos(slots, end > 0 ? end : VIDEO_TEMPLATE.targetDurationSeconds);
+      baselineRef.current = arranged.map((p) => ({ ...p }));
+      return arranged;
     });
   }, [teamMemberCount]);
 
@@ -528,9 +536,25 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       id: string,
       patch: Partial<Pick<TeamPhoto, "name" | "title" | "department">>,
     ) => {
-      setPhotos((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, ...patch } : p)),
-      );
+      setPhotos((prev) => {
+        const index = prev.findIndex((p) => p.id === id);
+        if (index >= 0) {
+          queueMicrotask(() => {
+            setThumbnailMembers((thumbs) =>
+              thumbs.map((t, i) =>
+                i === index
+                  ? {
+                      ...t,
+                      name: patch.name !== undefined ? patch.name : t.name,
+                      title: patch.title !== undefined ? patch.title : t.title,
+                    }
+                  : t,
+              ),
+            );
+          });
+        }
+        return prev.map((p) => (p.id === id ? { ...p, ...patch } : p));
+      });
       baselineRef.current = baselineRef.current.map((p) =>
         p.id === id ? { ...p, ...patch } : p,
       );
