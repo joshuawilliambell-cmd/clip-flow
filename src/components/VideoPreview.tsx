@@ -85,6 +85,8 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
   }, [videoVolume, video]);
 
   // Keep a looping music bed element for the selected track.
+  // Always apply musicVolume immediately (default 2%) — never leave HTMLAudio
+  // at its built-in 100% volume.
   useEffect(() => {
     if (musicRef.current) {
       musicRef.current.pause();
@@ -94,12 +96,22 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     const audio = new Audio(musicSrc);
     audio.loop = true;
     audio.preload = "auto";
+    audio.volume = Math.min(1, Math.max(0, musicVolume));
     musicRef.current = audio;
     return () => {
       audio.pause();
       if (musicRef.current === audio) musicRef.current = null;
     };
+    // musicVolume applied in a separate sync effect so track swaps stay quiet.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [musicSrc, musicTrackId, video?.url]);
+
+  // Keep bed music at the studio level (2% default) whenever it changes.
+  useEffect(() => {
+    if (musicRef.current) {
+      musicRef.current.volume = Math.min(1, Math.max(0, musicVolume));
+    }
+  }, [musicVolume, musicSrc]);
 
   // Play / pause the native video + optional music bed.
   useEffect(() => {
@@ -132,7 +144,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
       musicRef.current?.pause();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, video, musicEnabled, musicVolume, outputDuration]);
+  }, [isPlaying, video, musicEnabled, musicVolume, musicSrc, outputDuration]);
 
   // Reset frame flag when source changes
   useEffect(() => {
@@ -189,6 +201,11 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
           <p>This window shows what your finished video will look like.</p>
           <p>Team photos and names appear when it is their turn.</p>
           <p>Tap the big Play button to watch and listen.</p>
+          <p>
+            Background music starts at{" "}
+            {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}% so your voice
+            stays clear. You can change it in Finish &amp; Download.
+          </p>
           <p>
             Preview uses your browser&apos;s built-in video player so uploads
             show correctly. If it stays black, the file may be iPhone HEVC —
@@ -394,6 +411,11 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
             <strong>Pause</strong> stops it so you can look at one moment.
           </p>
         </HelpTip>
+        {musicEnabled && musicSrc ? (
+          <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-2 text-[13px] font-bold text-[var(--ink)]">
+            Music {Math.round(musicVolume * 100)}%
+          </span>
+        ) : null}
         <button
           type="button"
           onClick={restart}
