@@ -182,7 +182,7 @@ export function ThumbnailCreator({
     setStatus(null);
     try {
       const samples = [
-        { path: "/samples/team-jared.jpg", name: "Jared Thueson", title: "Total Truck Care" },
+        { path: "/samples/team-jared.jpg", name: "Jared Thueson", title: "Total Truck Care Account Manager" },
         {
           path: "/samples/team-bailey.jpg",
           name: "Bailey Ledbetter",

@@ -85,7 +85,7 @@ export function TeamPhotosStep() {
         {
           path: "/samples/team-jared.jpg",
           name: "Jared",
-          title: "Total Truck Care",
+          title: "Total Truck Care Account Manager",
         },
         {
           path: "/samples/team-bailey.jpg",

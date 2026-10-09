@@ -67,7 +67,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
           </p>
           <p>
             Titles appear in the script after each name (for example, “This is
-            Jared, Total Truck Care.”).
+            Jared, Total Truck Care Account Manager.”).
           </p>
         </HelpTip>
       </div>
