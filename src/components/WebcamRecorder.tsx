@@ -300,6 +300,12 @@ export function WebcamRecorder({
             the browser asks.
           </p>
           <p>
+            <strong>Sit back a little</strong> from the camera — about an
+            arm&apos;s length — so it does not look like you are reading from a
+            teleprompter. Looking slightly toward the lens (top of the monitor)
+            reads more natural on camera.
+          </p>
+          <p>
             Your Fleet Hub script appears as a{" "}
             <strong>top teleprompter</strong> over the live preview so your eyes
             stay near the webcam at the top of the monitor. Do one or two
@@ -317,6 +323,12 @@ export function WebcamRecorder({
             <strong>Use this recording</strong>.
           </p>
         </HelpTip>
+      </div>
+
+      <div className="how-banner mt-4">
+        <strong>Sit back a little</strong> from the camera (about an arm&apos;s
+        length) so it does not look like you are reading the teleprompter. Keep
+        your eyes near the webcam at the top of the monitor.
       </div>
 
       {phase === "idle" ? (
