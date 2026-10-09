@@ -153,6 +153,63 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     setNativeError(null);
   }, [video?.url]);
 
+  // WebM often under-reports duration as ~60s. Seek past the end once on load
+  // so Step 2 timeline/preview grow to the real length (incl. 2+ minutes).
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !video) return;
+    let cancelled = false;
+    let probing = false;
+
+    const finishProbe = () => {
+      if (cancelled || !probing) return;
+      probing = false;
+      const at = el.currentTime;
+      const reported =
+        Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 0;
+      const discovered = Math.max(at, reported);
+      if (discovered > 0.5) reconcileVideoDuration(discovered);
+      try {
+        el.currentTime = trimStart + Math.max(0, currentTime);
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const startProbe = () => {
+      if (cancelled || probing) return;
+      probing = true;
+      const onSeeked = () => {
+        el.removeEventListener("seeked", onSeeked);
+        finishProbe();
+      };
+      el.addEventListener("seeked", onSeeked);
+      try {
+        const reported =
+          Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 0;
+        el.currentTime = Math.max(reported + 3600, 1e101);
+      } catch {
+        el.removeEventListener("seeked", onSeeked);
+        probing = false;
+      }
+      window.setTimeout(() => {
+        if (probing) {
+          el.removeEventListener("seeked", onSeeked);
+          finishProbe();
+        }
+      }, 4000);
+    };
+
+    if (el.readyState >= 1) startProbe();
+    else el.addEventListener("loadedmetadata", startProbe, { once: true });
+
+    return () => {
+      cancelled = true;
+    };
+    // Only re-probe when the source file changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video?.url, reconcileVideoDuration]);
+
   const onTimeUpdate = () => {
     const el = videoRef.current;
     if (!el || !video) return;

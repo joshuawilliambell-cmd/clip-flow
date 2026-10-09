@@ -160,17 +160,17 @@ const StudioContext = createContext<StudioContextValue | null>(null);
 
 type LoadVideoOptions = {
   /**
-   * Known length (e.g. webcam timer). Used when the browser reports
-   * Infinity/NaN for MediaRecorder WebM duration.
+   * Known length (e.g. webcam timer). Used when the browser under-reports
+   * MediaRecorder WebM duration (Infinity or a too-short finite value).
    */
   durationHintSeconds?: number;
 };
 
 /**
  * Read width/height/duration for an uploaded or webcam-captured file.
- * MediaRecorder WebM often reports duration as Infinity until we seek to the
- * end — never fall back to the ~60s guidance target (that was a hard-looking
- * cap in preview/timeline).
+ * Always seek-probes past the end — WebM often reports Infinity or a false
+ * ~60s finite duration even when the file is longer. Never fall back to the
+ * 60s guidance target as a hard cap.
  */
 function loadVideoMetadata(
   file: File,
@@ -183,7 +183,7 @@ function loadVideoMetadata(
     el.muted = true;
     el.playsInline = true;
     let settled = false;
-    let seekAttempted = false;
+    let probing = false;
     let estimatedFromSeek = 0;
 
     const hint =
@@ -193,32 +193,16 @@ function loadVideoMetadata(
         ? options.durationHintSeconds
         : 0;
 
-    const resolveDuration = (): number | null => {
+    const bestDuration = () => {
       const raw = el.duration;
-      if (Number.isFinite(raw) && raw > 0) return raw;
-      if (estimatedFromSeek > 0.25) return estimatedFromSeek;
-      if (hint > 0) return hint;
-      return null;
+      const reported =
+        Number.isFinite(raw) && raw > 0 && raw !== Infinity ? raw : 0;
+      return Math.max(reported, estimatedFromSeek, hint, 0);
     };
 
-    const finish = (force = false) => {
+    const succeed = () => {
       if (settled) return;
-      const durationSeconds = resolveDuration();
-      const hasDims = Boolean(el.videoWidth && el.videoHeight);
-
-      if (!hasDims && durationSeconds === null) {
-        if (!force) return;
-        settled = true;
-        URL.revokeObjectURL(url);
-        reject(
-          new Error(
-            "Could not read that video in this browser. Try another MP4 (H.264) or record with the webcam option.",
-          ),
-        );
-        return;
-      }
-
-      if (!hasDims) {
+      if (!el.videoWidth || !el.videoHeight) {
         settled = true;
         URL.revokeObjectURL(url);
         reject(
@@ -228,57 +212,40 @@ function loadVideoMetadata(
         );
         return;
       }
-
-      // Wait for a real duration when possible (WebM seek still in flight).
-      if (durationSeconds === null && !force) return;
-
       settled = true;
-      // Prefer the longer of browser duration vs webcam timer — never clamp to 60.
-      const seconds = Math.max(durationSeconds ?? hint, hint, 0.5);
       resolve({
         url,
         fileName: file.name,
-        durationSeconds: seconds,
+        durationSeconds: Math.max(bestDuration(), 0.5),
         width: el.videoWidth || VIDEO_TEMPLATE.width,
         height: el.videoHeight || VIDEO_TEMPLATE.height,
       });
     };
 
-    const seekForDuration = () => {
-      if (seekAttempted) return;
-      seekAttempted = true;
+    const probeEnd = () => {
+      if (probing || settled) return;
+      probing = true;
+      const reported =
+        Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 0;
+      // Always seek past reported length — under-reported WebM is common.
+      const target = Math.max(reported + 3600, hint + 180, 1e101);
       try {
-        // Classic Chrome/WebM trick: seek far past the end; browser clamps to
-        // the real last frame, then duration (or currentTime) becomes usable.
-        el.currentTime = 1e101;
+        el.currentTime = target;
       } catch {
-        finish(false);
+        succeed();
       }
     };
 
     el.onloadedmetadata = () => {
-      if (Number.isFinite(el.duration) && el.duration > 0) {
-        finish();
-      } else {
-        seekForDuration();
-      }
-    };
-    el.ondurationchange = () => {
-      if (Number.isFinite(el.duration) && el.duration > 0) finish();
+      probeEnd();
     };
     el.onseeked = () => {
-      if (!Number.isFinite(el.duration) || el.duration === Infinity) {
-        if (el.currentTime > estimatedFromSeek) {
-          estimatedFromSeek = el.currentTime;
-        }
+      if (!probing || settled) return;
+      if (el.currentTime > estimatedFromSeek) {
+        estimatedFromSeek = el.currentTime;
       }
-      // Reset playhead after the duration probe.
-      try {
-        el.currentTime = 0;
-      } catch {
-        /* ignore */
-      }
-      finish();
+      probing = false;
+      succeed();
     };
     el.onerror = () => {
       if (settled) return;
@@ -291,10 +258,8 @@ function loadVideoMetadata(
       );
     };
     window.setTimeout(() => {
-      if (settled) return;
-      if (!seekAttempted) seekForDuration();
-      window.setTimeout(() => finish(true), 1500);
-    }, 6000);
+      if (!settled) succeed();
+    }, 8000);
     el.src = url;
   });
 }

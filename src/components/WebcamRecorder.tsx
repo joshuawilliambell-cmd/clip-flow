@@ -47,6 +47,8 @@ export function WebcamRecorder({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<number | null>(null);
+  const recordingStartedAtRef = useRef<number | null>(null);
+  const recordedDurationRef = useRef(0);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [seconds, setSeconds] = useState(0);
@@ -214,6 +216,11 @@ export function WebcamRecorder({
     };
     recorder.onstop = () => {
       clearTimer();
+      const elapsedMs = recordingStartedAtRef.current
+        ? performance.now() - recordingStartedAtRef.current
+        : seconds * 1000;
+      recordedDurationRef.current = Math.max(1, elapsedMs / 1000);
+      recordingStartedAtRef.current = null;
       const blob = new Blob(chunksRef.current, {
         type: recorder.mimeType || mimeType || "video/webm",
       });
@@ -236,6 +243,8 @@ export function WebcamRecorder({
     recorder.start(250);
     setPhase("recording");
     setSeconds(0);
+    recordedDurationRef.current = 0;
+    recordingStartedAtRef.current = performance.now();
     clearTimer();
     timerRef.current = window.setInterval(() => {
       setSeconds((s) => s + 1);
@@ -266,9 +275,13 @@ export function WebcamRecorder({
         `webcam-intro-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${ext}`,
         { type: reviewBlob.type || mimeType || "video/webm" },
       );
-      // MediaRecorder WebM often reports Infinity duration — pass the timer.
+      // MediaRecorder WebM often under-reports duration — pass measured length.
       await onCaptured(file, {
-        durationHintSeconds: Math.max(1, seconds),
+        durationHintSeconds: Math.max(
+          1,
+          recordedDurationRef.current,
+          seconds,
+        ),
       });
       resetReview();
       setPhase("idle");

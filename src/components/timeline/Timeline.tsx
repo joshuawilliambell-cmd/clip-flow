@@ -14,10 +14,15 @@ import { filledTeamPhotos } from "@/lib/team-slots";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
 
+/** Extra pixels after the last second so the playhead / trim handle aren’t clipped. */
+const TIMELINE_END_PAD_PX = 56;
+
 function useTimelineMetrics(duration: number, width: number) {
   const pxPerSecond = Math.max(
     8,
-    width > 0 && duration > 0 ? (width - 24) / Math.max(duration, 1) : 8,
+    width > 0 && duration > 0
+      ? Math.max(24, width - TIMELINE_END_PAD_PX - 16) / Math.max(duration, 1)
+      : 8,
   );
   return { pxPerSecond };
 }
@@ -141,7 +146,7 @@ export function Timeline() {
 
   const trackInnerWidth = Math.max(
     trackWidth - 8,
-    Math.max(sourceDuration, 1) * pxPerSecond,
+    Math.max(sourceDuration, 1) * pxPerSecond + TIMELINE_END_PAD_PX,
   );
   const keptLeft = trimStart * pxPerSecond;
   const keptWidth = Math.max(40, outputDuration * pxPerSecond);
@@ -212,9 +217,55 @@ export function Timeline() {
         </div>
       </div>
 
+      {/* Cut controls stay outside the horizontal scroll so they are never clipped. */}
+      <div className="section-card space-y-2 bg-[var(--panel-soft)] p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+            Track 1 · Your video (trim)
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              onClick={() => nudgeTrim("start", 1)}
+              disabled={outputDuration <= 3}
+              title="Remove 1 second from the beginning"
+            >
+              Cut start +1s
+            </button>
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              onClick={() => nudgeTrim("start", -1)}
+              disabled={trimStart <= 0}
+              title="Put 1 second back at the beginning"
+            >
+              Undo start −1s
+            </button>
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              onClick={() => nudgeTrim("end", -1)}
+              disabled={outputDuration <= 3}
+              title="Remove 1 second from the end"
+            >
+              Cut end +1s
+            </button>
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              onClick={() => nudgeTrim("end", 1)}
+              disabled={trimEnd >= sourceDuration}
+              title="Put 1 second back at the end"
+            >
+              Undo end −1s
+            </button>
+          </div>
+        </div>
+
       <div
         ref={measure}
-        className="relative overflow-x-auto section-card bg-[var(--panel-soft)] p-3"
+        className="relative overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border)] bg-white/60 p-3"
       >
         <div
           ref={contentRef}
@@ -245,52 +296,9 @@ export function Timeline() {
           </div>
 
           <div className="mb-3">
-            <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-              <div className="text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-                Track 1 · Your video (trim)
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
-                  onClick={() => nudgeTrim("start", 1)}
-                  disabled={outputDuration <= 3}
-                  title="Remove 1 second from the beginning"
-                >
-                  Cut start +1s
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
-                  onClick={() => nudgeTrim("start", -1)}
-                  disabled={trimStart <= 0}
-                  title="Put 1 second back at the beginning"
-                >
-                  Undo start −1s
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
-                  onClick={() => nudgeTrim("end", -1)}
-                  disabled={outputDuration <= 3}
-                  title="Remove 1 second from the end"
-                >
-                  Cut end +1s
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
-                  onClick={() => nudgeTrim("end", 1)}
-                  disabled={trimEnd >= sourceDuration}
-                  title="Put 1 second back at the end"
-                >
-                  Undo end −1s
-                </button>
-              </div>
-            </div>
             <div
               className="relative h-16 touch-none rounded-lg bg-[#d9d4c4]"
-              style={{ width: trackInnerWidth }}
+              style={{ width: Math.max(sourceDuration, 1) * pxPerSecond }}
               onPointerDown={(e) => {
                 if ((e.target as HTMLElement).dataset.handle) return;
                 beginScrub(e);
@@ -368,7 +376,7 @@ export function Timeline() {
             </div>
             <div
               className="relative h-16 touch-none rounded-lg bg-black/5"
-              style={{ width: trackInnerWidth }}
+              style={{ width: Math.max(sourceDuration, 1) * pxPerSecond }}
               onPointerDown={(e) => {
                 if ((e.target as HTMLElement).closest("[data-photo-block]")) return;
                 beginScrub(e);
@@ -452,6 +460,7 @@ export function Timeline() {
             <div className="pointer-events-none absolute bottom-0 top-6 left-1/2 w-0.5 -translate-x-1/2 bg-[var(--primary)]" />
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
