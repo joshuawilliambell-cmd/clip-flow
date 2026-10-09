@@ -22,6 +22,7 @@ import { exportIntroductionVideo } from "@/lib/export-video";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { PipSidePicker } from "@/components/PipSidePicker";
+import { TeamRosterFields } from "@/components/TeamRosterFields";
 import { HelpTip } from "@/components/HelpTip";
 import { filledTeamPhotos } from "@/lib/team-slots";
 
@@ -256,18 +257,18 @@ export function PreviewExportStep({
         )}
       </section>
 
-      {/* All video editing: photo placement, timing, preview, timeline */}
+      {/* All video / photo editing lives here in Finish & Download */}
       {teamMemberCount > 0 ? (
-        <section className="space-y-3">
+        <section className="space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-                Photo overlays & timing
+                Edit photos & video
               </h3>
               <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-                {filledCount} of {teamMemberCount} teammate PIP photos (not you
-                — your photo is thumbnail-only) · choose corner, then drag
-                timeline bars for when each face appears
+                Replace or remove teammate photos, choose the corner, trim the
+                clip, and drag timeline bars for when each face appears (
+                {filledCount} of {teamMemberCount} photos filled)
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -304,6 +305,7 @@ export function PreviewExportStep({
               </HelpTip>
             </div>
           </div>
+          <TeamRosterFields variant="review" />
           <PipSidePicker />
         </section>
       ) : (

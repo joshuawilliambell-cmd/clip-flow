@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Trash2, Users } from "lucide-react";
+import { ImagePlus, Replace, Trash2, Users } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { JobTitleField } from "@/components/JobTitleField";
 import { PronounField } from "@/components/PronounField";
@@ -86,7 +86,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
               {variant === "setup"
                 ? "These people get PIP photo overlays in the video and “This is…” lines in the script. You (the speaker) are not listed here — your photo is thumbnail-only in Your introduction."
-                : "Review teammate PIP photos, names, and titles. Adjust timing on the timeline below. You are not a PIP overlay."}
+                : "Replace or remove teammate photos here, then set corner and timing below. You are not a PIP overlay."}
             </p>
           </div>
         </div>
@@ -97,14 +97,22 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             on the thumbnail only.
           </p>
           <p>
-            Tap <strong>Select multiple photos</strong> and choose several
-            headshots (Ctrl/Cmd+click or Shift+click). They fill Teammate 1,
-            2, 3… in the order you selected.
+            Tap <strong>Replace photo</strong> (or the thumbnail) to pick a new
+            headshot. Tap <strong>Remove</strong> to clear that slot.
           </p>
-          <p>
-            You can also open one box and pick multiple files — they fill that
-            box and the ones after it.
-          </p>
+          {variant === "setup" ? (
+            <>
+              <p>
+                Tap <strong>Select multiple photos</strong> and choose several
+                headshots (Ctrl/Cmd+click or Shift+click). They fill Teammate 1,
+                2, 3… in the order you selected.
+              </p>
+              <p>
+                You can also open one box and pick multiple files — they fill
+                that box and the ones after it.
+              </p>
+            </>
+          ) : null}
           <p>Slot 1 is introduced first. Use ↑ ↓ to change order.</p>
         </HelpTip>
       </div>
@@ -188,14 +196,24 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                 }}
               />
               {photo.url ? (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => clearPhotoSlot(photo.id)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--primary)] disabled:opacity-50"
-                >
-                  <Trash2 className="h-3 w-3" /> Clear
-                </button>
+                <div className="flex w-full flex-col gap-1">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => fileRefs.current[index]?.click()}
+                    className="inline-flex items-center justify-center gap-1 rounded-md border border-[var(--ink)] bg-white px-1.5 py-1 text-[11px] font-semibold text-[var(--ink)] disabled:opacity-50"
+                  >
+                    <Replace className="h-3 w-3" /> Replace
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => clearPhotoSlot(photo.id)}
+                    className="inline-flex items-center justify-center gap-1 rounded-md border border-[var(--primary)] bg-white px-1.5 py-1 text-[11px] font-semibold text-[var(--primary)] disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3 w-3" /> Remove
+                  </button>
+                </div>
               ) : null}
             </div>
 
