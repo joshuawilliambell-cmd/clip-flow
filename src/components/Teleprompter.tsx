@@ -40,8 +40,15 @@ export function Teleprompter({
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const rosterKey = photos.map((p) => `${p.name}\0${p.title}`).join("|");
-  const rosterPeople = photos.map((p) => ({ name: p.name, title: p.title }));
+  const rosterKey = photos
+    .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
+    .join("|");
+  const rosterPeople = photos.map((p) => ({
+    name: p.name,
+    title: p.title,
+    pronoun: p.pronoun,
+    duties: p.duties,
+  }));
   const officialScript = scriptForTeam(teamMemberCount, {
     customerName,
     speakerName,
@@ -211,7 +218,8 @@ export function Teleprompter({
             </p>
             <p>
               Use the <strong>official</strong> Fleet Hub script for your team
-              size — teammate names and titles from above are filled in — or{" "}
+              size — names, pronouns, titles, and duties from above are filled
+              in — or{" "}
               <strong>upload / paste</strong> your own.
             </p>
             <p>

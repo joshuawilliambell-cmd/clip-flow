@@ -1,6 +1,21 @@
 import type { TeamMemberCount } from "@/lib/template";
+import { defaultDutiesForTitle } from "@/lib/job-titles";
 
 /** Official Fleet Hub teleprompter scripts by how many teammates you introduce. */
+
+const OPENING =
+  "Hey, [Customer Name], [Your Name] with Love's here. Welcome to your Fleet Hub. This is a portal where you can learn all about what Love's can do for your fleet.";
+
+const TEAMMATE_LINE =
+  "This is [Team Member Name], and [he/she] [is/are] [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";
+
+function scriptWithTeammates(count: 1 | 2 | 3 | 4): string {
+  if (count === 1) {
+    return `${OPENING} I also wanted to take a quick minute and introduce our team member who will be working with us. ${TEAMMATE_LINE}, and you can reach out to either one of us for support.`;
+  }
+  const lines = Array.from({ length: count }, () => TEAMMATE_LINE).join(". ");
+  return `${OPENING} I also wanted to take a quick minute and introduce our team members who will be working with us. ${lines}. And you can reach out to any of us for support.`;
+}
 
 export const INTRO_SCRIPTS: Record<
   TeamMemberCount,
@@ -8,69 +23,23 @@ export const INTRO_SCRIPTS: Record<
 > = {
   0: {
     title: "Just me",
-    script: `Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub!
-
-This is a platform where you learn more about what Love's can do for your fleet. Everything is here in one place so you can review it and share it with your team.
-
-I'm here to help as you go through the details, so take a look when you have a chance and give me a call with any questions.
-
-I'm looking forward to working with you!`,
+    script: `${OPENING} Take a look when you have a chance, and you can reach out to me anytime for support.`,
   },
   1: {
     title: "1 teammate",
-    script: `Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! This is a platform where you learn more about what Love's can do for your fleet.
-
-I also wanted to introduce someone who'll be working with us. You'll see their photo on screen while I keep talking.
-
-This is [Team Member Name]. We work together to support your fleet, and you'll have both of us to reach out to along the way.
-
-Take a look around, and let me know what questions you have. We're looking forward to working with you!`,
+    script: scriptWithTeammates(1),
   },
   2: {
     title: "2 teammates",
-    script: `Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! This is a platform where you learn more about what Love's can do for your fleet.
-
-I also wanted to introduce two people who'll be working with us. Their photos will appear on screen as I introduce them.
-
-This is [Team Member Name].
-
-And this is [Team Member Name].
-
-We work together to support your fleet, and you'll have all of us to reach out to along the way.
-
-Take a look around, and let me know what questions you have. We're looking forward to working with you!`,
+    script: scriptWithTeammates(2),
   },
   3: {
     title: "3 teammates",
-    script: `Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! This is a platform where you learn more about what Love's can do for your fleet.
-
-Before you take a look, I wanted to introduce your Love's Fleet Sales Team. Their photos will appear on screen as I keep talking.
-
-This is [Team Member Name].
-
-This is [Team Member Name].
-
-And this is [Team Member Name].
-
-We work closely together, so you'll have a whole team supporting your fleet.
-
-Take a look around, and let me know what you think. We're looking forward to working with you!`,
+    script: scriptWithTeammates(3),
   },
   4: {
     title: "4 teammates",
-    script: `Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! This is a platform where you learn more about what Love's can do for your fleet.
-
-Let me put some faces to the names of your Love's Fleet Sales Team. Their photos will appear on screen while I introduce them.
-
-This is [Team Member Name].
-
-This is [Team Member Name].
-
-This is [Team Member Name].
-
-And this is [Team Member Name].
-
-We're all here to help support your fleet. Take a look around, and give me a call with any questions!`,
+    script: scriptWithTeammates(4),
   },
 };
 
@@ -78,9 +47,13 @@ export function scriptForTeamCount(count: TeamMemberCount): string {
   return INTRO_SCRIPTS[count].script;
 }
 
+export type TeamIntroPronoun = "he" | "she" | "they" | "";
+
 export type TeamIntroPerson = {
   name: string;
   title?: string;
+  pronoun?: TeamIntroPronoun | string;
+  duties?: string;
 };
 
 export type ScriptFillIns = {
@@ -89,7 +62,19 @@ export type ScriptFillIns = {
   people?: TeamIntroPerson[];
 };
 
-/** Fill [Customer Name], [Your Name], and each [Team Member Name]. */
+function indefiniteArticle(title: string): string {
+  const trimmed = title.trim().toLowerCase();
+  if (!trimmed) return "[a/an]";
+  return /^[aeiou]/.test(trimmed) ? "an" : "a";
+}
+
+function replaceFirst(text: string, needle: string, value: string): string {
+  const index = text.indexOf(needle);
+  if (index === -1) return text;
+  return text.slice(0, index) + value + text.slice(index + needle.length);
+}
+
+/** Fill customer, speaker, and each teammate's name / pronoun / title / duties. */
 export function personalizeScript(
   template: string,
   peopleOrFillIns: TeamIntroPerson[] | ScriptFillIns = [],
@@ -101,7 +86,6 @@ export function personalizeScript(
   const customer = fillIns.customerName?.trim();
   const speaker = fillIns.speakerName?.trim();
 
-  let index = 0;
   let text = template;
   if (customer) {
     text = text.replace(/\[Customer Name\]/g, customer);
@@ -109,14 +93,37 @@ export function personalizeScript(
   if (speaker) {
     text = text.replace(/\[Your Name\]/g, speaker);
   }
-  return text.replace(/\[Team Member Name\]/g, () => {
-    const person = people[index];
-    index += 1;
-    const name = person?.name?.trim();
-    if (!name) return "[Team Member Name]";
-    const title = person?.title?.trim();
-    return title ? `${name}, ${title}` : name;
-  });
+
+  const teammateSlots = (text.match(/\[Team Member Name\]/g) ?? []).length;
+  for (let i = 0; i < teammateSlots; i += 1) {
+    const person = people[i];
+    const name = person?.name?.trim() || "[Team Member Name]";
+    const title = person?.title?.trim() || "[Job Title]";
+    const duties =
+      person?.duties?.trim() ||
+      defaultDutiesForTitle(person?.title ?? "") ||
+      "[Job Duties]";
+    const pronounRaw = (person?.pronoun ?? "").trim().toLowerCase();
+    const pronoun =
+      pronounRaw === "he" || pronounRaw === "she" || pronounRaw === "they"
+        ? pronounRaw
+        : "[he/she]";
+    const beVerb =
+      pronoun === "they" ? "are" : pronoun === "[he/she]" ? "[is/are]" : "is";
+    const article =
+      title === "[Job Title]" ? "[a/an]" : indefiniteArticle(title);
+
+    // Order matches TEAMMATE_LINE placeholders left-to-right.
+    text = replaceFirst(text, "[Team Member Name]", name);
+    text = replaceFirst(text, "[he/she]", pronoun);
+    text = replaceFirst(text, "[is/are]", beVerb);
+    text = replaceFirst(text, "[a/an]", article);
+    text = replaceFirst(text, "[Job Title]", title);
+    text = replaceFirst(text, "[he/she]", pronoun);
+    text = replaceFirst(text, "[Job Duties]", duties);
+  }
+
+  return text;
 }
 
 /** Official script for team size, with fill-ins and roster names. */

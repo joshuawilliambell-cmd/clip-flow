@@ -9,6 +9,8 @@ export function createEmptyTeamPhoto(): TeamPhoto {
     fileName: "",
     name: "",
     title: "",
+    pronoun: "",
+    duties: "",
     department: "",
     startSeconds: 0,
     durationSeconds: VIDEO_TEMPLATE.defaultPhotoDurationSeconds,

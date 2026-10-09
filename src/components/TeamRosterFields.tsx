@@ -4,7 +4,9 @@ import { useRef, useState } from "react";
 import { ImagePlus, Trash2, Users } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { JobTitleField } from "@/components/JobTitleField";
+import { defaultDutiesForTitle } from "@/lib/job-titles";
 import { useStudio } from "@/lib/studio-context";
+import type { TeamPhotoPronoun } from "@/lib/types";
 
 type TeamRosterFieldsProps = {
   /** Compact copy for Step 1 before recording. */
@@ -54,7 +56,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             </h3>
             <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
               {variant === "setup"
-                ? "Add a photo, name, and job title for each person in the order you’ll introduce them. Names and titles fill the teleprompter script."
+                ? "Add a photo, name, pronoun, job title, and short duties for each person in the order you’ll introduce them — they fill the teleprompter script."
                 : "Review photos, names, and titles. Adjust PIP timing on the timeline below."}
             </p>
           </div>
@@ -63,11 +65,13 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
           <p>Slot 1 is introduced first. Use ↑ ↓ to change order.</p>
           <p>
             Pick a job title from the list, or choose <strong>Other</strong> to
-            type a custom title.
+            type a custom title. Duties default from the title — edit them to
+            match how you want to introduce that person.
           </p>
           <p>
-            Titles appear in the script after each name (for example, “This is
-            Jared, Total Truck Care Account Manager.”).
+            Example: “This is Jared, and he is a Total Truck Care Account
+            Manager, and he can help you with things like maintenance and
+            repairs…”
           </p>
         </HelpTip>
       </div>
@@ -167,11 +171,53 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                 />
               </label>
 
+              <label className="block">
+                <span className="field-label">Pronoun</span>
+                <select
+                  value={photo.pronoun}
+                  onChange={(e) =>
+                    updatePhotoMeta(photo.id, {
+                      pronoun: e.target.value as TeamPhotoPronoun,
+                    })
+                  }
+                  className="field-input"
+                >
+                  <option value="">Select…</option>
+                  <option value="he">he</option>
+                  <option value="she">she</option>
+                  <option value="they">they</option>
+                </select>
+              </label>
+
               <JobTitleField
                 id={`job-title-${photo.id}`}
                 value={photo.title}
-                onChange={(title) => updatePhotoMeta(photo.id, { title })}
+                onChange={(title) => {
+                  const suggested = defaultDutiesForTitle(title);
+                  const priorDefault = defaultDutiesForTitle(photo.title);
+                  const dutiesStillDefault =
+                    !photo.duties.trim() || photo.duties.trim() === priorDefault;
+                  updatePhotoMeta(photo.id, {
+                    title,
+                    ...(dutiesStillDefault && suggested
+                      ? { duties: suggested }
+                      : {}),
+                  });
+                }}
               />
+
+              <label className="block">
+                <span className="field-label">Job duties (for script)</span>
+                <input
+                  value={photo.duties}
+                  onChange={(e) =>
+                    updatePhotoMeta(photo.id, { duties: e.target.value })
+                  }
+                  className="field-input"
+                  placeholder="Example: maintenance, repairs, and uptime"
+                  autoComplete="off"
+                />
+              </label>
             </div>
           </div>
         ))}

@@ -1,3 +1,5 @@
+export type TeamPhotoPronoun = "he" | "she" | "they" | "";
+
 export type TeamPhoto = {
   id: string;
   /** Null until the employee uploads a headshot into this slot. */
@@ -5,6 +7,10 @@ export type TeamPhoto = {
   fileName: string;
   name: string;
   title: string;
+  /** he / she / they for the teleprompter script. */
+  pronoun: TeamPhotoPronoun;
+  /** Short “things like…” phrase for the teleprompter script. */
+  duties: string;
   department: string;
   startSeconds: number;
   durationSeconds: number;

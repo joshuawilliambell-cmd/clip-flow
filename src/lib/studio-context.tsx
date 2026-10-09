@@ -79,7 +79,9 @@ type StudioContextValue = {
   replaceTeamPhotosFromFiles: (files: FileList | File[]) => Promise<TeamPhoto[]>;
   updatePhotoMeta: (
     id: string,
-    patch: Partial<Pick<TeamPhoto, "name" | "title" | "department">>,
+    patch: Partial<
+      Pick<TeamPhoto, "name" | "title" | "pronoun" | "duties" | "department">
+    >,
   ) => void;
   clearPhotoSlot: (id: string) => void;
   removePhoto: (id: string) => void;
@@ -535,7 +537,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const updatePhotoMeta = useCallback(
     (
       id: string,
-      patch: Partial<Pick<TeamPhoto, "name" | "title" | "department">>,
+      patch: Partial<
+        Pick<TeamPhoto, "name" | "title" | "pronoun" | "duties" | "department">
+      >,
     ) => {
       setPhotos((prev) => {
         const index = prev.findIndex((p) => p.id === id);
