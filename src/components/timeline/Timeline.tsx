@@ -163,8 +163,8 @@ export function Timeline() {
               Timeline
             </h3>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Drag the red trim handles to shorten · drag a photo onto another
-              to reorder · drag the playhead to scrub
+              Trim with red handles · photo body shows a move cursor · photo
+              edges show ↔ to change length · drag playhead to scrub
             </p>
           </div>
           <HelpTip title="How to use the timeline" size="lg">
@@ -367,7 +367,7 @@ export function Timeline() {
               Track 2 · Team photos
             </div>
             <div
-              className="relative h-16 cursor-ew-resize touch-none rounded-lg bg-black/5"
+              className="relative h-16 touch-none rounded-lg bg-black/5"
               style={{ width: trackInnerWidth }}
               onPointerDown={(e) => {
                 if ((e.target as HTMLElement).closest("[data-photo-block]")) return;
@@ -568,7 +568,8 @@ function PhotoBlock({
       data-photo-block
       data-photo-id={id}
       className={clsx(
-        "absolute top-1 bottom-1 flex touch-none overflow-hidden rounded-md text-white shadow transition-[box-shadow,outline] cursor-grab active:cursor-grabbing",
+        // Body uses move (four-arrow) cursor; edge handles set ew-resize themselves.
+        "absolute top-1 bottom-1 flex cursor-move touch-none overflow-hidden rounded-md text-white shadow transition-[box-shadow,outline] active:cursor-move",
         dragging ? "z-30 opacity-90 ring-2 ring-[var(--yellow)]" : "z-10",
         dropTarget && "z-20 ring-2 ring-white outline outline-2 outline-offset-2 outline-[var(--yellow)]",
       )}
@@ -578,7 +579,7 @@ function PhotoBlock({
         backgroundColor: color,
         transform: dragging ? `translateX(${dragDx}px)` : undefined,
       }}
-      title={`${name}: ${formatTime(start)}–${formatTime(start + duration)}. Drag onto another photo to reorder.`}
+      title={`${name}: ${formatTime(start)}–${formatTime(start + duration)}. Move cursor: drag to reposition or onto another photo to reorder. Edge arrows: change length.`}
       onPointerDown={(e) => {
         if ((e.target as HTMLElement).dataset.handle) return;
         e.preventDefault();
@@ -650,13 +651,13 @@ function PhotoBlock({
           window.addEventListener("pointerup", onUp);
         }}
       />
-      <div className="flex min-w-0 flex-1 items-center gap-2 px-1.5">
+      <div className="flex min-w-0 flex-1 cursor-move items-center gap-2 px-1.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={thumb}
           alt=""
           draggable={false}
-          className="h-10 w-10 shrink-0 rounded object-cover object-[center_28%] ring-1 ring-white/40"
+          className="pointer-events-none h-10 w-10 shrink-0 rounded object-cover object-[center_28%] ring-1 ring-white/40"
         />
         <div className="min-w-0 leading-tight">
           <div className="truncate text-xs font-semibold">{name}</div>

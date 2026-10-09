@@ -386,7 +386,7 @@ export function PreviewExportStep({
               <HelpTip title="Music volume">
                 <p>This controls how loud the background music is.</p>
                 <p>Keep it quieter than your voice so customers can hear you.</p>
-                <p>A good starting point is about 30%.</p>
+                <p>Default is 2% so your voice stays clear over the music.</p>
               </HelpTip>
             </span>
             <input
