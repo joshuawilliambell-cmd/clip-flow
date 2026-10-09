@@ -75,7 +75,7 @@ export function PreviewExportStep({
     }
     stopMusicSample();
     const audio = new Audio(src);
-    audio.volume = Math.min(1, Math.max(0.15, musicVolume));
+    audio.volume = Math.min(1, Math.max(0, musicVolume));
     sampleAudioRef.current = audio;
     setSamplingTrackId(trackId);
     void audio.play().catch(() => {

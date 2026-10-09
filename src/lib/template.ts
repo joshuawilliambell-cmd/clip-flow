@@ -34,7 +34,8 @@ export const VIDEO_TEMPLATE = {
   /** Optional Love's Team opening card length (keep in sync with thumbnail template). */
   introThumbnailSeconds: 1,
   musicFadeSeconds: 1.2,
-  defaultMusicVolume: 0.3,
+  /** Keep bed music quiet under the speaker voice (2%). */
+  defaultMusicVolume: 0.02,
   /** Start quieter so playback is comfortable; users can raise it. */
   defaultVideoVolume: 0.5,
   branding: {
