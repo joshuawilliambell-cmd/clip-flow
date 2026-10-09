@@ -163,8 +163,8 @@ export function Timeline() {
               Timeline
             </h3>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Trim with red handles · photo body shows a hand cursor · photo
-              edges show ↔ to change length · drag playhead to scrub
+              Trim with red handles · hover a team photo for a hand cursor, then
+              drag · edges show ↔ to change length · drag playhead to scrub
             </p>
           </div>
           <HelpTip title="How to use the timeline" size="lg">
@@ -568,9 +568,9 @@ function PhotoBlock({
       data-photo-block
       data-photo-id={id}
       className={clsx(
-        // Body uses hand (grab) cursor; edge handles set ew-resize themselves.
-        "absolute top-1 bottom-1 flex cursor-grab touch-none overflow-hidden rounded-md text-white shadow transition-[box-shadow,outline] active:cursor-grabbing",
-        dragging ? "z-30 cursor-grabbing opacity-90 ring-2 ring-[var(--yellow)]" : "z-10",
+        // Open hand on hover; closed hand while dragging. Edge handles use ↔.
+        "absolute top-1 bottom-1 flex touch-none overflow-hidden rounded-md text-white shadow transition-[box-shadow,outline]",
+        dragging ? "z-30 opacity-90 ring-2 ring-[var(--yellow)]" : "z-10",
         dropTarget && "z-20 ring-2 ring-white outline outline-2 outline-offset-2 outline-[var(--yellow)]",
       )}
       style={{
@@ -578,6 +578,8 @@ function PhotoBlock({
         width,
         backgroundColor: color,
         transform: dragging ? `translateX(${dragDx}px)` : undefined,
+        // Inline cursor so the hand wins over parent timeline cursors.
+        cursor: dragging ? "grabbing" : "grab",
       }}
       title={`${name}: ${formatTime(start)}–${formatTime(start + duration)}. Hand cursor: drag to reposition or onto another photo to reorder. Edge arrows: change length.`}
       onPointerDown={(e) => {
@@ -590,9 +592,13 @@ function PhotoBlock({
         origin.current = { x: e.clientX, start, left };
         setDragDx(0);
         onDragState(true, null);
+        // Keep the closed-hand cursor while pointer is captured outside the bar.
+        const prevCursor = document.body.style.cursor;
+        document.body.style.cursor = "grabbing";
         block.setPointerCapture(e.pointerId);
 
         const onMovePtr = (ev: PointerEvent) => {
+          document.body.style.cursor = "grabbing";
           const dx = ev.clientX - origin.current.x;
           setDragDx(dx);
           const scrollEl = track?.closest(".overflow-x-auto");
@@ -603,6 +609,7 @@ function PhotoBlock({
         };
 
         const onUp = (ev: PointerEvent) => {
+          document.body.style.cursor = prevCursor;
           const scrollEl = track?.closest(".overflow-x-auto");
           const scrollLeft = scrollEl instanceof HTMLElement ? scrollEl.scrollLeft : 0;
           const x = ev.clientX - trackLeftRef.current + scrollLeft;
@@ -651,7 +658,10 @@ function PhotoBlock({
           window.addEventListener("pointerup", onUp);
         }}
       />
-      <div className="flex min-w-0 flex-1 cursor-grab items-center gap-2 px-1.5 active:cursor-grabbing">
+      <div
+        className="flex min-w-0 flex-1 items-center gap-2 px-1.5"
+        style={{ cursor: dragging ? "grabbing" : "grab" }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={thumb}
