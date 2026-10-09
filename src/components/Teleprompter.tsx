@@ -491,7 +491,8 @@ export function Teleprompter({
               </p>
 
               <PanelSteps
-                className="rounded-md bg-black/25 px-3 py-2 text-white [&_strong]:text-[var(--yellow)]"
+                tone="dark"
+                className="rounded-md bg-black/25 px-3 py-2 [&_strong]:text-[var(--yellow)]"
                 steps={[
                   <>
                     Review or edit the script in the box below (or click{" "}
