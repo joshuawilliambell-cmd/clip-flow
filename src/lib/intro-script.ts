@@ -20,7 +20,7 @@ I'm looking forward to working with you!`,
     title: "1 teammate",
     script: `[On camera]
 
-Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! Your proposal is here for you to review and share with your team.
+Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! This is a platform where you learn more about what Love's can do for your fleet.
 
 I also wanted to introduce someone who'll be working with us.
 
@@ -36,7 +36,7 @@ Take a look around, and let me know what questions you have. We're looking forwa
     title: "2 teammates",
     script: `[On camera]
 
-Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! Your proposal is here for you to review and share with your team.
+Hey [Customer Name], it's [Your Name] with Love's. Welcome to your Fleet Hub! This is a platform where you learn more about what Love's can do for your fleet.
 
 I also wanted to introduce two people who'll be working with us.
 
