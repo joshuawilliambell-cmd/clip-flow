@@ -222,7 +222,7 @@ export function RecordingGuide() {
   return (
     <section
       aria-labelledby={`${baseId}-heading`}
-      className="rounded-3xl border-2 border-[var(--ink)] bg-white p-4 md:p-6"
+      className="section-card bg-white p-4 md:p-6"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
@@ -268,13 +268,13 @@ export function RecordingGuide() {
                 )
               }
               className={clsx(
-                "flex min-h-[7.5rem] flex-col items-start gap-2 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
+                "flex min-h-[7.5rem] flex-col items-start gap-2 rounded-[var(--radius-md)] border px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
                 selected
                   ? "border-[var(--ink)] bg-[var(--yellow)]"
                   : "border-[var(--ink)] bg-[var(--panel-soft)] hover:bg-[var(--yellow)]/50",
               )}
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--primary)] text-white">
+              <span className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
                 {device.icon}
               </span>
               <span className="text-lg font-bold leading-tight text-[var(--ink)]">
@@ -291,7 +291,7 @@ export function RecordingGuide() {
       {active ? (
         <div
           id={`${baseId}-${active.id}`}
-          className="mt-4 space-y-5 rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4 md:p-5"
+          className="mt-4 space-y-5 section-card bg-[var(--panel-soft)] p-4 md:p-5"
         >
           <div>
             <h4 className="text-2xl font-bold text-[var(--ink)]">
@@ -319,12 +319,12 @@ export function RecordingGuide() {
         </div>
       ) : null}
 
-      <div className="mt-5 rounded-2xl border-2 border-[var(--ink)] bg-[var(--yellow)]/40">
+      <div className="mt-5 section-card bg-[var(--yellow)]/40">
         <button
           type="button"
           aria-expanded={contentOpen}
           onClick={() => setContentOpen((v) => !v)}
-          className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]"
+          className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]"
         >
           <span>
             <span className="block text-xl font-bold text-[var(--ink)] md:text-2xl">

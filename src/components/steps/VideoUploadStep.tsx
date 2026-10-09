@@ -58,7 +58,7 @@ export function VideoUploadStep() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="font-display text-4xl tracking-wide text-[var(--ink)] md:text-5xl">
+          <h2 className="step-title">
             Step 1: Add your video
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
@@ -154,7 +154,7 @@ export function VideoUploadStep() {
             </button>
           </div>
 
-          <div className="rounded-3xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-6 py-5 text-center">
+          <div className="section-card bg-[var(--yellow)] px-6 py-5 text-center">
             <p className="text-xl font-bold text-[var(--ink)]">
               Just exploring? Load a practice video
             </p>
@@ -195,7 +195,7 @@ export function VideoUploadStep() {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-4">
+          <div className="flex flex-wrap items-center gap-3 section-card bg-[var(--panel-soft)] px-4 py-4">
             <Film className="h-7 w-7 text-[var(--primary)]" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-lg font-bold text-[var(--ink)]">

@@ -23,7 +23,7 @@ export function PipSidePicker() {
   const { pipSide, setPipSide } = useStudio();
 
   return (
-    <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
+    <section className="section-card bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-2xl font-bold text-[var(--ink)]">
@@ -59,13 +59,13 @@ export function PipSidePicker() {
               type="button"
               onClick={() => setPipSide(option.id)}
               className={clsx(
-                "flex min-h-[6.5rem] items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
+                "flex min-h-[6.5rem] items-center gap-3 rounded-[var(--radius-md)] border px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
                 selected
                   ? "border-[var(--ink)] bg-[var(--yellow)]"
                   : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
               )}
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primary)] text-white">
+              <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
                 {option.id === "left" ? (
                   <PanelLeft className="h-6 w-6" />
                 ) : (

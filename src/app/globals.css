@@ -3,93 +3,174 @@
 @tailwind utilities;
 
 /*
-  Love's Travel Stops website-inspired theme:
-  sunny yellow field, dark olive nav, red accents, bold friendly type.
+  Love's Video Studio — enterprise-crisp theme.
+  Brand: Love's red, yellow, olive. Type: Sora + Source Sans 3.
 */
 :root {
-  --background: #ffd400;
-  --background-deep: #f5c400;
-  --foreground: #1a1a1a;
-  --ink: #1a1a1a;
-  --muted: #3f3a2a;
-  --primary: #ed2024;
-  --primary-dark: #c41418;
-  --yellow: #ffd400;
-  --yellow-bright: #ffe34a;
-  --accent: #ffd400;
-  --olive: #3a3a1f;
-  --olive-soft: #4a4a28;
-  --brown: #997b1d;
+  --background: #f2c400;
+  --background-deep: #e0b400;
+  --foreground: #141414;
+  --ink: #141414;
+  --muted: #4a4538;
+  --primary: #e1181c;
+  --primary-dark: #b41014;
+  --yellow: #ffd100;
+  --yellow-bright: #ffe14a;
+  --accent: #ffd100;
+  --olive: #2f2f1a;
+  --olive-soft: #3d3d24;
+  --brown: #8a6f1a;
   --panel: #ffffff;
-  --panel-soft: #fff8d6;
-  --border: #d6b800;
-  --border-strong: #1a1a1a;
-  --track-video: #1a1a1a;
-  --focus-ring: #ffd400;
+  --panel-soft: #f7f4ea;
+  --border: #c9aa00;
+  --border-strong: #141414;
+  --track-video: #141414;
+  --focus-ring: #ffd100;
+  --hairline: rgba(20, 20, 20, 0.12);
+  --elevate: 0 1px 0 rgba(20, 20, 20, 0.06), 0 8px 24px rgba(20, 20, 20, 0.08);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-sans), "Nunito", Helvetica, sans-serif;
-  font-size: 18px;
-  line-height: 1.5;
+  font-family: var(--font-sans), "Source Sans 3", Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .font-display {
-  font-family: var(--font-display), "Nunito", Helvetica, sans-serif;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-}
-
-/* Big outlined headline style like Love's "Rewards" lettering */
-.font-hero {
-  font-family: var(--font-display), "Nunito", Helvetica, sans-serif;
-  font-weight: 900;
-  color: #ffffff;
+  font-family: var(--font-display), Sora, Helvetica, sans-serif;
+  font-weight: 700;
   letter-spacing: -0.03em;
-  text-shadow:
-    -2px -2px 0 #1a1a1a,
-    2px -2px 0 #1a1a1a,
-    -2px 2px 0 #1a1a1a,
-    2px 2px 0 #1a1a1a,
-    0 3px 0 #1a1a1a,
-    0 6px 10px rgba(0, 0, 0, 0.18);
+  line-height: 1.15;
 }
 
-/* Large, readable controls for all ages */
+.font-hero {
+  font-family: var(--font-display), Sora, Helvetica, sans-serif;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.035em;
+  text-shadow:
+    0 1px 0 rgba(20, 20, 20, 0.9),
+    0 2px 8px rgba(20, 20, 20, 0.25);
+}
+
 .btn-primary {
-  @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-6 text-lg font-extrabold text-white shadow-sm transition hover:bg-[var(--primary-dark)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)] disabled:cursor-not-allowed disabled:opacity-45;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 px-5 text-[15px] font-semibold tracking-tight text-white transition disabled:cursor-not-allowed disabled:opacity-45;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  border: 1px solid var(--primary-dark);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--olive);
+  outline-offset: 2px;
 }
 
 .btn-secondary {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-white px-5 text-base font-extrabold text-[var(--ink)] transition hover:bg-[var(--yellow-bright)] focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)] disabled:cursor-not-allowed disabled:opacity-45;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 px-4 text-[15px] font-semibold tracking-tight text-[var(--ink)] transition disabled:cursor-not-allowed disabled:opacity-45;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ink);
+  background: #fff;
+}
+
+.btn-secondary:hover {
+  background: var(--panel-soft);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--olive);
+  outline-offset: 2px;
 }
 
 .btn-yellow {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow-bright)] px-5 text-base font-extrabold text-[var(--ink)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--primary)] disabled:cursor-not-allowed disabled:opacity-45;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 px-4 text-[15px] font-semibold tracking-tight text-[var(--ink)] transition disabled:cursor-not-allowed disabled:opacity-45;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ink);
+  background: var(--yellow-bright);
+}
+
+.btn-yellow:hover {
+  filter: brightness(0.97);
+}
+
+.btn-yellow:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .field-label {
-  @apply mb-1 block text-base font-extrabold text-[var(--ink)];
+  @apply mb-1.5 block text-[13px] font-semibold uppercase tracking-[0.06em] text-[var(--muted)];
 }
 
 .field-input {
-  @apply w-full rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-3 text-lg font-semibold text-[var(--ink)] outline-none focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--yellow)];
+  @apply w-full bg-white px-3.5 py-2.5 text-[15px] font-medium text-[var(--ink)] outline-none transition;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ink);
+}
+
+.field-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(225, 24, 28, 0.15);
 }
 
 .how-banner {
-  @apply rounded-2xl border-2 border-[var(--ink)] bg-white px-4 py-4 text-base font-semibold leading-relaxed text-[var(--ink)] md:text-lg;
+  @apply px-4 py-3.5 text-[15px] font-medium leading-relaxed text-[var(--ink)];
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--ink);
+  background: #fff;
 }
 
 .studio-panel {
-  @apply rounded-3xl border-2 border-[var(--ink)] bg-white shadow-[0_12px_0_rgba(58,58,31,0.12)];
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--ink);
+  background: #fff;
+  box-shadow: var(--elevate);
+}
+
+.section-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ink);
+  background: #fff;
+}
+
+.section-card-soft {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--hairline);
+  background: var(--panel-soft);
+}
+
+.step-title {
+  font-family: var(--font-display), Sora, Helvetica, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  font-size: clamp(1.65rem, 2.4vw, 2.15rem);
+  color: var(--ink);
+}
+
+.surface-chip {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ink);
+  background: var(--panel-soft);
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -98,15 +179,15 @@ body {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.45s ease-out both;
+  animation: fade-up 0.35s ease-out both;
 }
 
 .animate-fade-up-delay {
-  animation: fade-up 0.55s ease-out 0.06s both;
+  animation: fade-up 0.4s ease-out 0.05s both;
 }
 
 .animate-rise {
-  animation: fade-up 0.55s ease-out 0.1s both;
+  animation: fade-up 0.4s ease-out 0.08s both;
 }
 
 @media (prefers-reduced-motion: reduce) {

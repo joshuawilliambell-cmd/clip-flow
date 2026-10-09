@@ -38,18 +38,20 @@ export function StepIndicator({
   onChange: (step: StudioStep) => void;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <div className="flex items-center gap-2">
-        <h2 className="text-xl font-bold text-[var(--ink)] md:text-2xl">
-          Follow these 3 steps
+        <h2 className="font-display text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
+          Workflow
         </h2>
         <HelpTip title="How the steps work">
           <p>You only need to do three things, in order.</p>
-          <p>Tap a step button to jump there. Yellow means the step you are on now.</p>
-          <p>If you get stuck, tap any yellow ? for plain-language help.</p>
+          <p>
+            Tap a step to jump there. Yellow means the step you are on now.
+          </p>
+          <p>If you get stuck, tap any ? for plain-language help.</p>
         </HelpTip>
       </div>
-      <ol className="grid gap-3 md:grid-cols-3">
+      <ol className="grid gap-2.5 md:grid-cols-3">
         {STEPS.map((item) => {
           const active = item.id === step;
           const done = item.id < step;
@@ -59,28 +61,30 @@ export function StepIndicator({
                 type="button"
                 onClick={() => onChange(item.id)}
                 className={clsx(
-                  "flex min-h-[5.5rem] w-full items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]",
-                  active &&
-                    "border-[var(--ink)] bg-[var(--yellow-bright)] shadow-[0_6px_0_rgba(58,58,31,0.18)]",
+                  "flex min-h-[4.75rem] w-full items-center gap-3 border px-3.5 py-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
+                  "rounded-[var(--radius-md)]",
+                  active && "border-[var(--ink)] bg-[var(--yellow-bright)]",
                   !active && done && "border-[var(--primary)] bg-white",
-                  !active && !done && "border-[var(--ink)] bg-white/90",
+                  !active &&
+                    !done &&
+                    "border-[var(--hairline)] bg-white/95 hover:border-[var(--ink)]",
                 )}
               >
                 <span
                   className={clsx(
-                    "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl font-extrabold",
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-[15px] font-bold tabular-nums",
                     active && "bg-[var(--olive)] text-[var(--yellow)]",
                     done && !active && "bg-[var(--primary)] text-white",
-                    !active && !done && "bg-black/10 text-[var(--ink)]",
+                    !active && !done && "bg-[var(--panel-soft)] text-[var(--ink)]",
                   )}
                 >
                   {item.id}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-lg font-bold leading-tight text-[var(--ink)] md:text-xl">
+                  <span className="block text-[15px] font-semibold leading-tight tracking-tight text-[var(--ink)] md:text-[16px]">
                     {item.label.replace(/^\d+\.\s*/, "")}
                   </span>
-                  <span className="mt-1 block text-base text-[var(--muted)]">
+                  <span className="mt-0.5 block text-[13px] font-medium text-[var(--muted)]">
                     {item.hint}
                   </span>
                 </span>

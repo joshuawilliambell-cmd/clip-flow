@@ -109,7 +109,7 @@ export function Timeline() {
 
   if (!video) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-8 text-center text-lg text-[var(--muted)]">
+      <div className="rounded-[var(--radius-md)] border border-dashed border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-8 text-center text-lg text-[var(--muted)]">
         Add a video in Step 1 to use the timeline.
       </div>
     );
@@ -178,7 +178,7 @@ export function Timeline() {
 
       <div
         ref={measure}
-        className="relative overflow-x-auto rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-3"
+        className="relative overflow-x-auto section-card bg-[var(--panel-soft)] p-3"
       >
         <div
           ref={contentRef}

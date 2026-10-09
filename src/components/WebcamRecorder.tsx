@@ -279,7 +279,7 @@ export function WebcamRecorder({
   const live = phase === "preview" || phase === "recording";
 
   return (
-    <div className="rounded-3xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
+    <div className="section-card bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
@@ -337,7 +337,7 @@ export function WebcamRecorder({
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
             <div className="space-y-3">
-              <div className="relative overflow-hidden rounded-2xl border-2 border-[var(--ink)] bg-black">
+              <div className="relative overflow-hidden section-card bg-black">
                 <video
                   ref={videoRef}
                   muted
@@ -346,7 +346,7 @@ export function WebcamRecorder({
                   className="aspect-video w-full object-cover scale-x-[-1]"
                 />
                 {phase === "recording" ? (
-                  <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
+                  <div className="absolute left-3 top-3 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
                     <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
                     Live · Rec {formatClock(seconds)}
                   </div>
@@ -408,7 +408,7 @@ export function WebcamRecorder({
           <p className="text-lg font-bold text-[var(--ink)]">
             Review your recording ({formatClock(seconds)})
           </p>
-          <div className="overflow-hidden rounded-2xl border-2 border-[var(--ink)] bg-black">
+          <div className="overflow-hidden section-card bg-black">
             <video
               src={reviewUrl}
               controls

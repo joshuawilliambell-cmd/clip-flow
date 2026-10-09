@@ -75,7 +75,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
   return (
     <div
       className={clsx(
-        "flex h-full min-h-[16rem] flex-col rounded-2xl border-2 border-[var(--ink)] bg-[var(--olive)] text-white",
+        "flex h-full min-h-[16rem] flex-col section-card bg-[var(--olive)] text-white",
         className,
       )}
     >
@@ -83,7 +83,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
         <div className="flex items-center gap-2">
           <ScrollText className="h-5 w-5 text-[var(--yellow)]" aria-hidden />
           <div>
-            <p className="text-lg font-extrabold">Teleprompter</p>
+            <p className="text-lg font-semibold">Teleprompter</p>
             <p className="text-sm font-semibold text-white/80">
               Script: {INTRO_SCRIPTS[teamMemberCount].title}
             </p>
@@ -161,7 +161,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
         )}
         aria-live="polite"
       >
-        <div className="mx-auto max-w-xl whitespace-pre-wrap font-extrabold tracking-wide">
+        <div className="mx-auto max-w-xl whitespace-pre-wrap font-semibold tracking-wide">
           {script.trim() || "Add a script above, then start recording."}
         </div>
         <div className="h-40" aria-hidden />

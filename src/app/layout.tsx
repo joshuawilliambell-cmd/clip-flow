@@ -1,23 +1,23 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Sora, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 
-const nunito = Nunito({
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
 });
 
-const nunitoDisplay = Nunito({
+const sora = Sora({
   subsets: ["latin"],
-  weight: ["800", "900"],
+  weight: ["500", "600", "700", "800"],
   variable: "--font-display",
 });
 
 export const metadata: Metadata = {
   title: "Love's Video Studio",
   description:
-    "Simple Love's-branded introduction video creator for Allego. Upload, add team photos, export an MP4.",
+    "Love's-branded introduction video creator for Allego. Upload, add team photos, export an MP4.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${nunito.variable} ${nunitoDisplay.variable} antialiased`}
+        className={`${sourceSans.variable} ${sora.variable} antialiased`}
       >
         {children}
       </body>

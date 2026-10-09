@@ -136,7 +136,7 @@ export function TeamPhotosStep() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="font-display text-4xl tracking-wide text-[var(--ink)] md:text-5xl">
+          <h2 className="step-title">
             Step 2: Add your team
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
@@ -262,7 +262,7 @@ export function TeamPhotosStep() {
               setDragging(false);
               void handleFiles(e.dataTransfer.files);
             }}
-            className={`rounded-2xl border-2 border-dashed px-4 py-3 text-center text-base ${
+            className={`rounded-[var(--radius-md)] border border-dashed px-4 py-3 text-center text-base ${
               dragging
                 ? "border-[var(--primary)] bg-[var(--yellow)]/40"
                 : "border-[var(--border)] bg-[var(--panel-soft)]"
@@ -313,7 +313,7 @@ export function TeamPhotosStep() {
                   }
                   clearSlotDrag();
                 }}
-                className={`flex gap-3 rounded-2xl border-2 bg-white p-4 transition ${
+                className={`flex gap-3 rounded-[var(--radius-md)] border bg-white p-4 transition ${
                   isDragging
                     ? "border-[var(--primary)] opacity-60"
                     : isDropTarget

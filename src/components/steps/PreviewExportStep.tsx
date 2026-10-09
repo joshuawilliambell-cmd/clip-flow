@@ -137,7 +137,7 @@ export function PreviewExportStep({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="font-display text-4xl tracking-wide text-[var(--ink)] md:text-5xl">
+          <h2 className="step-title">
             Step 3: Finish and download
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
@@ -174,7 +174,7 @@ export function PreviewExportStep({
         you need to) and music near 30%, then adjust.
       </div>
 
-      <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-5">
+      <section className="section-card bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-2">
             <div>
@@ -274,7 +274,7 @@ export function PreviewExportStep({
       <VideoPreview />
       <Timeline />
 
-      <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-5">
+      <section className="section-card bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-2">
             <div>
@@ -327,7 +327,7 @@ export function PreviewExportStep({
               <div
                 key={track.id}
                 className={clsx(
-                  "min-h-[8rem] rounded-2xl border-2 px-4 py-4 text-left transition",
+                  "min-h-[8rem] rounded-[var(--radius-md)] border px-4 py-4 text-left transition",
                   !musicEnabled && "opacity-40",
                   selected
                     ? "border-[var(--ink)] bg-[var(--yellow)]"
@@ -339,7 +339,7 @@ export function PreviewExportStep({
                     type="button"
                     disabled={!musicEnabled}
                     onClick={() => setMusicTrackId(track.id)}
-                    className="min-w-0 flex-1 text-left focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]"
+                    className="min-w-0 flex-1 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]"
                   >
                     <div className="flex items-center gap-2">
                       <Music2 className="h-5 w-5 shrink-0 text-[var(--primary)]" />
@@ -381,7 +381,7 @@ export function PreviewExportStep({
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <label className="block rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4">
+          <label className="block section-card bg-[var(--panel-soft)] p-4">
             <span className="flex items-center gap-2 text-lg font-bold text-[var(--ink)]">
               <Mic className="h-5 w-5 text-[var(--primary)]" />
               Your voice volume: {Math.round(videoVolume * 100)}%
@@ -407,7 +407,7 @@ export function PreviewExportStep({
             />
           </label>
 
-          <label className="block rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4">
+          <label className="block section-card bg-[var(--panel-soft)] p-4">
             <span className="flex items-center gap-2 text-lg font-bold text-[var(--ink)]">
               <Music2 className="h-5 w-5 text-[var(--primary)]" />
               Music volume: {Math.round(musicVolume * 100)}%
@@ -451,7 +451,7 @@ export function PreviewExportStep({
         </button>
       </div>
 
-      <div className="rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-5">
+      <div className="section-card bg-[var(--panel-soft)] p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="text-2xl font-bold text-[var(--ink)]">
@@ -514,7 +514,7 @@ export function PreviewExportStep({
           </p>
         ) : null}
 
-        <div className="mt-5 rounded-2xl border-2 border-[var(--ink)] bg-white px-4 py-4">
+        <div className="mt-5 section-card bg-white px-4 py-4">
           <p className="text-lg font-bold text-[var(--ink)]">After you download</p>
           <ol className="mt-2 list-decimal space-y-1 pl-6 text-base leading-relaxed text-[var(--ink)] md:text-lg">
             <li>Open Allego and upload your MP4.</li>

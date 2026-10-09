@@ -36,10 +36,10 @@ export function StartOverButton() {
       <button
         type="button"
         onClick={askStartOver}
-        className="inline-flex items-center gap-2 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-3 py-2 text-sm font-extrabold uppercase tracking-wide text-[var(--ink)] shadow-sm transition hover:bg-[var(--yellow-bright)]"
+        className="inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--ink)] bg-[var(--yellow)] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--ink)] transition hover:bg-[var(--yellow-bright)]"
         aria-haspopup="dialog"
       >
-        <RotateCcw className="h-4 w-4" />
+        <RotateCcw className="h-3.5 w-3.5" />
         Start over
       </button>
 
@@ -53,14 +53,14 @@ export function StartOverButton() {
             if (e.target === e.currentTarget) setConfirmOpen(false);
           }}
         >
-          <div className="w-full max-w-md rounded-2xl border-2 border-[var(--ink)] bg-white p-5 shadow-xl">
+          <div className="w-full max-w-md rounded-[var(--radius-lg)] border border-[var(--ink)] bg-white p-5 shadow-[var(--elevate)]">
             <h2
               id="start-over-title"
-              className="text-2xl font-bold text-[var(--ink)]"
+              className="font-display text-xl font-semibold tracking-tight text-[var(--ink)]"
             >
               Start over?
             </h2>
-            <p className="mt-3 text-lg text-[var(--muted)]">
+            <p className="mt-2.5 text-[15px] font-medium text-[var(--muted)]">
               {hasWork
                 ? "This clears your video, team photos, timeline, music settings, and thumbnail from this project. You cannot undo this."
                 : "This resets the studio back to a blank project on Step 1."}

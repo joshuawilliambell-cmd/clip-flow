@@ -199,7 +199,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
       <div
         ref={shellRef}
-        className="relative overflow-hidden rounded-2xl border-2 border-[var(--ink)] bg-black"
+        className="relative overflow-hidden section-card bg-black"
       >
         <div className={compact ? "aspect-video" : "aspect-video"}>
           {video ? (

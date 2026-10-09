@@ -56,12 +56,12 @@ export function HelpTip({
         aria-controls={tipId}
         onClick={() => setOpen((v) => !v)}
         className={clsx(
-          "inline-flex items-center justify-center rounded-full border-2 border-[var(--ink)] bg-[var(--yellow)] text-[var(--ink)] shadow-sm transition hover:brightness-95 focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--yellow)]",
-          size === "lg" ? "h-11 w-11" : "h-9 w-9",
+          "inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--ink)] bg-[var(--yellow)] text-[var(--ink)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
+          size === "lg" ? "h-9 w-9" : "h-8 w-8",
         )}
         title={`Help: ${title}`}
       >
-        <HelpCircle className={size === "lg" ? "h-6 w-6" : "h-5 w-5"} />
+        <HelpCircle className="h-4 w-4" />
         <span className="sr-only">Help: {title}</span>
       </button>
 
@@ -70,25 +70,25 @@ export function HelpTip({
           id={tipId}
           role="dialog"
           aria-label={title}
-          className="absolute left-1/2 top-[calc(100%+0.5rem)] z-50 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-2xl border-2 border-[var(--ink)] bg-white p-4 text-left shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
+          className="absolute left-1/2 top-[calc(100%+0.45rem)] z-50 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-white p-3.5 text-left shadow-[var(--elevate)]"
         >
           <div className="mb-2 flex items-start justify-between gap-3">
-            <p className="text-base font-bold leading-snug text-[var(--ink)] md:text-lg">
+            <p className="text-[15px] font-semibold leading-snug tracking-tight text-[var(--ink)]">
               {title}
             </p>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-full p-1 text-[var(--ink)] hover:bg-black/5"
+              className="rounded-[var(--radius-sm)] p-1 text-[var(--ink)] hover:bg-black/5"
               aria-label="Close tip"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
-          <div className="space-y-2 text-base leading-relaxed text-[var(--ink)] md:text-[1.05rem]">
+          <div className="space-y-2 text-[14px] leading-relaxed text-[var(--ink)]">
             {children}
           </div>
-          <div className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-l-2 border-t-2 border-[var(--ink)] bg-white" />
+          <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-[var(--ink)] bg-white" />
         </div>
       ) : null}
     </div>

@@ -29,14 +29,14 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
     : TEAM_MEMBER_COUNT_OPTIONS;
 
   return (
-    <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
+    <section className="section-card bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-white">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
             <Users className="h-6 w-6" />
           </span>
           <div>
-            <h3 className="text-2xl font-extrabold text-[var(--ink)]">
+            <h3 className="text-2xl font-semibold text-[var(--ink)]">
               {compact
                 ? "How many people on this thumbnail?"
                 : "How many teammates will you introduce?"}
@@ -78,13 +78,13 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
               type="button"
               onClick={() => setTeamMemberCount(count)}
               className={clsx(
-                "min-h-[5.5rem] rounded-2xl border-2 px-3 py-4 text-center transition focus-visible:outline focus-visible:outline-4 focus-visible:outline-[var(--olive)]",
+                "min-h-[5.5rem] rounded-[var(--radius-md)] border px-3 py-4 text-center transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
                 selected
                   ? "border-[var(--ink)] bg-[var(--yellow-bright)]"
                   : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
               )}
             >
-              <span className="block text-4xl font-extrabold text-[var(--ink)]">
+              <span className="block text-4xl font-semibold text-[var(--ink)]">
                 {count}
               </span>
               <span className="mt-1 block text-base font-bold text-[var(--ink)]">

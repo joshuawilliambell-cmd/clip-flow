@@ -276,7 +276,7 @@ export function ThumbnailCreator({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="font-display text-4xl tracking-wide text-[var(--ink)] md:text-5xl">
+          <h2 className="step-title">
             Create a Love&apos;s Team thumbnail
           </h2>
           <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
@@ -306,7 +306,7 @@ export function ThumbnailCreator({
       <TeamSizePicker compact />
 
       {/* Purpose */}
-      <section className="rounded-2xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] p-4 md:p-5">
+      <section className="section-card bg-[var(--panel-soft)] p-4 md:p-5">
         <h3 className="text-2xl font-bold text-[var(--ink)]">
           Why this thumbnail matters
         </h3>
@@ -328,7 +328,7 @@ export function ThumbnailCreator({
       </section>
 
       {/* How to */}
-      <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
+      <section className="section-card bg-white p-4 md:p-5">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <h3 className="text-2xl font-bold text-[var(--ink)]">
             How to use this tool
@@ -426,7 +426,7 @@ export function ThumbnailCreator({
               }
               clearSlotDrag();
             }}
-            className={`rounded-2xl border-2 bg-white p-4 transition ${
+            className={`rounded-[var(--radius-md)] border bg-white p-4 transition ${
               isDragging
                 ? "border-[var(--primary)] opacity-60"
                 : isDropTarget
@@ -561,7 +561,7 @@ export function ThumbnailCreator({
         })}
       </div>
 
-      <section className="rounded-2xl border-2 border-[var(--ink)] bg-white p-4 md:p-5">
+      <section className="section-card bg-white p-4 md:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-2xl font-bold text-[var(--ink)]">
