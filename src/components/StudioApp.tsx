@@ -3,7 +3,6 @@
 import { StudioProvider, useStudio } from "@/lib/studio-context";
 import { StepIndicator } from "@/components/StepIndicator";
 import { HelpTip } from "@/components/HelpTip";
-import { PurposeGuide } from "@/components/PurposeGuide";
 import { StartOverButton } from "@/components/StartOverButton";
 import { VideoUploadStep } from "@/components/steps/VideoUploadStep";
 import { PreviewExportStep } from "@/components/steps/PreviewExportStep";
