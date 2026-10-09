@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { StudioProvider, useStudio } from "@/lib/studio-context";
 import { StepIndicator } from "@/components/StepIndicator";
 import { HelpTip } from "@/components/HelpTip";
@@ -9,6 +10,12 @@ import { PreviewExportStep } from "@/components/steps/PreviewExportStep";
 
 function StudioShell() {
   const { step, setStep } = useStudio();
+
+  // After webcam/upload, Continue sits at the bottom of a long Step 1 — jump
+  // to the top so Step 2 (and Back / workflow jumps) open at the page start.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [step]);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
