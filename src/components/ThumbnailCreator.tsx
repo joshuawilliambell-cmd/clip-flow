@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
   Clapperboard,
   Download,
   GripVertical,
-  ImagePlus,
-  Trash2,
+  RotateCcw,
 } from "lucide-react";
-import { v4 as uuid } from "uuid";
 import { HelpTip } from "@/components/HelpTip";
 import { PhotoFrameEditor } from "@/components/PhotoFrameEditor";
 import {
@@ -23,10 +21,6 @@ import {
   defaultPhotoFit,
   type ThumbnailMember,
 } from "@/lib/thumbnail-template";
-import {
-  clearThumbnailMembers,
-  emptyThumbnailMembers,
-} from "@/lib/thumbnail-members";
 
 const SLOT_DRAG_TYPE = "application/x-loves-thumb-slot";
 
@@ -47,22 +41,36 @@ export function ThumbnailCreator({
   } = useStudio();
 
   const slotCount = Math.max(1, teamMemberCount) as 1 | 2 | 3 | 4;
+  const rosterKey = rosterPhotos
+    .map((p) => `${p.id}\0${p.url ?? ""}\0${p.name}\0${p.title}`)
+    .join("|");
 
-  // Keep context member list length aligned with the shared team size.
+  // Keep thumbnail cards in sync with Your teammates (photos, names, titles).
+  // Preserve face framing and left-to-right order when possible.
   useEffect(() => {
-    if (members.length === slotCount) return;
     setMembers((prev) => {
-      if (prev.length === slotCount) return prev;
-      if (prev.length > slotCount) {
-        const dropped = prev.slice(slotCount);
-        dropped.forEach((m) => {
-          if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-        });
-        return prev.slice(0, slotCount);
-      }
-      return [...prev, ...emptyThumbnailMembers(slotCount - prev.length)];
+      const fitById = new Map(prev.map((m) => [m.id, m.photoFit]));
+      const prevOrder = prev.map((m) => m.id);
+      const rosterIds = rosterPhotos.map((p) => p.id);
+      const orderedIds = [
+        ...prevOrder.filter((id) => rosterIds.includes(id)),
+        ...rosterIds.filter((id) => !prevOrder.includes(id)),
+      ];
+      const photoById = new Map(rosterPhotos.map((p) => [p.id, p]));
+      return orderedIds.map((id) => {
+        const photo = photoById.get(id)!;
+        return {
+          id: photo.id,
+          photoUrl: photo.url,
+          name: photo.name,
+          title: photo.title,
+          photoFit: fitById.get(id) ?? defaultPhotoFit(),
+        } satisfies ThumbnailMember;
+      });
     });
-  }, [slotCount, members.length, setMembers]);
+    // rosterKey encodes roster photo identity + fields; rosterPhotos is current.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rosterKey, setMembers]);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -70,12 +78,20 @@ export function ThumbnailCreator({
   const [status, setStatus] = useState<string | null>(null);
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
-  const fileRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   const filledCount = useMemo(
-    () => members.filter((m) => m.photoUrl || m.name.trim() || m.title.trim()).length,
+    () =>
+      members.filter((m) => m.photoUrl || m.name.trim() || m.title.trim())
+        .length,
     [members],
   );
+
+  const membersKey = members
+    .map(
+      (m) =>
+        `${m.id}\0${m.photoUrl ?? ""}\0${m.name}\0${m.title}\0${m.photoFit.scale}\0${m.photoFit.focusX}\0${m.photoFit.focusY}`,
+    )
+    .join("|");
 
   useEffect(() => {
     let cancelled = false;
@@ -84,12 +100,14 @@ export function ThumbnailCreator({
         try {
           const canvas = await renderTeamThumbnail(members);
           if (cancelled) return;
-          const url = canvas.toDataURL("image/png");
-          setPreviewUrl(url);
+          setPreviewUrl(canvas.toDataURL("image/png"));
+          setError(null);
         } catch (e) {
           if (!cancelled) {
             setError(
-              e instanceof Error ? e.message : "Could not update thumbnail preview.",
+              e instanceof Error
+                ? e.message
+                : "Could not update thumbnail preview.",
             );
           }
         }
@@ -99,10 +117,14 @@ export function ThumbnailCreator({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [members]);
+    // membersKey tracks framing + roster fields without stale closures.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [membersKey]);
 
-  const updateMember = (id: string, patch: Partial<ThumbnailMember>) => {
-    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
+  const updateFit = (id: string, photoFit: ThumbnailMember["photoFit"]) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, photoFit } : m)),
+    );
   };
 
   const clearSlotDrag = () => {
@@ -128,87 +150,12 @@ export function ThumbnailCreator({
     });
   };
 
-  const onPickPhoto = async (id: string, file: File | undefined) => {
-    if (!file) return;
-    setError(null);
-    setStatus(null);
-    if (
-      !/^image\/(jpeg|png|webp)$/i.test(file.type) &&
-      !/\.(jpe?g|png|webp)$/i.test(file.name)
-    ) {
-      setError("Please upload a JPG, PNG, or WebP headshot.");
-      return;
-    }
-    const url = URL.createObjectURL(file);
+  const resetFraming = () => {
     setMembers((prev) =>
-      prev.map((m) => {
-        if (m.id !== id) return m;
-        if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-        const guessed = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
-        return {
-          ...m,
-          photoUrl: url,
-          name: m.name || guessed,
-          photoFit: defaultPhotoFit(),
-        };
-      }),
+      prev.map((m) => ({ ...m, photoFit: defaultPhotoFit() })),
     );
-  };
-
-  const clearPhoto = (id: string) => {
-    setMembers((prev) =>
-      prev.map((m) => {
-        if (m.id !== id) return m;
-        if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-        return { ...m, photoUrl: null, photoFit: defaultPhotoFit() };
-      }),
-    );
-  };
-
-  const pullFromRoster = async () => {
-    setBusy(true);
+    setStatus("Face framing reset. Drag and zoom again if needed.");
     setError(null);
-    setStatus(null);
-    try {
-      const next: ThumbnailMember[] = [];
-      for (let i = 0; i < slotCount; i += 1) {
-        const photo = rosterPhotos[i];
-        let photoUrl: string | null = null;
-        if (photo?.url) {
-          const res = await fetch(photo.url);
-          if (!res.ok) throw new Error("Could not copy a teammate photo.");
-          const blob = await res.blob();
-          photoUrl = URL.createObjectURL(blob);
-        }
-        next.push({
-          id: uuid(),
-          photoUrl,
-          name: photo?.name?.trim() ?? "",
-          title: photo?.title?.trim() ?? "",
-          photoFit: defaultPhotoFit(),
-        });
-      }
-      if (!next.some((m) => m.photoUrl || m.name.trim() || m.title.trim())) {
-        throw new Error(
-          "Add teammate photos or names above first, then try again.",
-        );
-      }
-      setMembers((prev) => {
-        prev.forEach((m) => {
-          if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-        });
-        return next;
-      });
-      setStatus(
-        "Pulled photos, names, and titles from your teammates above. Adjust face framing if needed.",
-      );
-    } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Could not pull teammates from above.",
-      );
-    } finally {
-      setBusy(false);
-    }
   };
 
   const hasContent = () =>
@@ -220,7 +167,9 @@ export function ThumbnailCreator({
     setStatus(null);
     try {
       if (!hasContent()) {
-        throw new Error("Add at least one teammate photo or name first.");
+        throw new Error(
+          "Add teammate photos and names above in Your teammates first.",
+        );
       }
       const blob = await exportTeamThumbnailPng(members);
       const url = URL.createObjectURL(blob);
@@ -229,7 +178,9 @@ export function ThumbnailCreator({
       a.download = "loves-team-thumbnail.png";
       a.click();
       URL.revokeObjectURL(url);
-      setStatus("PNG downloaded. You can also add it to the start of your video.");
+      setStatus(
+        "PNG downloaded. You can also add it to the start of your video.",
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not download thumbnail.");
     } finally {
@@ -243,7 +194,9 @@ export function ThumbnailCreator({
     setStatus(null);
     try {
       if (!hasContent()) {
-        throw new Error("Add at least one teammate photo or name first.");
+        throw new Error(
+          "Add teammate photos and names above in Your teammates first.",
+        );
       }
       const blob = await exportTeamThumbnailPng(members);
       const url = URL.createObjectURL(blob);
@@ -261,6 +214,8 @@ export function ThumbnailCreator({
     }
   };
 
+  if (teamMemberCount === 0) return null;
+
   return (
     <section className="section-card space-y-4 bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -269,50 +224,43 @@ export function ThumbnailCreator({
             Love&apos;s Team thumbnail
           </h3>
           <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
-            Optional · {slotCount} people · {THUMBNAIL_TEMPLATE.introDurationSeconds}
-            s video opener or download PNG. Frame faces here — order can differ
-            from the intro order above.
+            Optional · uses Your teammates above ·{" "}
+            {THUMBNAIL_TEMPLATE.introDurationSeconds}s video opener or download
+            PNG. Frame faces here — thumbnail order can differ from intro order.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
+          <p>
+            Photos, names, and titles come from <strong>Your teammates</strong>{" "}
+            above. Edit them there — this section only frames faces and sets
+            left-to-right order on the thumbnail.
+          </p>
           <p>
             Optional Allego opener: shows for{" "}
             {THUMBNAIL_TEMPLATE.introDurationSeconds}s then your talking video
             continues.
           </p>
-          <p>
-            Tap <strong>Use teammates from above</strong> to copy photos and
-            names, then drag/zoom each face. Preview → Add to video or Download
-            PNG.
-          </p>
-          <p>Drag card grips to set left-to-right order on the thumbnail.</p>
         </HelpTip>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={() => void pullFromRoster()}
-          disabled={busy}
-          className="btn-yellow"
-        >
-          <ImagePlus className="h-5 w-5" />
-          {busy ? "Working…" : "Use teammates from above"}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setMembers((prev) => {
-              clearThumbnailMembers(prev);
-              return emptyThumbnailMembers(slotCount);
-            });
-            setStatus(null);
-          }}
-          className="btn-secondary"
-        >
-          Clear all
-        </button>
-      </div>
+      {filledCount === 0 ? (
+        <div className="how-banner">
+          Add photos and names in <strong>Your teammates</strong> above — they
+          show up here automatically for framing.
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={resetFraming}
+            disabled={busy}
+            className="btn-secondary"
+          >
+            <RotateCcw className="h-5 w-5" />
+            Reset face framing
+          </button>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         {members.map((member, index) => {
@@ -321,162 +269,110 @@ export function ThumbnailCreator({
             dropTargetIndex === index &&
             dragFromIndex !== null &&
             dragFromIndex !== index;
+          const label =
+            member.name.trim() || `Teammate ${index + 1}`;
           return (
-          <article
-            key={member.id}
-            onDragOver={(e) => {
-              if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
-              e.preventDefault();
-              e.dataTransfer.dropEffect = "move";
-              setDropTargetIndex(index);
-            }}
-            onDragLeave={(e) => {
-              if (e.currentTarget.contains(e.relatedTarget as Node)) return;
-              setDropTargetIndex((current) =>
-                current === index ? null : current,
-              );
-            }}
-            onDrop={(e) => {
-              if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
-              e.preventDefault();
-              const raw = e.dataTransfer.getData(SLOT_DRAG_TYPE);
-              const from = Number.parseInt(raw, 10);
-              if (!Number.isNaN(from)) {
-                reorderMembers(from, index);
-              }
-              clearSlotDrag();
-            }}
-            className={`rounded-[var(--radius-md)] border bg-white p-4 transition ${
-              isDragging
-                ? "border-[var(--primary)] opacity-60"
-                : isDropTarget
-                  ? "border-[var(--primary)] bg-[var(--yellow)]/30 ring-2 ring-[var(--primary)]"
-                  : "border-[var(--ink)]"
-            }`}
-          >
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  draggable
-                  aria-label={`Drag to reorder teammate ${index + 1}`}
-                  title="Drag to reorder"
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData(SLOT_DRAG_TYPE, String(index));
-                    e.dataTransfer.effectAllowed = "move";
-                    setDragFromIndex(index);
-                  }}
-                  onDragEnd={clearSlotDrag}
-                  className="flex h-10 w-10 cursor-grab items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-[var(--panel-soft)] text-[var(--ink)] active:cursor-grabbing"
-                >
-                  <GripVertical className="h-5 w-5" />
-                </button>
-                <div className="flex flex-col gap-1">
+            <article
+              key={member.id}
+              onDragOver={(e) => {
+                if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                setDropTargetIndex(index);
+              }}
+              onDragLeave={(e) => {
+                if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+                setDropTargetIndex((current) =>
+                  current === index ? null : current,
+                );
+              }}
+              onDrop={(e) => {
+                if (!e.dataTransfer.types.includes(SLOT_DRAG_TYPE)) return;
+                e.preventDefault();
+                const raw = e.dataTransfer.getData(SLOT_DRAG_TYPE);
+                const from = Number.parseInt(raw, 10);
+                if (!Number.isNaN(from)) {
+                  reorderMembers(from, index);
+                }
+                clearSlotDrag();
+              }}
+              className={`rounded-[var(--radius-md)] border bg-[var(--panel-soft)] p-4 transition ${
+                isDragging
+                  ? "border-[var(--primary)] opacity-60"
+                  : isDropTarget
+                    ? "border-[var(--primary)] bg-[var(--yellow)]/30 ring-2 ring-[var(--primary)]"
+                    : "border-[var(--ink)]"
+              }`}
+            >
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
                   <button
                     type="button"
-                    aria-label={`Move teammate ${index + 1} up`}
-                    disabled={index === 0}
-                    onClick={() => reorderMembers(index, index - 1)}
-                    className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                    draggable
+                    aria-label={`Drag to reorder ${label}`}
+                    title="Drag to reorder"
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData(SLOT_DRAG_TYPE, String(index));
+                      e.dataTransfer.effectAllowed = "move";
+                      setDragFromIndex(index);
+                    }}
+                    onDragEnd={clearSlotDrag}
+                    className="flex h-10 w-10 shrink-0 cursor-grab items-center justify-center rounded-lg border-2 border-[var(--ink)] bg-white text-[var(--ink)] active:cursor-grabbing"
                   >
-                    <ChevronUp className="h-4 w-4" />
+                    <GripVertical className="h-5 w-5" />
                   </button>
-                  <button
-                    type="button"
-                    aria-label={`Move teammate ${index + 1} down`}
-                    disabled={index >= members.length - 1}
-                    onClick={() => reorderMembers(index, index + 1)}
-                    className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      aria-label={`Move ${label} up`}
+                      disabled={index === 0}
+                      onClick={() => reorderMembers(index, index - 1)}
+                      className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Move ${label} down`}
+                      disabled={index >= members.length - 1}
+                      onClick={() => reorderMembers(index, index + 1)}
+                      className="flex h-8 w-9 items-center justify-center rounded-md border-2 border-[var(--ink)] bg-white text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-35"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-[15px] font-bold text-[var(--ink)]">
+                      {label}
+                    </p>
+                    <p className="truncate text-[13px] font-medium text-[var(--muted)]">
+                      {member.title.trim() || "Job title from Your teammates"}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-lg font-bold text-[var(--ink)]">
-                  Teammate {index + 1}
-                </p>
+                <HelpTip title={label}>
+                  <p>
+                    Name and title come from Your teammates. Drag or zoom the
+                    face so it fills the tall frame.
+                  </p>
+                  <p>Use the grip or ↑ ↓ for left-to-right thumbnail order.</p>
+                </HelpTip>
               </div>
-              <HelpTip title={`Teammate ${index + 1}`}>
-                <p>Upload a headshot, then drag and zoom so the face fills the tall frame.</p>
-                <p>Drag the grip or use ↑ ↓ to change left-to-right order.</p>
-                <p>Leave a card empty if you have fewer than four people.</p>
-              </HelpTip>
-            </div>
 
-            <div className="grid gap-4 sm:grid-cols-[auto_1fr]">
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => fileRefs.current[index]?.click()}
-                  className="relative flex h-28 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[var(--ink)] bg-[#eef1f6] sm:w-40"
-                >
-                  {member.photoUrl ? (
-                    <span className="text-sm font-semibold text-[var(--ink)]">
-                      Change photo
-                    </span>
-                  ) : (
-                    <span className="flex flex-col items-center gap-2 px-2 text-center text-sm font-semibold text-[var(--ink)]">
-                      <ImagePlus className="h-6 w-6 text-[var(--primary)]" />
-                      Add headshot
-                    </span>
-                  )}
-                </button>
-                <input
-                  ref={(el) => {
-                    fileRefs.current[index] = el;
-                  }}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                  className="hidden"
-                  onChange={(e) => {
-                    void onPickPhoto(member.id, e.target.files?.[0]);
-                    e.currentTarget.value = "";
-                  }}
+              {member.photoUrl ? (
+                <PhotoFrameEditor
+                  photoUrl={member.photoUrl}
+                  fit={member.photoFit}
+                  onChange={(photoFit) => updateFit(member.id, photoFit)}
                 />
-
-                {member.photoUrl ? (
-                  <PhotoFrameEditor
-                    photoUrl={member.photoUrl}
-                    fit={member.photoFit}
-                    onChange={(photoFit) => updateMember(member.id, { photoFit })}
-                  />
-                ) : null}
-              </div>
-
-              <div className="min-w-0 space-y-3">
-                <label className="block">
-                  <span className="field-label">Name</span>
-                  <input
-                    className="field-input"
-                    value={member.name}
-                    placeholder="Example: Jared Thueson"
-                    onChange={(e) =>
-                      updateMember(member.id, { name: e.target.value })
-                    }
-                  />
-                </label>
-                <label className="block">
-                  <span className="field-label">Job title</span>
-                  <input
-                    className="field-input"
-                    value={member.title}
-                    placeholder="Example: Total Truck Care Account Manager"
-                    onChange={(e) =>
-                      updateMember(member.id, { title: e.target.value })
-                    }
-                  />
-                </label>
-                {member.photoUrl ? (
-                  <button
-                    type="button"
-                    onClick={() => clearPhoto(member.id)}
-                    className="inline-flex items-center gap-2 text-base font-semibold text-[var(--primary)]"
-                  >
-                    <Trash2 className="h-4 w-4" /> Remove photo
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          </article>
+              ) : (
+                <div className="rounded-xl border-2 border-dashed border-[var(--ink)] bg-white px-3 py-6 text-center text-[14px] font-medium text-[var(--muted)]">
+                  Add a headshot for this person in{" "}
+                  <strong className="text-[var(--ink)]">Your teammates</strong>{" "}
+                  above.
+                </div>
+              )}
+            </article>
           );
         })}
       </div>

@@ -14,23 +14,21 @@ export function emptyThumbnailMembers(count: number): ThumbnailMember[] {
   }));
 }
 
+/**
+ * Resize thumbnail slots. Photo URLs come from the Your teammates roster,
+ * so we never revoke them here.
+ */
 export function resizeThumbnailMembers(
   prev: ThumbnailMember[],
   count: number,
 ): ThumbnailMember[] {
   const nextCount = Math.max(1, count);
   if (prev.length === nextCount) return prev;
-  if (prev.length > nextCount) {
-    prev.slice(nextCount).forEach((m) => {
-      if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-    });
-    return prev.slice(0, nextCount);
-  }
+  if (prev.length > nextCount) return prev.slice(0, nextCount);
   return [...prev, ...emptyThumbnailMembers(nextCount - prev.length)];
 }
 
-export function clearThumbnailMembers(members: ThumbnailMember[]): void {
-  members.forEach((m) => {
-    if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-  });
+/** No-op cleanup — roster owns headshot object URLs. */
+export function clearThumbnailMembers(_members: ThumbnailMember[]): void {
+  // Intentionally empty.
 }

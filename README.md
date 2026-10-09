@@ -45,7 +45,7 @@ You can also import the Git repo in the [Vercel dashboard](https://vercel.com/ne
 2. **Finish & Download** — turn the opening thumbnail on/off, choose music, set volumes, **Export to MP4**
 
 ### Team thumbnail (in Step 1)
-After adding teammates, use **Use teammates from above** (or upload headshots), frame faces, then **Add to start of video** and/or **Download PNG**.
+After adding teammates, frame faces on the thumbnail (photos/names/titles come from Your teammates), then **Add to start of video** and/or **Download PNG**.
 
 ## Stack
 
