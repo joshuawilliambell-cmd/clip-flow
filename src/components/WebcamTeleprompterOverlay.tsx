@@ -9,7 +9,6 @@ import {
   TELEPROMPTER_TICK_MS,
   clampTeleprompterSpeed,
   scriptForTeam,
-  suggestedPixelsPerTickForScript,
 } from "@/lib/intro-script";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
@@ -26,6 +25,7 @@ type WebcamTeleprompterOverlayProps = {
  * Script sits near the top of the frame so eyes stay toward the webcam
  * (usually above the monitor) instead of the screen center. Overlay is
  * DOM-only and is never burned into MediaRecorder.
+ * Scroll speed matches the Script teleprompter practice area.
  */
 export function WebcamTeleprompterOverlay({
   active,
@@ -38,6 +38,9 @@ export function WebcamTeleprompterOverlay({
     speakerName,
     speakerTitle,
     speakerDuties,
+    teleprompterPixelsPerTick: pixelsPerTick,
+    setTeleprompterPixelsPerTick,
+    setTeleprompterSpeedOverridden,
   } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const pixelsPerTickRef = useRef(0);
@@ -58,16 +61,12 @@ export function WebcamTeleprompterOverlay({
 
   const [enabled, setEnabled] = useState(true);
   const [scrolling, setScrolling] = useState(false);
-  const [pixelsPerTick, setPixelsPerTick] = useState(() =>
-    suggestedPixelsPerTickForScript(script, true),
-  );
 
   pixelsPerTickRef.current = pixelsPerTick;
 
-  // Keep paced default when the official script changes (unless user is mid-scroll).
+  // Reset scroll position when the official script text changes.
   useEffect(() => {
     if (scrolling) return;
-    setPixelsPerTick(suggestedPixelsPerTickForScript(script, true));
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     scrollCarryRef.current = 0;
   }, [script, scrolling]);
@@ -128,9 +127,8 @@ export function WebcamTeleprompterOverlay({
       <div className="relative z-20 mx-auto flex w-full max-w-4xl flex-col px-2 pt-2 md:px-4 md:pt-3">
         {!recording ? (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2.5 py-1.5 text-center text-[11px] font-semibold leading-snug text-white md:text-[12px]">
-            Tip: do 1–2 practice recordings and tweak Speed below until the
-            scroll matches your pace. Reading stays at the top so you look
-            toward the webcam.
+            Scroll speed matches Script teleprompter practice above. Do 1–2
+            practice takes if you still need to tweak Speed.
           </p>
         ) : null}
 
@@ -216,9 +214,12 @@ export function WebcamTeleprompterOverlay({
             step={TELEPROMPTER_SPEED_STEP}
             value={pixelsPerTick}
             disabled={!enabled}
-            onChange={(e) =>
-              setPixelsPerTick(clampTeleprompterSpeed(Number(e.target.value)))
-            }
+            onChange={(e) => {
+              setTeleprompterPixelsPerTick(
+                clampTeleprompterSpeed(Number(e.target.value)),
+              );
+              setTeleprompterSpeedOverridden(true);
+            }}
             aria-label="Webcam teleprompter scroll speed"
             className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/30 accent-[var(--yellow)] disabled:opacity-40"
           />

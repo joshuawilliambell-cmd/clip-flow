@@ -16,6 +16,10 @@ import {
   type TeamMemberCount,
 } from "@/lib/template";
 import {
+  clampTeleprompterSpeed,
+  suggestedPixelsPerTickForTeamCount,
+} from "@/lib/intro-script";
+import {
   autoArrangePhotos,
   getOutputDuration,
   movePhotoBlock,
@@ -70,6 +74,14 @@ type StudioContextValue = {
   speakerPhotoUrl: string | null;
   setSpeakerPhotoFromFile: (file: File) => Promise<void>;
   clearSpeakerPhoto: () => void;
+  /**
+   * Shared teleprompter scroll speed (px per tick). Tuned in Script
+   * teleprompter practice, then reused on the webcam preview overlay.
+   */
+  teleprompterPixelsPerTick: number;
+  teleprompterSpeedOverridden: boolean;
+  setTeleprompterPixelsPerTick: (pixelsPerTick: number) => void;
+  setTeleprompterSpeedOverridden: (overridden: boolean) => void;
   musicEnabled: boolean;
   musicVolume: number;
   videoVolume: number;
@@ -263,6 +275,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [speakerTitle, setSpeakerTitle] = useState("");
   const [speakerDuties, setSpeakerDuties] = useState("");
   const [speakerPhotoUrl, setSpeakerPhotoUrl] = useState<string | null>(null);
+  const [teleprompterPixelsPerTick, setTeleprompterPixelsPerTickState] =
+    useState(() =>
+      suggestedPixelsPerTickForTeamCount(
+        VIDEO_TEMPLATE.defaultTeamMemberCount,
+      ),
+    );
+  const [teleprompterSpeedOverridden, setTeleprompterSpeedOverridden] =
+    useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState<number>(
     VIDEO_TEMPLATE.defaultMusicVolume,
@@ -327,6 +347,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
       return null;
     });
+  }, []);
+
+  const setTeleprompterPixelsPerTick = useCallback((pixelsPerTick: number) => {
+    setTeleprompterPixelsPerTickState(clampTeleprompterSpeed(pixelsPerTick));
   }, []);
 
   const outputDuration = getOutputDuration(trimStart, trimEnd);
@@ -420,6 +444,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
       return null;
     });
+    setTeleprompterPixelsPerTickState(
+      suggestedPixelsPerTickForTeamCount(
+        VIDEO_TEMPLATE.defaultTeamMemberCount,
+      ),
+    );
+    setTeleprompterSpeedOverridden(false);
     setMusicEnabled(true);
     setMusicVolume(VIDEO_TEMPLATE.defaultMusicVolume);
     setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);
@@ -839,6 +869,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       speakerPhotoUrl,
       setSpeakerPhotoFromFile,
       clearSpeakerPhoto,
+      teleprompterPixelsPerTick,
+      teleprompterSpeedOverridden,
+      setTeleprompterPixelsPerTick,
+      setTeleprompterSpeedOverridden,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -894,6 +928,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       speakerTitle,
       speakerDuties,
       speakerPhotoUrl,
+      teleprompterPixelsPerTick,
+      teleprompterSpeedOverridden,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -915,6 +951,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       clearIntroThumbnail,
       setSpeakerPhotoFromFile,
       clearSpeakerPhoto,
+      setTeleprompterPixelsPerTick,
       setVideoFromFile,
       clearVideo,
       setTrim,

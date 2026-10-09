@@ -289,8 +289,9 @@ export function WebcamRecorder({
             </h3>
           </div>
           <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-            Optional — script scrolls at the top of your live preview so you
-            look toward the webcam (not saved into the video)
+            Optional — uses the scroll speed from Script teleprompter practice
+            above; text stays at the top near the webcam (not saved into the
+            video)
           </p>
         </div>
         <HelpTip title="Webcam recording" size="lg">

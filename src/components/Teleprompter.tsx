@@ -45,6 +45,10 @@ export function Teleprompter({
     speakerName,
     speakerTitle,
     speakerDuties,
+    teleprompterPixelsPerTick: pixelsPerTick,
+    teleprompterSpeedOverridden: speedOverridden,
+    setTeleprompterPixelsPerTick,
+    setTeleprompterSpeedOverridden,
   } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -76,10 +80,6 @@ export function Teleprompter({
   const [customScript, setCustomScript] = useState("");
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [pixelsPerTick, setPixelsPerTick] = useState(() =>
-    suggestedPixelsPerTickForScript(officialScript),
-  );
-  const [speedOverridden, setSpeedOverridden] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [fontLarge, setFontLarge] = useState(true);
   const [scrollDistancePx, setScrollDistancePx] = useState(0);
@@ -105,9 +105,12 @@ export function Teleprompter({
     source === "official" ? script : customScript.trim() || script;
 
   // Default scroll speed ~60s for the active script (unless user overrode).
+  // Writes into shared studio speed so the webcam overlay matches practice.
   useEffect(() => {
     if (speedOverriddenRef.current) return;
-    setPixelsPerTick(suggestedPixelsPerTickForScript(displayScript, fontLarge));
+    setTeleprompterPixelsPerTick(
+      suggestedPixelsPerTickForScript(displayScript, fontLarge),
+    );
 
     // Refine from real layout once the scroller has overflow.
     const id = window.requestAnimationFrame(() => {
@@ -117,12 +120,19 @@ export function Teleprompter({
       const distance = el.scrollHeight - el.clientHeight;
       setScrollDistancePx(Math.max(0, distance));
       if (distance <= 2) return;
-      setPixelsPerTick(
+      setTeleprompterPixelsPerTick(
         idealPixelsPerTickForDistance(distance, TARGET_INTRO_SECONDS),
       );
     });
     return () => window.cancelAnimationFrame(id);
-  }, [displayScript, fontLarge, teamMemberCount, source, speedOverridden]);
+  }, [
+    displayScript,
+    fontLarge,
+    teamMemberCount,
+    source,
+    speedOverridden,
+    setTeleprompterPixelsPerTick,
+  ]);
 
   // Keep estimated duration in sync with layout even after the user overrides speed.
   useEffect(() => {
@@ -177,7 +187,7 @@ export function Teleprompter({
     setSource("official");
     setScript(officialScript);
     setUploadError(null);
-    setSpeedOverridden(false);
+    setTeleprompterSpeedOverridden(false);
     resetScroll();
   };
 
@@ -212,7 +222,7 @@ export function Teleprompter({
       setScript(cleaned);
       setSource("custom");
       setUploadName(file.name);
-      setSpeedOverridden(false);
+      setTeleprompterSpeedOverridden(false);
       resetScroll();
     } catch {
       setUploadError("Could not read that file.");
@@ -220,12 +230,12 @@ export function Teleprompter({
   };
 
   const onSpeedSlider = (value: number) => {
-    setPixelsPerTick(clampTeleprompterSpeed(value));
-    setSpeedOverridden(true);
+    setTeleprompterPixelsPerTick(clampTeleprompterSpeed(value));
+    setTeleprompterSpeedOverridden(true);
   };
 
   const restorePacedSpeed = () => {
-    setSpeedOverridden(false);
+    setTeleprompterSpeedOverridden(false);
   };
 
   const paceSeconds = estimatedScrollSeconds(scrollDistancePx, pixelsPerTick);
@@ -392,10 +402,10 @@ export function Teleprompter({
                       setCustomScript(value);
                       setSource("custom");
                       setUploadName(null);
-                      setSpeedOverridden(false);
+                      setTeleprompterSpeedOverridden(false);
                     } else {
                       setCustomScript(value);
-                      setSpeedOverridden(false);
+                      setTeleprompterSpeedOverridden(false);
                     }
                   }}
                   rows={5}

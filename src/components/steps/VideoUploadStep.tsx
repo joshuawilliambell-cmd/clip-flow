@@ -94,24 +94,34 @@ export function VideoUploadStep() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              Script teleprompter
+              Script teleprompter · practice
             </h3>
             <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
-              Works with webcam or a phone on a tripod — leave this scrolling on
-              your computer screen behind the phone, then upload the recording.
+              Practice area — fine-tune your script and scroll speed here before
+              you record. The speed you set carries over to the webcam
+              teleprompter.
             </p>
           </div>
-          <HelpTip title="Phone on a tripod">
+          <HelpTip title="Practice teleprompter">
             <p>
-              Set your phone on a desk tripod facing you. Keep this browser
-              window on the computer behind the phone.
+              Use this section to rehearse: pick the official or uploaded
+              script, adjust <strong>scroll speed</strong>, and tap{" "}
+              <strong>Scroll</strong> until it matches how you talk.
             </p>
             <p>
-              Pick the official or uploaded script, set speed, tap{" "}
-              <strong>Scroll</strong>, then record on your phone. Upload the
-              file when you are done.
+              Your speed setting automatically applies when you record with the
+              webcam below (top-of-preview teleprompter).
+            </p>
+            <p>
+              Phone on a tripod? Leave this panel scrolling on your computer
+              screen behind the phone, then upload the recording.
             </p>
           </HelpTip>
+        </div>
+        <div className="how-banner">
+          <strong>Practice here first.</strong> Dial in script wording and
+          scroll speed — those settings apply to the webcam teleprompter when
+          you record.
         </div>
         <Teleprompter />
       </section>
