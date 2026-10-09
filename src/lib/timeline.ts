@@ -30,7 +30,11 @@ export function formatClock(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-/** Place filled photos sequentially; empty slots stay at the end unused. */
+/**
+ * Place filled photos at the preferred Allego defaults (23s / 35s / 47s / 56s,
+ * 10s each). On shorter clips, starts are clamped and durations shorten so
+ * bars still fit without overlapping. Empty slots stay unused. Users can drag.
+ */
 export function autoArrangePhotos(
   photos: TeamPhoto[],
   timelineDuration: number,
@@ -41,35 +45,45 @@ export function autoArrangePhotos(
   const empty = photos.filter((p) => !p.url);
   if (filled.length === 0) return photos;
 
-  const start = Math.min(
-    VIDEO_TEMPLATE.photoStartOffsetSeconds,
-    Math.max(0, timelineDuration - MIN),
-  );
-  const available = Math.max(0, timelineDuration - start);
   const defaultDur = VIDEO_TEMPLATE.defaultPhotoDurationSeconds;
+  const defaultStarts = VIDEO_TEMPLATE.defaultPhotoStartSeconds;
 
-  let duration: number = defaultDur;
-  if (filled.length * defaultDur > available) {
-    duration = Math.max(MIN, available / filled.length);
+  // Very short videos: pack evenly from the start.
+  if (timelineDuration < defaultStarts[0] + MIN) {
+    const duration = Math.max(MIN, timelineDuration / filled.length);
+    let cursor = 0;
+    const packed = filled.map((photo) => {
+      const start = clamp(cursor, 0, Math.max(0, timelineDuration - MIN));
+      const dur = clamp(duration, MIN, timelineDuration - start);
+      cursor = start + dur;
+      return {
+        ...photo,
+        startSeconds: roundToSecond(start),
+        durationSeconds: roundToSecond(dur),
+      };
+    });
+    return [...packed, ...empty.map((p) => ({ ...p }))];
   }
 
-  let cursor = start;
-  const arranged = filled.map((photo) => {
-    const remaining = Math.max(0, timelineDuration - cursor);
-    const dur = Math.min(duration, remaining);
-    const next: TeamPhoto = {
+  let previousEnd = 0;
+  const arranged = filled.map((photo, index) => {
+    const preferred =
+      defaultStarts[Math.min(index, defaultStarts.length - 1)] ??
+      defaultStarts[0];
+    // Honor the cue when possible; nudge forward only to avoid overlap.
+    let start = Math.max(preferred, previousEnd);
+    start = clamp(start, 0, Math.max(0, timelineDuration - MIN));
+    const duration = clamp(
+      defaultDur,
+      MIN,
+      Math.max(MIN, timelineDuration - start),
+    );
+    previousEnd = start + duration;
+    return {
       ...photo,
-      startSeconds: roundToSecond(cursor),
-      durationSeconds: roundToSecond(Math.max(MIN, dur)),
+      startSeconds: roundToSecond(start),
+      durationSeconds: roundToSecond(duration),
     };
-    cursor = next.startSeconds + next.durationSeconds;
-    if (cursor > timelineDuration) {
-      next.durationSeconds = roundToSecond(
-        Math.max(MIN, timelineDuration - next.startSeconds),
-      );
-      cursor = next.startSeconds + next.durationSeconds;
-    }
-    return next;
   });
 
   return [...arranged, ...empty.map((p) => ({ ...p }))];
@@ -188,7 +202,7 @@ export function reorderPhotos(
   next.splice(toIndex, 0, moved);
 
   const baseStart =
-    next[0]?.startSeconds ?? VIDEO_TEMPLATE.photoStartOffsetSeconds;
+    next[0]?.startSeconds ?? VIDEO_TEMPLATE.defaultPhotoStartSeconds[0];
   let cursor = Math.min(baseStart, Math.max(0, timelineDuration - MIN));
 
   return next.map((photo) => {

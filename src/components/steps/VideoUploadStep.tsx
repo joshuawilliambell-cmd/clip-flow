@@ -276,13 +276,17 @@ export function VideoUploadStep() {
               </button>
               <HelpTip title="Photo timing">
                 <p>
-                  Photos default to{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s each. Drag the
-                  ends of a timeline bar to change length.
+                  Defaults: teammate 1 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[0]}s, 2 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[1]}s, 3 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[2]}s, 4 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[3]}s — each{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s long. Drag bars
+                  or their ends anytime to change.
                 </p>
                 <p>
-                  Auto Arrange lines them up one after another from the start of
-                  your trim.
+                  <strong>Auto Arrange Photos</strong> restores those default
+                  cue points (or packs them on shorter videos).
                 </p>
               </HelpTip>
             </div>

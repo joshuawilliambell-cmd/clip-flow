@@ -175,9 +175,9 @@ export function Timeline() {
               end. Gray areas are discarded.
             </p>
             <p>
-              <strong>Track 2 (colored bars)</strong> are team photos. Drag one
-              photo bar <strong>onto another</strong> to change the order they
-              appear. Drag a bar&apos;s ends to make it shorter or longer.
+              <strong>Track 2 (colored bars)</strong> are team photos. Defaults
+              are about 23s, 35s, 47s, and 56s (10s each). Drag one bar{" "}
+              <strong>onto another</strong> to reorder, or drag ends to resize.
             </p>
             <p>
               Drag the <strong>red play line</strong> (ball on top) to jump to

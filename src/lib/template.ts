@@ -26,9 +26,15 @@ export const VIDEO_TEMPLATE = {
   maxPhotos: 4,
   defaultTeamMemberCount: 2 as TeamMemberCount,
   minPhotoDurationSeconds: 1,
-  /** Default PIP still length — easy short videos; users can drag edges to change. */
+  /** Default PIP still length — users can drag edges to change. */
   defaultPhotoDurationSeconds: 10,
-  photoStartOffsetSeconds: 5,
+  /**
+   * Default start times (seconds into the finished/trimmed video) for teammate
+   * PIP photos 1–4. Users can drag bars on the timeline to change these.
+   */
+  defaultPhotoStartSeconds: [23, 35, 47, 56] as const,
+  /** @deprecated prefer defaultPhotoStartSeconds[0] */
+  photoStartOffsetSeconds: 23,
   fadeInSeconds: 0.35,
   fadeOutSeconds: 0.35,
   /** Optional Love's Team opening card length (keep in sync with thumbnail template). */
