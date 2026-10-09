@@ -10,12 +10,16 @@ const OPENING =
 const TEAMMATE_LINE =
   "This is [Team Member Name], and [he/she] is [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";
 
+/** Shared closer after the support line on every official script. */
+const CLOSING =
+  "Feel free to look around inside the Fleet Hub and if you have any interest in any other services or products that Love's offers, please don't hesitate to reach out and I can help you explore those. Thanks again.";
+
 function scriptWithTeammates(count: 1 | 2 | 3 | 4): string {
   if (count === 1) {
-    return `${OPENING} I also wanted to take a quick minute and introduce our team member who will be working with us. ${TEAMMATE_LINE}, and you can reach out to either one of us for support.`;
+    return `${OPENING} I also wanted to take a quick minute and introduce our team member who will be working with us. ${TEAMMATE_LINE}, and you can reach out to either one of us for support. ${CLOSING}`;
   }
   const lines = Array.from({ length: count }, () => TEAMMATE_LINE).join(". ");
-  return `${OPENING} I also wanted to take a quick minute and introduce our team members who will be working with us. ${lines}. And you can reach out to any of us for support.`;
+  return `${OPENING} I also wanted to take a quick minute and introduce our team members who will be working with us. ${lines}. And you can reach out to any of us for support. ${CLOSING}`;
 }
 
 export const INTRO_SCRIPTS: Record<
@@ -24,7 +28,7 @@ export const INTRO_SCRIPTS: Record<
 > = {
   0: {
     title: "Just me",
-    script: `${OPENING} Take a look when you have a chance, and you can reach out to me anytime for support.`,
+    script: `${OPENING} Take a look when you have a chance, and you can reach out to me anytime for support. ${CLOSING}`,
   },
   1: {
     title: "1 teammate",
