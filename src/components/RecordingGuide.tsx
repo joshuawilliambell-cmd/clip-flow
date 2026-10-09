@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 
-type DeviceId = "webcam" | "iphone" | "android" | "standalone";
+type DeviceId = "webcam" | "phone" | "standalone";
 
 type DeviceGuide = {
   id: DeviceId;
@@ -61,86 +61,49 @@ const DEVICES: DeviceGuide[] = [
       "Save the file as MP4 or MOV when you are done.",
     ],
     getIntoTool: [
-      "Easiest: in Step 1, use Option B — Record with this computer’s webcam — to record right in this tool.",
+      "Easiest: in Step 1, use Record with webcam to record right in this tool.",
       "Or record in Camera / QuickTime, then in Step 1 tap Choose video from folder and select the file.",
       "Watch the preview, then trim with the red timeline handles if needed.",
     ],
   },
   {
-    id: "iphone",
-    title: "iPhone",
-    shortLabel: "iPhone",
+    id: "phone",
+    title: "Phone camera (iPhone or Android)",
+    shortLabel: "Phone camera",
     icon: <Smartphone className="h-6 w-6" aria-hidden />,
     summary:
-      "Great picture quality. Hold the phone sideways (landscape) and prop it up so it does not shake.",
+      "Works the same on iPhone or Android: hold the phone sideways (landscape), prop it up steady, face the light, and record in a quiet room.",
     camera: [
       "Turn the phone sideways (landscape). Do not record tall/portrait.",
-      "Use the back camera for sharper video (or front camera if you need to see yourself).",
-      "Prop the phone on a stack of books, a mug, or a small tripod at eye level.",
+      "Use the rear/back camera for sharper video (or the front camera if you need to see yourself).",
+      "Prop the phone on books, a mug, or a small tripod at eye level so it does not shake.",
       "Clean the lens with a soft cloth.",
-      "Stand or sit so you fill the frame from mid-chest up, with a little space above your head.",
+      "Frame yourself from mid-chest up, with a little space above your head.",
       "Leave empty space on one side of the frame when you can — teammate photos will sit in a top corner (left or right).",
     ],
     lighting: [
-      "Face a window or bright indoor light.",
+      "Face a window or bright indoor light — light in front of you.",
       "Do not stand with a bright window or lamp right behind you.",
-      "Turn on a lamp in front of you if the room looks dim on screen.",
+      "If your face looks dark on the preview, turn toward a brighter area or add a lamp in front of you.",
     ],
     audio: [
-      "Find a quiet spot. Silence notifications (Focus / Do Not Disturb).",
+      "Find a quiet spot. Silence notifications: iPhone Focus / Do Not Disturb, or Android Do Not Disturb.",
       "Stay within a few feet of the phone so your voice is clear.",
-      "If windy outdoors, step inside — wind noise is hard to fix later.",
+      "If it is windy outdoors, step inside — wind noise is hard to fix later.",
       "Record a short test, play it back, then do your real take.",
     ],
     recordSteps: [
-      "Open the Camera app → choose Video.",
+      "Open the Camera app and choose Video (iPhone Camera → Video, or Android Camera → Video).",
       "Rotate the phone to landscape.",
-      "Tap the red record button. Speak your intro. Tap stop when finished.",
-      "Aim for about one minute. It is OK if you go a little long — you can trim here.",
+      "Tap the red record button. Speak your intro (~60 seconds). Tap stop when finished.",
+      "It is OK if you go a little long — you can trim here. Keep the clip in Photos (iPhone) or Photos / Gallery (Android).",
     ],
     getIntoTool: [
-      "AirDrop the video to your computer, or email / text it to yourself, or save to Files / OneDrive / Google Drive.",
-      "On your computer, open this Love’s Video Studio page.",
-      "In Step 1, tap Choose video file and pick the iPhone video (MOV or MP4).",
-      "If you are on the iPhone browser, you can try uploading from Photos — a computer upload is often easier for the next editing steps.",
-    ],
-  },
-  {
-    id: "android",
-    title: "Android phone",
-    shortLabel: "Android",
-    icon: <Smartphone className="h-6 w-6" aria-hidden />,
-    summary:
-      "Same idea as iPhone: landscape video, steady phone, good front light, quiet room.",
-    camera: [
-      "Turn the phone sideways (landscape).",
-      "Open the Camera app and choose Video.",
-      "Prop the phone at eye level so it does not shake.",
-      "Use the rear camera for sharper video when you can.",
-      "Frame mid-chest up. Leave a little room above your head.",
-      "Keep some empty space on the right for teammate photos in the finished video.",
-    ],
-    lighting: [
-      "Face a window or lamp — light in front of you.",
-      "Avoid bright light behind you.",
-      "Check the preview screen: if your face looks dark, move the light or turn toward a brighter area.",
-    ],
-    audio: [
-      "Turn on Do Not Disturb so calls and texts do not interrupt.",
-      "Record indoors if it is windy outside.",
-      "Speak clearly a few feet from the phone.",
-      "Do a short test clip and listen before the real recording.",
-    ],
-    recordSteps: [
-      "Open Camera → Video → hold phone sideways.",
-      "Tap record, say your intro (~60 seconds), tap stop.",
-      "Save or keep the clip in Photos / Gallery.",
-    ],
-    getIntoTool: [
-      "Send the file to your computer (email, USB cable, Google Drive, OneDrive, or Nearby Share).",
-      "On your computer, open Love’s Video Studio → Step 1 → Choose video file.",
-      "Select the Android video (usually MP4).",
-      "Trim with the red handles if the clip is longer than you need.",
+      "iPhone: AirDrop to your computer, or email / text it to yourself, or save to Files / iCloud / OneDrive / Google Drive.",
+      "Android: email, USB cable, Google Drive, OneDrive, or Nearby Share to your computer.",
+      "On your computer, open Love’s Video Studio → Step 1 → Choose video from folder.",
+      "Pick the phone video (MOV or MP4). Trim with the red handles if needed.",
+      "You can also try uploading from the phone browser, but a computer upload is often easier for the next steps.",
     ],
   },
   {
@@ -177,7 +140,7 @@ const DEVICES: DeviceGuide[] = [
     getIntoTool: [
       "Copy the video file to your computer with a card reader, cable, or camera software.",
       "Prefer MP4 or MOV files.",
-      "In Step 1, tap Choose video file and select the recording.",
+      "In Step 1, tap Choose video from folder and select the recording.",
       "Trim the start/end in this tool so the finished video is about 60 seconds.",
     ],
   },
@@ -231,14 +194,14 @@ export function RecordingGuide() {
         </div>
         <HelpTip title="Recording help" size="lg">
           <p>
-            Record on a computer camera, iPhone, Android, or separate camera,
-            then upload the file in Step 1.
+            Record on a computer camera, phone (iPhone or Android), or separate
+            camera, then upload the file in Step 1.
           </p>
           <p>Landscape, eye-level, front light, quiet room works best.</p>
         </HelpTip>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
         {DEVICES.map((device) => {
           const selected = openDevice === device.id;
           const panelId = `${baseId}-${device.id}`;
