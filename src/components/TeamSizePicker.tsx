@@ -45,12 +45,13 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
         </div>
         <HelpTip title="Team size" size="lg">
           <p>
-            <strong>Just me (0)</strong> — no photo overlays; Fleet Hub script
-            with no introductions.
+            <strong>Just me (0)</strong> — no photo overlays; you still
+            introduce yourself in the script opening. Optional thumbnail can
+            use your featured photo.
           </p>
           <p>
-            For 1–4, photo slots and the matching teleprompter script update
-            automatically.
+            For 1–4, teammate photo slots and “This is…” script lines update
+            automatically. You are not counted as a teammate in the script.
           </p>
         </HelpTip>
       </div>
