@@ -33,7 +33,7 @@ const DEVICES: DeviceGuide[] = [
     shortLabel: "Computer camera",
     icon: <Laptop className="h-6 w-6" aria-hidden />,
     summary:
-      "Best if you are already at a desk laptop or desktop. Use the built-in camera, or a USB webcam, plus your computer microphone (or a headset).",
+      "Best at a desk laptop or desktop. This studio opens your built-in or USB webcam and microphone right in the browser — no separate Camera app, Teams, or Zoom.",
     camera: [
       "Sit so the camera is at eye level (stack books under a laptop if needed).",
       "Frame yourself from about mid-chest up. Leave a little space above your head.",
@@ -51,19 +51,19 @@ const DEVICES: DeviceGuide[] = [
       "Record in a quiet room. Close the door and pause fans or music.",
       "A headset or earbuds with a mic often sound clearer than a laptop mic.",
       "Keep the mic about a hand’s length from your mouth if using a headset.",
-      "Do a 5-second test recording and play it back before the real take.",
+      "Do a short practice take in the studio preview before your real recording.",
     ],
     recordSteps: [
-      "Open your computer’s Camera app (Windows) or Photo Booth / QuickTime (Mac).",
-      "Or use Teams / Zoom local recording if that is how your team usually records.",
-      "Record in landscape (wide) if your app gives you a choice — not tall/portrait.",
-      "Speak for about 45–70 seconds. You can trim later in this tool.",
-      "Save the file as MP4 or MOV when you are done.",
+      "In Step 1, tap Start webcam under Record with webcam.",
+      "Allow camera and microphone access when the browser asks.",
+      "Check your framing and the on-screen teleprompter, then tap Record.",
+      "Speak your intro (about 45–70 seconds is a good target). Tap Stop when finished.",
+      "Use the take if it looks good, or record again — no need to save a file from another app.",
     ],
     getIntoTool: [
-      "Easiest: in Step 1, use Record with webcam to record right in this tool.",
-      "Or record in Camera / QuickTime, then in Step 1 tap Choose video from folder and select the file.",
+      "Your recording loads into the studio automatically when you finish.",
       "Watch the preview, then trim with the red timeline handles if needed.",
+      "Prefer a file you already have? Use Choose video from folder instead of the webcam recorder.",
     ],
   },
   {
