@@ -117,7 +117,13 @@ export function scriptForTeamCount(count: TeamMemberCount): string {
 /** @deprecated use INTRO_SCRIPTS / scriptForTeamCount */
 export const SAMPLE_INTRO_SCRIPT = INTRO_SCRIPTS[2].script;
 
-/** Scroll speed presets (pixels added every 40ms tick). */
+/** Target intro length the teleprompter is paced for. */
+export const TARGET_INTRO_SECONDS = 60;
+
+/** Scroll loop interval used by the teleprompter UI. */
+export const TELEPROMPTER_TICK_MS = 40;
+
+/** Scroll speed presets (pixels added every TELEPROMPTER_TICK_MS). */
 export const TELEPROMPTER_SPEEDS = [
   { id: "slow", label: "Slow", pixelsPerTick: 0.55 },
   { id: "medium", label: "Medium", pixelsPerTick: 1.15 },
@@ -132,6 +138,70 @@ export function pixelsPerTickForSpeed(id: TeleprompterSpeedId): number {
     TELEPROMPTER_SPEEDS.find((s) => s.id === id)?.pixelsPerTick ??
     TELEPROMPTER_SPEEDS[1].pixelsPerTick
   );
+}
+
+/**
+ * Rough scroll distance for a script before layout (large teleprompter type).
+ * Used to pick a default speed that finishes near TARGET_INTRO_SECONDS.
+ */
+export function estimateScrollDistancePx(
+  script: string,
+  fontLarge = true,
+): number {
+  const text = script.trim();
+  if (!text) return 0;
+  const lines = text.split("\n");
+  // Large centered type wraps earlier than body copy.
+  const charsPerLine = fontLarge ? 28 : 38;
+  let visualLines = 0;
+  for (const line of lines) {
+    const len = line.trim().length || 1;
+    visualLines += Math.max(1, Math.ceil(len / charsPerLine));
+  }
+  const linePx = fontLarge ? 48 : 36;
+  const bottomSpacerPx = 160;
+  const viewportPx = 280;
+  return Math.max(120, visualLines * linePx + bottomSpacerPx - viewportPx);
+}
+
+/** Ideal px/tick so `distancePx` scrolls in about TARGET_INTRO_SECONDS. */
+export function idealPixelsPerTickForDistance(
+  distancePx: number,
+  durationSeconds = TARGET_INTRO_SECONDS,
+): number {
+  const ticks = (durationSeconds * 1000) / TELEPROMPTER_TICK_MS;
+  if (ticks <= 0) return TELEPROMPTER_SPEEDS[1].pixelsPerTick;
+  return Math.max(0.35, distancePx / ticks);
+}
+
+/**
+ * Preset for a px/tick target. Prefers the slowest speed that still finishes
+ * by ~TARGET_INTRO_SECONDS (slightly fast rather than running long).
+ */
+export function nearestSpeedForPixelsPerTick(
+  pixelsPerTick: number,
+): TeleprompterSpeedId {
+  const fastEnough = TELEPROMPTER_SPEEDS.filter(
+    (s) => s.pixelsPerTick + 0.02 >= pixelsPerTick,
+  );
+  if (fastEnough.length > 0) return fastEnough[0].id;
+  return TELEPROMPTER_SPEEDS[TELEPROMPTER_SPEEDS.length - 1].id;
+}
+
+/** Default preset paced for ~60s for this script text. */
+export function suggestedSpeedForScript(
+  script: string,
+  fontLarge = true,
+): TeleprompterSpeedId {
+  const distance = estimateScrollDistancePx(script, fontLarge);
+  return nearestSpeedForPixelsPerTick(idealPixelsPerTickForDistance(distance));
+}
+
+/** Default preset for an official team-size script (~60s intro). */
+export function suggestedSpeedForTeamCount(
+  count: TeamMemberCount,
+): TeleprompterSpeedId {
+  return suggestedSpeedForScript(scriptForTeamCount(count));
 }
 
 /** Accept plain-text script uploads. */

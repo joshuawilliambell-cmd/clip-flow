@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, Trash2, Check } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
-import { Teleprompter } from "@/components/Teleprompter";
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
@@ -289,22 +288,23 @@ export function WebcamRecorder({
             </h3>
           </div>
           <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-            Live preview + teleprompter
+            Optional — use the teleprompter above with a phone on a tripod, or
+            record here
           </p>
         </div>
-        <HelpTip title="Webcam + teleprompter" size="lg">
+        <HelpTip title="Webcam recording" size="lg">
           <p>
             Tap <strong>Start webcam</strong>. Allow camera and microphone when
             the browser asks.
           </p>
           <p>
-            You will see a <strong>live preview</strong> of yourself the whole
-            time — before and during recording.
+            You will see a <strong>live preview</strong> before and during
+            recording. Aim for about 60 seconds.
           </p>
           <p>
-            Use the <strong>official</strong> script for your team size, or
-            upload your own. Set scroll speed, toggle On/Off, then tap{" "}
-            <strong>Start recording</strong>.
+            Prefer a phone on a tripod? Skip this and use the{" "}
+            <strong>teleprompter</strong> on this screen while you record on
+            your phone, then upload the clip.
           </p>
           <p>
             Tap <strong>Stop</strong>, review the clip, then{" "}
@@ -313,104 +313,88 @@ export function WebcamRecorder({
         </HelpTip>
       </div>
 
-      {phase === "idle" || live ? (
-        <div className="mt-4 space-y-4">
-          {phase === "idle" ? (
-            <>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => void startCamera()}
-                  className="btn-primary"
-                >
-                  <Camera className="h-5 w-5" />
-                  Start webcam
-                </button>
-              </div>
-              <p className="text-[13px] font-medium text-[var(--muted)]">
-                Set your script and scroll speed below, then start the webcam
-                when you are ready.
-              </p>
-            </>
-          ) : (
-            <div className="how-banner">
-              Live preview stays on · read the teleprompter while recording
-            </div>
-          )}
-
-          <div
-            className={
-              live
-                ? "grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]"
-                : undefined
-            }
+      {phase === "idle" ? (
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => void startCamera()}
+            className="btn-primary"
           >
-            {live ? (
-              <div className="space-y-3">
-                <div className="relative overflow-hidden section-card bg-black">
-                  <video
-                    ref={videoRef}
-                    muted
-                    playsInline
-                    autoPlay
-                    className="aspect-video w-full object-cover scale-x-[-1]"
-                  />
-                  {phase === "recording" ? (
-                    <div className="absolute left-3 top-3 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
-                      <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
-                      Live · Rec {formatClock(seconds)}
-                    </div>
-                  ) : (
-                    <div className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
-                      Live preview — not recording yet
-                    </div>
-                  )}
-                </div>
+            <Camera className="h-5 w-5" />
+            Start webcam
+          </button>
+        </div>
+      ) : null}
 
-                <div className="flex flex-wrap items-center gap-3">
-                  {phase === "preview" ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={startRecording}
-                        className="btn-primary"
-                      >
-                        <Circle className="h-5 w-5 fill-current" />
-                        Start recording
-                      </button>
-                      <button
-                        type="button"
-                        onClick={closeCamera}
-                        className="btn-secondary"
-                      >
-                        Cancel webcam
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={stopRecording}
-                        className="btn-primary"
-                      >
-                        <Square className="h-5 w-5 fill-current" />
-                        Stop recording
-                      </button>
-                      <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
-                        Recording… {formatClock(seconds)}
-                      </span>
-                    </>
-                  )}
-                </div>
-                <p className="text-base text-[var(--muted)]">
-                  Aim for about 60 seconds. Edit your script first, then record.
-                  You can trim the clip on the timeline after you save it.
-                </p>
-              </div>
-            ) : null}
+      {live ? (
+        <div className="mt-4 space-y-4">
+          <div className="how-banner">
+            Live preview stays on · keep the teleprompter above in view while
+            you talk
+          </div>
 
-            <Teleprompter recording={phase === "recording"} />
+          <div className="space-y-3">
+            <div className="relative overflow-hidden section-card bg-black">
+              <video
+                ref={videoRef}
+                muted
+                playsInline
+                autoPlay
+                className="aspect-video w-full object-cover scale-x-[-1]"
+              />
+              {phase === "recording" ? (
+                <div className="absolute left-3 top-3 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
+                  <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
+                  Live · Rec {formatClock(seconds)}
+                </div>
+              ) : (
+                <div className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
+                  Live preview — not recording yet
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {phase === "preview" ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={startRecording}
+                    className="btn-primary"
+                  >
+                    <Circle className="h-5 w-5 fill-current" />
+                    Start recording
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeCamera}
+                    className="btn-secondary"
+                  >
+                    Cancel webcam
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={stopRecording}
+                    className="btn-primary"
+                  >
+                    <Square className="h-5 w-5 fill-current" />
+                    Stop recording
+                  </button>
+                  <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
+                    Recording… {formatClock(seconds)}
+                  </span>
+                </>
+              )}
+            </div>
+            <p className="text-base text-[var(--muted)]">
+              Aim for about 60 seconds. Start the teleprompter scroll above,
+              then record. You can trim the clip on the timeline after you save
+              it.
+            </p>
           </div>
         </div>
       ) : null}

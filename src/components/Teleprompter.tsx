@@ -11,10 +11,14 @@ import {
 import { HelpTip } from "@/components/HelpTip";
 import {
   INTRO_SCRIPTS,
+  TARGET_INTRO_SECONDS,
   TELEPROMPTER_SPEEDS,
+  idealPixelsPerTickForDistance,
   isScriptUploadFile,
+  nearestSpeedForPixelsPerTick,
   pixelsPerTickForSpeed,
   scriptForTeamCount,
+  suggestedSpeedForScript,
   type TeleprompterSpeedId,
 } from "@/lib/intro-script";
 import { useStudio } from "@/lib/studio-context";
@@ -24,11 +28,14 @@ type ScriptSource = "official" | "custom";
 
 type TeleprompterProps = {
   /** When true, auto-scroll can start (usually while recording). */
-  recording: boolean;
+  recording?: boolean;
   className?: string;
 };
 
-export function Teleprompter({ recording, className }: TeleprompterProps) {
+export function Teleprompter({
+  recording = false,
+  className,
+}: TeleprompterProps) {
   const { teamMemberCount } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -39,7 +46,10 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
   const [customScript, setCustomScript] = useState("");
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [speedId, setSpeedId] = useState<TeleprompterSpeedId>("medium");
+  const [speedId, setSpeedId] = useState<TeleprompterSpeedId>(() =>
+    suggestedSpeedForScript(scriptForTeamCount(teamMemberCount)),
+  );
+  const [speedOverridden, setSpeedOverridden] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [fontLarge, setFontLarge] = useState(true);
 
@@ -50,9 +60,29 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
   }, [teamMemberCount, source]);
 
-  // Show the active script in the scroller.
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
+
+  // Default scroll speed ~60s for the active script (unless user overrode).
+  useEffect(() => {
+    if (speedOverridden) return;
+    const suggested = suggestedSpeedForScript(displayScript, fontLarge);
+    setSpeedId(suggested);
+
+    // Refine from real layout once the scroller has overflow.
+    const id = window.requestAnimationFrame(() => {
+      const el = scrollerRef.current;
+      if (!el || speedOverridden) return;
+      const distance = el.scrollHeight - el.clientHeight;
+      if (distance <= 2) return;
+      setSpeedId(
+        nearestSpeedForPixelsPerTick(
+          idealPixelsPerTickForDistance(distance, TARGET_INTRO_SECONDS),
+        ),
+      );
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [displayScript, fontLarge, teamMemberCount, source, speedOverridden]);
 
   // Auto-start scroll when recording begins; allow manual scroll while preparing.
   useEffect(() => {
@@ -71,7 +101,6 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
     const id = window.setInterval(() => {
       const el = scrollerRef.current;
       if (!el) return;
-      // Nothing to scroll yet (layout still growing) — keep running.
       if (el.scrollHeight <= el.clientHeight + 2) return;
       el.scrollTop += speed;
       if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
@@ -90,6 +119,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
     setSource("official");
     setScript(scriptForTeamCount(teamMemberCount));
     setUploadError(null);
+    setSpeedOverridden(false);
     resetScroll();
   };
 
@@ -124,10 +154,20 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
       setScript(cleaned);
       setSource("custom");
       setUploadName(file.name);
+      setSpeedOverridden(false);
       resetScroll();
     } catch {
       setUploadError("Could not read that file.");
     }
+  };
+
+  const selectSpeed = (id: TeleprompterSpeedId) => {
+    setSpeedId(id);
+    setSpeedOverridden(true);
+  };
+
+  const restorePacedSpeed = () => {
+    setSpeedOverridden(false);
   };
 
   return (
@@ -159,20 +199,22 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
         <div className="flex items-center gap-2">
           <HelpTip title="Teleprompter">
             <p>
-              <strong>On/Off</strong> shows or hides the scrolling script while
-              you record.
+              <strong>On/Off</strong> shows or hides the scrolling script.
             </p>
             <p>
               Use the <strong>official</strong> Fleet Hub script for your team
               size, or <strong>upload / paste</strong> your own.
             </p>
             <p>
-              Set <strong>scroll speed</strong> before you record. Start/pause
-              anytime.
+              Default <strong>scroll speed</strong> is paced for about{" "}
+              {TARGET_INTRO_SECONDS} seconds for your script — change it anytime.
+            </p>
+            <p>
+              Phone on a tripod? Leave this panel on your computer screen behind
+              the phone and tap Scroll when you start talking.
             </p>
           </HelpTip>
 
-          {/* Simple on/off switch */}
           <button
             type="button"
             role="switch"
@@ -283,8 +325,10 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
                       setCustomScript(value);
                       setSource("custom");
                       setUploadName(null);
+                      setSpeedOverridden(false);
                     } else {
                       setCustomScript(value);
+                      setSpeedOverridden(false);
                     }
                   }}
                   rows={5}
@@ -336,7 +380,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
                   <button
                     key={s.id}
                     type="button"
-                    onClick={() => setSpeedId(s.id)}
+                    onClick={() => selectSpeed(s.id)}
                     className={clsx(
                       "rounded-[var(--radius-sm)] border px-2.5 py-1 text-[12px] font-semibold",
                       speedId === s.id
@@ -349,6 +393,23 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
                 ))}
               </div>
             </div>
+            <p className="text-[11px] font-medium text-white/65">
+              {speedOverridden
+                ? "Custom speed — you chose this."
+                : `Default paced for ~${TARGET_INTRO_SECONDS}s with this script.`}
+              {speedOverridden ? (
+                <>
+                  {" "}
+                  <button
+                    type="button"
+                    onClick={restorePacedSpeed}
+                    className="font-semibold text-[var(--yellow)] underline"
+                  >
+                    Use ~{TARGET_INTRO_SECONDS}s pace
+                  </button>
+                </>
+              ) : null}
+            </p>
 
             <div className="flex flex-wrap items-center gap-2">
               <button

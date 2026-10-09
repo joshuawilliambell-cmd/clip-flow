@@ -9,6 +9,7 @@ import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
 import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
+import { Teleprompter } from "@/components/Teleprompter";
 
 export function VideoUploadStep() {
   const { video, setVideoFromFile, clearVideo, setStep, teamMemberCount } =
@@ -83,6 +84,32 @@ export function VideoUploadStep() {
       ) : null}
 
       <RecordingGuide />
+
+      <section className="section-card space-y-3 bg-white p-4 md:p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+              Script teleprompter
+            </h3>
+            <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
+              Works with webcam or a phone on a tripod — leave this scrolling on
+              your computer screen behind the phone, then upload the recording.
+            </p>
+          </div>
+          <HelpTip title="Phone on a tripod">
+            <p>
+              Set your phone on a desk tripod facing you. Keep this browser
+              window on the computer behind the phone.
+            </p>
+            <p>
+              Pick the official or uploaded script, set speed, tap{" "}
+              <strong>Scroll</strong>, then record on your phone. Upload the
+              file when you are done.
+            </p>
+          </HelpTip>
+        </div>
+        <Teleprompter />
+      </section>
 
       {!video ? (
         <div className="space-y-4">
