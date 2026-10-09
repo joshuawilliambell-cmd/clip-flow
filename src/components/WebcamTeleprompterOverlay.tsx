@@ -22,10 +22,10 @@ type WebcamTeleprompterOverlayProps = {
 };
 
 /**
- * Center-of-preview teleprompter for webcam capture.
- * Pattern matches Descript / Kommodo / Riverside: large centered script over
- * the live camera, auto-scroll when recording starts, overlay never burned
- * into MediaRecorder (DOM-only).
+ * Top-of-preview teleprompter for webcam capture.
+ * Script sits near the top of the frame so eyes stay toward the webcam
+ * (usually above the monitor) instead of the screen center. Overlay is
+ * DOM-only and is never burned into MediaRecorder.
  */
 export function WebcamTeleprompterOverlay({
   active,
@@ -72,7 +72,7 @@ export function WebcamTeleprompterOverlay({
     scrollCarryRef.current = 0;
   }, [script, scrolling]);
 
-  // Auto-scroll shortly after recording begins (Descript default).
+  // Auto-scroll shortly after recording begins.
   useEffect(() => {
     if (!active || !enabled) {
       setScrolling(false);
@@ -118,55 +118,49 @@ export function WebcamTeleprompterOverlay({
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
-      {/* Focus-mode gradients (Descript) — keep eyes near center / lens */}
+      {/* Soften lower half so the top reading band draws the eye upward */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[28%] bg-gradient-to-b from-black/55 to-transparent"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[28%] bg-gradient-to-t from-black/55 to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/50 to-transparent"
         aria-hidden
       />
 
-      {/* Practice tip — visible while previewing, tucked away once recording */}
-      {!recording ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center px-3 pt-12 md:pt-14">
-          <p className="max-w-xl rounded-lg border border-[var(--yellow)]/70 bg-black/70 px-3 py-2 text-center text-[12px] font-semibold leading-snug text-white shadow-lg md:text-[13px]">
+      {/* Top reading band — near the webcam lens */}
+      <div className="relative z-20 mx-auto flex w-full max-w-4xl flex-col px-2 pt-2 md:px-4 md:pt-3">
+        {!recording ? (
+          <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2.5 py-1.5 text-center text-[11px] font-semibold leading-snug text-white md:text-[12px]">
             Tip: do 1–2 practice recordings and tweak Speed below until the
-            scroll matches your pace before your final take.
+            scroll matches your pace. Reading stays at the top so you look
+            toward the webcam.
           </p>
-        </div>
-      ) : null}
+        ) : null}
 
-      {/* Center reading band */}
-      <div className="relative mx-auto flex h-full w-full max-w-3xl flex-1 flex-col justify-center px-3 py-10 md:px-8">
-        <div className="relative max-h-[52%] min-h-[9rem] overflow-hidden rounded-xl border border-white/25 bg-black/35 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-[2px]">
-          {/* Center reading guide */}
+        <div className="relative h-[min(38%,11.5rem)] min-h-[7.5rem] overflow-hidden rounded-xl border border-white/30 bg-black/45 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:min-h-[9rem]">
+          {/* Reading guide near the top of the band (eye line → webcam) */}
           <div
-            className="pointer-events-none absolute inset-x-4 top-1/2 z-20 h-0.5 -translate-y-1/2 bg-[var(--yellow)]/80"
+            className="pointer-events-none absolute inset-x-3 top-[28%] z-20 h-0.5 bg-[var(--yellow)]/85"
             aria-hidden
           />
           <div
             ref={scrollerRef}
             className={clsx(
-              "h-full overflow-y-auto px-4 py-[22%] text-center scrollbar-none",
+              "h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none md:px-5 md:pt-4",
               !enabled && "opacity-40",
             )}
             style={{ scrollbarWidth: "none" }}
             aria-live="polite"
           >
-            <p className="whitespace-pre-wrap text-[1.35rem] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] md:text-[1.65rem] md:leading-relaxed">
+            <p className="whitespace-pre-wrap text-[1.25rem] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] md:text-[1.5rem] md:leading-relaxed">
               {enabled
                 ? script.trim() || "Add your script above in the teleprompter."
                 : "Teleprompter off — tap On below to show your script."}
             </p>
-            <div className="h-28" aria-hidden />
+            <div className="h-24" aria-hidden />
           </div>
         </div>
       </div>
 
-      {/* Controls sit on the preview so eyes stay near the lens */}
-      <div className="pointer-events-auto absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/70 via-black/40 to-transparent px-3 pb-3 pt-8">
+      {/* Controls stay at the bottom so they do not pull eyes from the lens */}
+      <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-3 pb-3 pt-10">
         <button
           type="button"
           role="switch"

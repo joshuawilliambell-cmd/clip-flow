@@ -289,8 +289,8 @@ export function WebcamRecorder({
             </h3>
           </div>
           <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-            Optional — script scrolls across the center of your live preview
-            while you record (not saved into the video)
+            Optional — script scrolls at the top of your live preview so you
+            look toward the webcam (not saved into the video)
           </p>
         </div>
         <HelpTip title="Webcam recording" size="lg">
@@ -300,11 +300,12 @@ export function WebcamRecorder({
           </p>
           <p>
             Your Fleet Hub script appears as a{" "}
-            <strong>center teleprompter</strong> over the live preview. Do one
-            or two practice recordings and adjust Speed until the scroll matches
-            how you talk, then record your real take. Pause or turn the
-            prompter off anytime. The text is preview-only and will not appear
-            in the saved clip.
+            <strong>top teleprompter</strong> over the live preview so your eyes
+            stay near the webcam at the top of the monitor. Do one or two
+            practice recordings and adjust Speed until the scroll matches how
+            you talk, then record your real take. Pause or turn the prompter
+            off anytime. The text is preview-only and will not appear in the
+            saved clip.
           </p>
           <p>
             Prefer a phone on a tripod? Use the larger teleprompter above on
@@ -354,12 +355,12 @@ export function WebcamRecorder({
                 recording={phase === "recording"}
               />
               {phase === "recording" ? (
-                <div className="absolute left-3 top-3 z-20 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
+                <div className="absolute right-3 top-3 z-30 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
                   <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
                   Live · Rec {formatClock(seconds)}
                 </div>
               ) : (
-                <div className="absolute left-3 top-3 z-20 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
+                <div className="absolute right-3 top-3 z-30 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
                   Live preview — not recording yet
                 </div>
               )}
