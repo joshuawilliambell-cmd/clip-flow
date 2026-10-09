@@ -54,12 +54,13 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
 
-  // Auto-start scroll when recording begins (only if teleprompter is on).
+  // Auto-start scroll when recording begins; allow manual scroll while preparing.
   useEffect(() => {
-    if (!recording || !enabled) {
+    if (!enabled) {
       setScrolling(false);
       return;
     }
+    if (!recording) return;
     const delay = window.setTimeout(() => setScrolling(true), 800);
     return () => window.clearTimeout(delay);
   }, [recording, enabled]);
@@ -70,6 +71,8 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
     const id = window.setInterval(() => {
       const el = scrollerRef.current;
       if (!el) return;
+      // Nothing to scroll yet (layout still growing) — keep running.
+      if (el.scrollHeight <= el.clientHeight + 2) return;
       el.scrollTop += speed;
       if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
         setScrolling(false);
@@ -130,7 +133,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
   return (
     <div
       className={clsx(
-        "flex h-full min-h-[16rem] flex-col section-card bg-[var(--olive)] text-white",
+        "flex h-full min-h-[22rem] max-h-[36rem] flex-col section-card bg-[var(--olive)] text-white",
         className,
       )}
     >
@@ -311,7 +314,7 @@ export function Teleprompter({ recording, className }: TeleprompterProps) {
           <div
             ref={scrollerRef}
             className={clsx(
-              "flex-1 overflow-y-auto px-5 py-6 text-center leading-snug",
+              "min-h-0 flex-1 overflow-y-auto px-5 py-6 text-center leading-snug",
               fontLarge ? "text-2xl md:text-3xl" : "text-xl md:text-2xl",
             )}
             aria-live="polite"
