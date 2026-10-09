@@ -58,7 +58,7 @@ export function VideoUploadStep() {
           <h2 className="step-title">Step 1: Prepare your video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             Build your team roster and script, record or upload, then set when
-            photos appear — about 60 seconds.
+            photos appear. About 60 seconds is preferred; longer videos are fine.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">

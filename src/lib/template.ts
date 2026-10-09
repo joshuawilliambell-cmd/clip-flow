@@ -17,6 +17,10 @@ export const VIDEO_TEMPLATE = {
   width: 1920,
   height: 1080,
   fps: 30,
+  /**
+   * Preferred Allego intro length (guidance + teleprompter pacing default).
+   * Not a hard maximum — uploads and trims may be longer.
+   */
   targetDurationSeconds: 60,
   /** Max teammates for intro videos / thumbnails (user picks 1–4 at the start). */
   maxPhotos: 4,

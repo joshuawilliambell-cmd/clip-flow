@@ -16,7 +16,7 @@ export function PurposeGuide() {
           id="purpose-heading"
           className="font-display text-lg tracking-tight text-[var(--ink)] md:text-xl"
         >
-          ~60s team intro for Allego
+          ~60s preferred Allego intro (longer OK)
         </h2>
         <p className="mt-0.5 text-[14px] font-medium text-[var(--muted)]">
           Record yourself, add teammate photos, export an MP4 for your sales
@@ -33,8 +33,8 @@ export function PurposeGuide() {
           sales room.
         </p>
         <p>
-          Aim for about 60 seconds. Introduce one teammate at a time while their
-          photo is on screen.
+          About 60 seconds is preferred (longer is fine). Introduce one teammate
+          at a time while their photo is on screen.
         </p>
       </HelpTip>
     </section>

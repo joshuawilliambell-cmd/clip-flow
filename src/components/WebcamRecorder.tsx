@@ -402,9 +402,9 @@ export function WebcamRecorder({
               )}
             </div>
             <p className="text-base text-[var(--muted)]">
-              Aim for about 60 seconds. Frame yourself, check the first lines of
-              the script, then record — scroll starts automatically. Trim on the
-              timeline after you save.
+              About 60 seconds is preferred, but you can go longer. Frame
+              yourself, check the first lines of the script, then record —
+              scroll starts automatically. Trim on the timeline after you save.
             </p>
           </div>
         </div>

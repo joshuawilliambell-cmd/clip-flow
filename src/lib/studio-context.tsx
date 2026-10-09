@@ -363,22 +363,22 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     }
 
     const meta = await loadVideoMetadata(file);
-    const end = Math.min(
-      meta.durationSeconds,
-      VIDEO_TEMPLATE.targetDurationSeconds,
-    );
+    // Use the full source length — ~60s is preferred guidance, not a hard cap.
+    const end =
+      meta.durationSeconds > 0
+        ? meta.durationSeconds
+        : VIDEO_TEMPLATE.targetDurationSeconds;
     setVideo((prev) => {
       if (prev) URL.revokeObjectURL(prev.url);
       return meta;
     });
     setTrimStart(0);
-    setTrimEnd(end > 0 ? end : VIDEO_TEMPLATE.targetDurationSeconds);
+    setTrimEnd(end);
     setCurrentTime(0);
     setIsPlaying(false);
     // Keep Step 1 roster (names, titles, headshots); only retime PIP slots.
     setPhotos((prev) => {
-      const duration = end > 0 ? end : VIDEO_TEMPLATE.targetDurationSeconds;
-      const arranged = autoArrangePhotos(prev, duration);
+      const arranged = autoArrangePhotos(prev, end);
       baselineRef.current = arranged.map((p) => ({ ...p }));
       return arranged;
     });

@@ -57,7 +57,7 @@ const DEVICES: DeviceGuide[] = [
       "In Step 1, tap Start webcam under Record with webcam.",
       "Allow camera and microphone access when the browser asks.",
       "Check your framing and the on-screen teleprompter, then tap Record.",
-      "Speak your intro (about 45–70 seconds is a good target). Tap Stop when finished.",
+      "Speak your intro — about 60 seconds is preferred; longer is fine. Tap Stop when finished.",
       "Use the take if it looks good, or record again — no need to save a file from another app.",
     ],
     getIntoTool: [
@@ -95,7 +95,7 @@ const DEVICES: DeviceGuide[] = [
     recordSteps: [
       "Open the Camera app and choose Video (iPhone Camera → Video, or Android Camera → Video).",
       "Rotate the phone to landscape.",
-      "Tap the red record button. Speak your intro (~60 seconds). Tap stop when finished.",
+      "Tap the red record button. Speak your intro (about 60 seconds preferred; longer is fine). Tap stop when finished.",
       "It is OK if you go a little long — you can trim here. Keep the clip in Photos (iPhone) or Photos / Gallery (Android).",
     ],
     getIntoTool: [
@@ -141,7 +141,7 @@ const DEVICES: DeviceGuide[] = [
       "Copy the video file to your computer with a card reader, cable, or camera software.",
       "Prefer MP4 or MOV files.",
       "In Step 1, tap Choose video from folder and select the recording.",
-      "Trim the start/end in this tool so the finished video is about 60 seconds.",
+      "Trim the start/end in this tool if you want. About 60 seconds is preferred; longer videos are fine.",
     ],
   },
 ];
