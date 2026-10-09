@@ -89,8 +89,8 @@ export function ScriptFillIns() {
             <strong>job duties</strong> if you want.
           </>,
           <>
-            Optional: click <strong>Add Photo</strong> for your featured
-            thumbnail photo.
+            Optional: click <strong>Click Here to Add Photo</strong> for your
+            featured thumbnail photo.
           </>,
         ]}
       />
@@ -107,7 +107,7 @@ export function ScriptFillIns() {
           />
         </label>
         <label className="block">
-          <span className="field-label">Your name</span>
+          <span className="field-label">Your Name</span>
           <input
             value={speakerName}
             onChange={(e) => setSpeakerName(e.target.value)}
@@ -127,7 +127,7 @@ export function ScriptFillIns() {
           />
         </div>
         <label className="block">
-          <span className="field-label">Your job duties (for script)</span>
+          <span className="field-label">Your Job Duties (For Script)</span>
           <input
             value={speakerDuties}
             onChange={(e) => setSpeakerDuties(e.target.value)}
@@ -142,14 +142,14 @@ export function ScriptFillIns() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[15px] font-bold text-[var(--ink)]">
-              Featured photo for thumbnail
+              Featured Photo For Thumbnail
             </p>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
               Optional · shows you on the Love&apos;s Team thumbnail with your
               name and title. Does{" "}
-              <strong className="text-[var(--ink)]">not</strong> add a PIP
-              photo overlay during the video — only teammates below appear on
-              screen.
+              <strong className="text-[var(--ink)]">not</strong> put a small
+              photo of you in the corner during the talking video — only
+              teammates below can appear on screen while you speak.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -163,8 +163,8 @@ export function ScriptFillIns() {
               {photoBusy
                 ? "Adding…"
                 : speakerPhotoUrl
-                  ? "Replace photo"
-                  : "Add photo"}
+                  ? "Click Here to Replace Photo"
+                  : "Click Here to Add Photo"}
             </button>
             {speakerPhotoUrl ? (
               <button
@@ -173,7 +173,7 @@ export function ScriptFillIns() {
                 className="btn-secondary text-[var(--primary)]"
               >
                 <Trash2 className="h-5 w-5" />
-                Remove
+                Click Here to Remove
               </button>
             ) : null}
           </div>

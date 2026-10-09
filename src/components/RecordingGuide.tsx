@@ -223,7 +223,7 @@ export function RecordingGuide() {
                     {device.icon}
                   </span>
                   <span className="text-[14px] font-semibold leading-tight text-[var(--ink)]">
-                    {device.shortLabel}
+                    Click Here for {device.shortLabel}
                   </span>
                 </button>
               );

@@ -204,15 +204,15 @@ export function PreviewExportStep({
                 >
                   <ImageIcon className="h-5 w-5" />
                   {introThumbnailEnabled
-                    ? "Thumbnail on (1s at start) ✓"
-                    : "Thumbnail off"}
+                    ? "Click Here — Thumbnail On (1s) ✓"
+                    : "Click Here — Thumbnail Off"}
                 </button>
                 <button
                   type="button"
                   onClick={clearIntroThumbnail}
                   className="btn-secondary"
                 >
-                  Remove thumbnail
+                  Click Here to Remove Thumbnail
                 </button>
                 {onEditThumbnail ? (
                   <button
@@ -220,7 +220,7 @@ export function PreviewExportStep({
                     onClick={onEditThumbnail}
                     className="btn-secondary"
                   >
-                    Edit in Step 1
+                    Click Here to Edit In Step 1
                   </button>
                 ) : null}
               </div>
@@ -245,7 +245,7 @@ export function PreviewExportStep({
                 className="btn-yellow mt-4"
               >
                 <ImageIcon className="h-5 w-5" />
-                Go to Step 1 thumbnail
+                Click Here to Go To Step 1 Thumbnail
               </button>
             ) : null}
           </div>
@@ -321,11 +321,11 @@ export function PreviewExportStep({
           >
             {musicEnabled ? (
               <>
-                <Volume2 className="h-5 w-5" /> Music on
+                <Volume2 className="h-5 w-5" /> Click Here — Music On
               </>
             ) : (
               <>
-                <VolumeX className="h-5 w-5" /> Music off
+                <VolumeX className="h-5 w-5" /> Click Here — Music Off
               </>
             )}
           </button>
@@ -356,7 +356,7 @@ export function PreviewExportStep({
                     <div className="flex items-center gap-2">
                       <Music2 className="h-5 w-5 shrink-0 text-[var(--primary)]" />
                       <span className="text-lg font-bold text-[var(--ink)]">
-                        {track.label}
+                        Click Here for {track.label}
                       </span>
                     </div>
                     <p className="mt-2 text-base leading-relaxed text-[var(--muted)]">
@@ -384,7 +384,7 @@ export function PreviewExportStep({
                     ) : (
                       <Play className="h-4 w-4 fill-current" />
                     )}
-                    {sampling ? "Stop" : "30s"}
+                    {sampling ? "Stop" : "Click Here · 30s"}
                   </button>
                 </div>
               </div>
@@ -396,8 +396,8 @@ export function PreviewExportStep({
           <label className="block section-card bg-[var(--panel-soft)] p-4">
             <span className="flex items-center gap-2 text-lg font-bold text-[var(--ink)]">
               <Mic className="h-5 w-5 text-[var(--primary)]" />
-              Your voice volume: {Math.round(videoVolume * 100)}%
-              <HelpTip title="Your voice volume">
+              Your Voice Volume: {Math.round(videoVolume * 100)}%
+              <HelpTip title="Your Voice Volume">
                 <p>This controls how loud your talking video sounds.</p>
                 <p>Drag right to make your voice louder.</p>
                 <p>Drag left to make your voice quieter.</p>
@@ -422,7 +422,7 @@ export function PreviewExportStep({
           <label className="block section-card bg-[var(--panel-soft)] p-4">
             <span className="flex items-center gap-2 text-lg font-bold text-[var(--ink)]">
               <Music2 className="h-5 w-5 text-[var(--primary)]" />
-              Music volume: {Math.round(musicVolume * 100)}%
+              Music Volume: {Math.round(musicVolume * 100)}%
               <HelpTip title="Music Volume">
                 <p>This controls how loud the background music is.</p>
                 <p>

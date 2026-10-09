@@ -383,20 +383,21 @@ export function ThumbnailCreator({
                     <>
                       <p>
                         Your featured card for the thumbnail still image. Add
-                        or replace your photo here or in Your introduction.
+                        or replace your photo here or in Your Introduction.
                       </p>
                       <p>
-                        This is <strong>not</strong> a PIP overlay in the
-                        talking video. You introduce yourself in the script
-                        opening; teammates get the on-screen photos.
+                        This is <strong>not</strong> a small corner photo in
+                        the talking video. You introduce yourself in the script
+                        opening; teammates get the on-screen corner photos.
                       </p>
                     </>
                   ) : (
                     <>
                       <p>
-                        Name and title come from Your teammates. These people
-                        can appear as PIP overlays in the video. Drag or zoom
-                        the face so it fills the tall frame.
+                        Name and title come from Your Teammates. These people
+                        can appear as a small photo in the corner of the video
+                        while you talk about them. Drag or zoom the face so it
+                        fills the tall frame.
                       </p>
                       <p>
                         Use the grip or ↑ ↓ for left-to-right thumbnail order.
@@ -408,7 +409,7 @@ export function ThumbnailCreator({
 
               {isSpeaker ? (
                 <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--primary)]">
-                  Thumbnail only · not a video PIP
+                  Thumbnail Only · Not A Corner Photo In The Video
                 </p>
               ) : null}
 
@@ -423,13 +424,13 @@ export function ThumbnailCreator({
                   {isSpeaker ? (
                     <>
                       Add your featured headshot for the thumbnail (not used as
-                      a PIP overlay in the video).
+                      a corner photo during the talking video).
                     </>
                   ) : (
                     <>
                       Add a headshot for this person in{" "}
                       <strong className="text-[var(--ink)]">
-                        Your teammates
+                        Your Teammates
                       </strong>{" "}
                       above.
                     </>
@@ -449,8 +450,8 @@ export function ThumbnailCreator({
                     {speakerPhotoBusy
                       ? "Adding…"
                       : member.photoUrl
-                        ? "Replace your photo"
-                        : "Add your photo"}
+                        ? "Click Here to Replace Your Photo"
+                        : "Click Here to Add Your Photo"}
                   </button>
                   {member.photoUrl ? (
                     <button
@@ -458,7 +459,7 @@ export function ThumbnailCreator({
                       onClick={clearSpeakerPhoto}
                       className="btn-secondary text-[var(--primary)]"
                     >
-                      Remove
+                      Click Here to Remove
                     </button>
                   ) : null}
                   <input

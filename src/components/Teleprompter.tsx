@@ -334,8 +334,8 @@ export function Teleprompter({
                     <strong>My Script</strong> / <strong>Upload .txt</strong>).
                   </>,
                   <>
-                    Click <strong>Scroll</strong> under Practice Here and read
-                    out loud at that speed.
+                    Click <strong>Play / Scroll</strong> under Practice Here
+                    and read out loud at that speed.
                   </>,
                   <>
                     If it feels too fast, finish the pass first, then move the
@@ -356,7 +356,7 @@ export function Teleprompter({
                       : "border-white/35 text-white hover:border-[var(--yellow)]",
                   )}
                 >
-                  Official Script
+                  Click Here for Official Script
                 </button>
                 <button
                   type="button"
@@ -368,7 +368,7 @@ export function Teleprompter({
                       : "border-white/35 text-white hover:border-[var(--yellow)]",
                   )}
                 >
-                  My Script
+                  Click Here for My Script
                 </button>
                 <button
                   type="button"
@@ -446,10 +446,10 @@ export function Teleprompter({
             </p>
             <p className="mt-1 text-[12px] font-medium leading-snug text-white/80">
               This is the scrolling teleprompter practice area. Click{" "}
-              <strong className="text-white">Scroll</strong> and try to read at
-              that speed out loud. If it feels too fast, finish the full pass,
-              then slow the slider — do not adjust midway. Practice several
-              times before you record a real video.
+              <strong className="text-white">Play / Scroll</strong> and try to
+              read at that speed out loud. If it feels too fast, finish the
+              full pass, then slow the slider — do not adjust midway. Practice
+              several times before you record a real video.
             </p>
             <p className="mt-1.5 text-[12px] font-medium leading-snug text-white/70">
               Scroll speed is set for about a {TARGET_INTRO_SECONDS}-second
@@ -466,9 +466,9 @@ export function Teleprompter({
             )}
             aria-live="polite"
           >
-            <div className="mx-auto max-w-[14ch] whitespace-pre-wrap font-semibold tracking-wide">
+            <div className="mx-auto max-w-[28ch] whitespace-pre-wrap font-semibold tracking-wide">
               {displayScript.trim() ||
-                "Add a script above, then click Scroll to practice."}
+                "Add a script above, then click Play / Scroll to practice."}
             </div>
             <div className="h-40" aria-hidden />
           </div>
@@ -521,12 +521,12 @@ export function Teleprompter({
               >
                 {scrolling ? (
                   <>
-                    <Pause className="h-3.5 w-3.5" /> Pause
+                    <Pause className="h-3.5 w-3.5" /> Click Here to Pause
                   </>
                 ) : (
                   <>
                     <Play className="h-3.5 w-3.5 fill-current" /> Click Here to
-                    Scroll
+                    Play / Scroll
                   </>
                 )}
               </button>
@@ -542,7 +542,9 @@ export function Teleprompter({
                 onClick={() => setFontLarge((v) => !v)}
                 className="ml-auto rounded-[var(--radius-sm)] border border-white/35 px-2.5 py-1.5 text-[12px] font-semibold text-white"
               >
-                {fontLarge ? "Smaller Text" : "Bigger Text"}
+                {fontLarge
+                  ? "Click Here for Smaller Text"
+                  : "Click Here for Bigger Text"}
               </button>
             </div>
           </div>

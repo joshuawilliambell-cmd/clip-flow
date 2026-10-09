@@ -13,6 +13,7 @@ import {
 import { filledTeamPhotos } from "@/lib/team-slots";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
+import { PanelSteps } from "@/components/PanelStep";
 
 /** Extra pixels after the last second so the playhead / trim handle aren’t clipped. */
 const TIMELINE_END_PAD_PX = 56;
@@ -184,8 +185,8 @@ export function Timeline() {
               teammate&apos;s small corner photo. Bars start near when that
               person&apos;s name is said in your script. Hover for a hand
               cursor, then drag the middle of a bar to move when the photo
-              shows. Drag the left or right edge (↔) to make it shorter or
-              longer. Drag one bar onto another to swap order.
+              shows. Drag the left or right edge to make it shorter or longer.
+              Drag one bar onto another to swap order.
             </p>
             <p>
               Drag the <strong>red play line</strong> (ball on top) to jump to
@@ -202,11 +203,11 @@ export function Timeline() {
           >
             {isPlaying ? (
               <>
-                <Pause className="h-5 w-5" /> Pause
+                <Pause className="h-5 w-5" /> Click Here to Pause
               </>
             ) : (
               <>
-                <Play className="h-5 w-5 fill-current" /> Play
+                <Play className="h-5 w-5 fill-current" /> Click Here to Play
               </>
             )}
           </button>
@@ -217,6 +218,32 @@ export function Timeline() {
             Finished length: {formatClock(outputDuration)}
           </div>
         </div>
+      </div>
+
+      <PanelSteps
+        steps={[
+          <>
+            <strong>Trim your video</strong> — use Cut Start / Cut End, or drag
+            the red handles on Track 1, to remove extra time at the beginning or
+            end.
+          </>,
+          <>
+            <strong>Match photos to names</strong> — each colored bar on Track 2
+            is a teammate&apos;s corner photo. It starts near when you say their
+            name. Drag the middle of a bar (hand cursor) to move when it shows;
+            drag the ends to change how long it stays.
+          </>,
+          <>
+            Click <strong>Play</strong> and watch. If a face pops up too early
+            or too late, pause and drag that bar until it matches when you say
+            the name.
+          </>,
+        ]}
+      />
+
+      <div className="how-banner">
+        Photos are placed automatically from your script. You only need to move
+        a bar if the timing feels off when you watch the preview.
       </div>
 
       {/* Cut controls stay outside the horizontal scroll so they are never clipped. */}
@@ -233,7 +260,7 @@ export function Timeline() {
               disabled={outputDuration <= 3}
               title="Remove 1 second from the beginning"
             >
-              Cut Start +1s
+              Click Here to Cut Start +1s
             </button>
             <button
               type="button"
@@ -242,7 +269,7 @@ export function Timeline() {
               disabled={trimStart <= 0}
               title="Put 1 second back at the beginning"
             >
-              Undo Start −1s
+              Click Here to Undo Start −1s
             </button>
             <button
               type="button"
@@ -251,7 +278,7 @@ export function Timeline() {
               disabled={outputDuration <= 3}
               title="Remove 1 second from the end"
             >
-              Cut End +1s
+              Click Here to Cut End +1s
             </button>
             <button
               type="button"
@@ -260,7 +287,7 @@ export function Timeline() {
               disabled={trimEnd >= sourceDuration}
               title="Put 1 second back at the end"
             >
-              Undo End −1s
+              Click Here to Undo End −1s
             </button>
           </div>
         </div>

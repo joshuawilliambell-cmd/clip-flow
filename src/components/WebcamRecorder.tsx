@@ -488,7 +488,7 @@ export function WebcamRecorder({
               }}
               className="btn-secondary"
             >
-              Cancel
+              Click Here to Cancel
             </button>
           </div>
         </div>

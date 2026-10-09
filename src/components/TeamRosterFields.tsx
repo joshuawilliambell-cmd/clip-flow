@@ -104,7 +104,8 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
               <>
                 <strong>Add photos</strong> — either click the yellow button to
                 pick several headshots at once, or click{" "}
-                <strong>Add Photo</strong> on each teammate card one at a time.
+                <strong>Click Here To Add Photo</strong> on each teammate card
+                one at a time.
               </>,
               <>
                 Fill in each person&apos;s <strong>name</strong>,{" "}
@@ -135,8 +136,8 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             </button>
             <p className="text-[13px] font-medium text-[var(--muted)]">
               <strong>Option B — one photo at a time:</strong> on each teammate
-              card below, click <strong>Add Photo</strong> (or Replace Photo)
-              and pick that person&apos;s headshot.
+              card below, click <strong>Click Here To Add Photo</strong> (or
+              Replace) and pick that person&apos;s headshot.
               {emptySlots > 0
                 ? ` ${emptySlots} card${emptySlots === 1 ? "" : "s"} still need a photo.`
                 : " All cards have photos — you can replace any of them."}
@@ -190,7 +191,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                 ) : (
                   <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center text-[11px] font-semibold text-[var(--ink)]">
                     <ImagePlus className="h-5 w-5 text-[var(--primary)]" />
-                    Add Photo
+                    Click Here To Add Photo
                   </span>
                 )}
               </button>
@@ -216,7 +217,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                     className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--ink)] bg-white px-1.5 py-1.5 text-[11px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)] disabled:opacity-50"
                   >
                     <Replace className="h-3.5 w-3.5 shrink-0" />
-                    Replace Photo
+                    Click Here To Replace
                   </button>
                   <button
                     type="button"
@@ -225,7 +226,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                     className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--primary)] bg-white px-1.5 py-1.5 text-[11px] font-bold text-[var(--primary)] hover:bg-red-50 disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                    Remove
+                    Click Here To Remove
                   </button>
                 </>
               ) : (
@@ -236,7 +237,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                   className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--ink)] bg-[var(--yellow)] px-1.5 py-1.5 text-[11px] font-bold text-[var(--ink)] disabled:opacity-50"
                 >
                   <ImagePlus className="h-3.5 w-3.5 shrink-0" />
-                  Add Photo
+                  Click Here To Add Photo
                 </button>
               )}
             </div>

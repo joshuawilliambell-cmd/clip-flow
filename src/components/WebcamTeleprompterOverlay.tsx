@@ -145,7 +145,7 @@ export function WebcamTeleprompterOverlay({
             aria-live="polite"
           >
             {/* ~5 words wide so eyes move top-to-bottom, not left-to-right */}
-            <p className="mx-auto max-w-[11ch] whitespace-pre-wrap text-[1.05rem] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] md:text-[1.2rem]">
+            <p className="mx-auto max-w-[28ch] whitespace-pre-wrap text-[1.05rem] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] md:text-[1.2rem]">
               {enabled
                 ? script.trim() || "Add your script above in the teleprompter."
                 : "Teleprompter off — tap On below to show your script."}
@@ -172,7 +172,9 @@ export function WebcamTeleprompterOverlay({
               : "border-white/40 bg-black/50 text-white",
           )}
         >
-          {enabled ? "Prompter on" : "Prompter off"}
+          {enabled
+            ? "Click Here — Prompter On"
+            : "Click Here — Prompter Off"}
         </button>
 
         <button
@@ -187,7 +189,7 @@ export function WebcamTeleprompterOverlay({
             </>
           ) : (
             <>
-              <Play className="h-3.5 w-3.5" /> Scroll
+              <Play className="h-3.5 w-3.5" /> Play / Scroll
             </>
           )}
         </button>

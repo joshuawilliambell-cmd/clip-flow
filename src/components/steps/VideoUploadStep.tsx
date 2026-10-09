@@ -102,15 +102,20 @@ export function VideoUploadStep() {
         <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
           Upload A Saved Video
         </h3>
+        <div className="how-banner">
+          If you have already created a video from your computer, phone, or
+          camera and have it saved as a file, you can upload it here.
+          Otherwise, continue to the next step to record your video here.
+        </div>
         <PanelSteps
           steps={[
             <>
-              If you already recorded a video on your computer, phone, or
-              camera and saved the file, upload it here.
+              Click <strong>Choose Video From File</strong> (or drag a file
+              into the box) if you already have a saved recording.
             </>,
             <>
               Otherwise, skip this box and continue to{" "}
-              <strong>Record With Webcam</strong> below to record in this tool.
+              <strong>Record With Webcam</strong> below.
             </>,
           ]}
         />
@@ -175,14 +180,14 @@ export function VideoUploadStep() {
                 onClick={() => inputRef.current?.click()}
                 className="btn-secondary"
               >
-                Replace With Video From File
+                Click Here to Replace With Video From File
               </button>
               <button
                 type="button"
                 onClick={clearVideo}
                 className="btn-secondary text-[var(--primary)]"
               >
-                Remove
+                Click Here to Remove
               </button>
             </div>
             <div className="how-banner">
