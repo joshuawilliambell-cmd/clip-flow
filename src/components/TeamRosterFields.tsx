@@ -25,22 +25,51 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
     updatePhotoMeta,
     reorderTeamSlots,
     setPhotoOnSlot,
+    assignPhotosFromIndex,
     clearPhotoSlot,
   } = useStudio();
+  const multiRef = useRef<HTMLInputElement>(null);
   const fileRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   if (teamMemberCount === 0) return null;
 
-  const handleSlotFile = async (id: string, file: File | undefined) => {
-    if (!file) return;
+  const handleMultiFiles = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setBusy(true);
     setError(null);
     try {
-      await setPhotoOnSlot(id, file);
+      await assignPhotosFromIndex(0, files);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
+    } finally {
+      setBusy(false);
     }
   };
+
+  const handleSlotFiles = async (
+    startIndex: number,
+    slotId: string,
+    files: FileList | null,
+  ) => {
+    if (!files?.length) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if (files.length === 1) {
+        await setPhotoOnSlot(slotId, files[0]);
+      } else {
+        await assignPhotosFromIndex(startIndex, files);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const emptySlots = photos.filter((p) => !p.url).length;
 
   return (
     <section className="section-card space-y-4 bg-white p-4 md:p-5">
@@ -56,25 +85,56 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             </h3>
             <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
               {variant === "setup"
-                ? "Add a photo, name, pronoun, job title, and short duties for each person in the order you’ll introduce them — they fill the teleprompter script."
+                ? "Select multiple headshots at once to fill the boxes in order, then add name, pronoun, job title, and duties for the script."
                 : "Review photos, names, and titles. Adjust PIP timing on the timeline below."}
             </p>
           </div>
         </div>
-        <HelpTip title="Teammate order">
+        <HelpTip title="Teammate photos">
+          <p>
+            Tap <strong>Select multiple photos</strong> and choose several
+            headshots (Ctrl/Cmd+click or Shift+click). They fill Teammate 1,
+            2, 3… in the order you selected.
+          </p>
+          <p>
+            You can also open one box and pick multiple files — they fill that
+            box and the ones after it.
+          </p>
           <p>Slot 1 is introduced first. Use ↑ ↓ to change order.</p>
-          <p>
-            Pick a job title from the list, or choose <strong>Other</strong> to
-            type a custom title. Duties default from the title — edit them to
-            match how you want to introduce that person.
-          </p>
-          <p>
-            Example: “This is Jared, and he is a Total Truck Care Account
-            Manager, and he can help you with things like maintenance and
-            repairs…”
-          </p>
         </HelpTip>
       </div>
+
+      {variant === "setup" ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => multiRef.current?.click()}
+            className="btn-yellow"
+          >
+            <ImagePlus className="h-5 w-5" />
+            {busy
+              ? "Adding photos…"
+              : `Select multiple photos (${teamMemberCount} slots)`}
+          </button>
+          <p className="text-[13px] font-medium text-[var(--muted)]">
+            {emptySlots === 0
+              ? "All boxes have photos — selecting again replaces them in order."
+              : `${emptySlots} empty · pick up to ${teamMemberCount} images`}
+          </p>
+          <input
+            ref={multiRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              void handleMultiFiles(e.target.files);
+              e.currentTarget.value = "";
+            }}
+          />
+        </div>
+      ) : null}
 
       {error ? (
         <p className="rounded-[var(--radius-sm)] border border-[var(--primary)] bg-red-50 px-3 py-2 text-[14px] font-medium text-[var(--primary-dark)]">
@@ -91,8 +151,9 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             <div className="flex shrink-0 flex-col items-center gap-2">
               <button
                 type="button"
+                disabled={busy}
                 onClick={() => fileRefs.current[index]?.click()}
-                className="relative h-24 w-20 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-white"
+                className="relative h-24 w-20 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-white disabled:opacity-60"
               >
                 {photo.url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -114,17 +175,19 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                 }}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                multiple
                 className="hidden"
                 onChange={(e) => {
-                  void handleSlotFile(photo.id, e.target.files?.[0]);
+                  void handleSlotFiles(index, photo.id, e.target.files);
                   e.currentTarget.value = "";
                 }}
               />
               {photo.url ? (
                 <button
                   type="button"
+                  disabled={busy}
                   onClick={() => clearPhotoSlot(photo.id)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--primary)]"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--primary)] disabled:opacity-50"
                 >
                   <Trash2 className="h-3 w-3" /> Clear
                 </button>
@@ -140,7 +203,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                   <button
                     type="button"
                     aria-label={`Move teammate ${index + 1} up`}
-                    disabled={index === 0}
+                    disabled={index === 0 || busy}
                     onClick={() => reorderTeamSlots(index, index - 1)}
                     className="rounded border border-[var(--ink)] bg-white px-2 py-0.5 text-[12px] font-semibold disabled:opacity-35"
                   >
@@ -149,7 +212,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                   <button
                     type="button"
                     aria-label={`Move teammate ${index + 1} down`}
-                    disabled={index >= photos.length - 1}
+                    disabled={index >= photos.length - 1 || busy}
                     onClick={() => reorderTeamSlots(index, index + 1)}
                     className="rounded border border-[var(--ink)] bg-white px-2 py-0.5 text-[12px] font-semibold disabled:opacity-35"
                   >

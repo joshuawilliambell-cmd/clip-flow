@@ -75,6 +75,14 @@ type StudioContextValue = {
   setTeamMemberCount: (count: TeamMemberCount) => void;
   addPhotosFromFiles: (files: FileList | File[]) => Promise<TeamPhoto[]>;
   setPhotoOnSlot: (id: string, file: File) => Promise<void>;
+  /**
+   * Assign selected photos into teammate boxes starting at `startIndex`
+   * (file order → Teammate N, N+1, …). Replaces photos in those slots.
+   */
+  assignPhotosFromIndex: (
+    startIndex: number,
+    files: FileList | File[],
+  ) => Promise<TeamPhoto[]>;
   /** Clear all slots, then fill from files in order (up to team size). */
   replaceTeamPhotosFromFiles: (files: FileList | File[]) => Promise<TeamPhoto[]>;
   updatePhotoMeta: (
@@ -497,6 +505,45 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [outputDuration],
   );
 
+  const assignPhotosFromIndex = useCallback(
+    async (startIndex: number, files: FileList | File[]) => {
+      const prepared = await prepareImageFiles(files);
+      if (prepared.length === 0) {
+        throw new Error("Please upload JPG, PNG, or WebP images.");
+      }
+
+      let arrangedResult: TeamPhoto[] = [];
+      setPhotos((prev) => {
+        const next = prev.map((p) => ({ ...p }));
+        const start = Math.max(0, Math.min(startIndex, next.length));
+        let pi = 0;
+        for (let i = start; i < next.length && pi < prepared.length; i += 1) {
+          const { file, url } = prepared[pi];
+          pi += 1;
+          const guessed = file.name
+            .replace(/\.[^.]+$/, "")
+            .replace(/[-_]/g, " ");
+          revokePhotoUrl(next[i].url);
+          next[i] = {
+            ...next[i],
+            url,
+            fileName: file.name,
+            name: next[i].name.trim() ? next[i].name : guessed,
+          };
+        }
+        while (pi < prepared.length) {
+          URL.revokeObjectURL(prepared[pi].url);
+          pi += 1;
+        }
+        arrangedResult = autoArrangePhotos(next, outputDuration);
+        baselineRef.current = arrangedResult.map((p) => ({ ...p }));
+        return arrangedResult;
+      });
+      return arrangedResult;
+    },
+    [outputDuration],
+  );
+
   const replaceTeamPhotosFromFiles = useCallback(
     async (files: FileList | File[]) => {
       const prepared = await prepareImageFiles(files);
@@ -727,6 +774,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setTrim,
       setTeamMemberCount,
       addPhotosFromFiles,
+      assignPhotosFromIndex,
       setPhotoOnSlot,
       replaceTeamPhotosFromFiles,
       updatePhotoMeta,
@@ -783,6 +831,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       clearVideo,
       setTrim,
       addPhotosFromFiles,
+      assignPhotosFromIndex,
       updatePhotoMeta,
       removePhoto,
       movePhoto,

@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import {
   Film,
   FolderOpen,
-  ImagePlus,
   RotateCcw,
   Upload,
   Wand2,
@@ -32,12 +31,10 @@ export function VideoUploadStep() {
     setStep,
     teamMemberCount,
     photos,
-    addPhotosFromFiles,
     autoArrange,
     resetTimeline,
   } = useStudio();
   const inputRef = useRef<HTMLInputElement>(null);
-  const bulkRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -49,16 +46,6 @@ export function VideoUploadStep() {
     setError(null);
     try {
       await setVideoFromFile(file);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
-    }
-  };
-
-  const handleBulkPhotos = async (files: FileList | null) => {
-    if (!files?.length) return;
-    setError(null);
-    try {
-      await addPhotosFromFiles(files);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
     }
@@ -92,32 +79,6 @@ export function VideoUploadStep() {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => bulkRef.current?.click()}
-              className="btn-secondary"
-            >
-              <ImagePlus className="h-5 w-5" /> Fill empty photo slots
-            </button>
-            <HelpTip title="Photo slots">
-              <p>
-                Choose how many teammates above, then add a headshot for each
-                person in the order you will introduce them.
-              </p>
-            </HelpTip>
-          </div>
-          <input
-            ref={bulkRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              void handleBulkPhotos(e.target.files);
-              e.currentTarget.value = "";
-            }}
-          />
           <TeamRosterFields variant="setup" />
           <ThumbnailCreator />
         </>
