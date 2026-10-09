@@ -32,6 +32,7 @@ export function ThumbnailCreator({
   const {
     teamMemberCount,
     photos: rosterPhotos,
+    reorderTeamSlots,
     setIntroThumbnail,
     clearIntroThumbnail,
     introThumbnailEnabled,
@@ -45,31 +46,24 @@ export function ThumbnailCreator({
     .map((p) => `${p.id}\0${p.url ?? ""}\0${p.name}\0${p.title}`)
     .join("|");
 
-  // Keep thumbnail cards in sync with Your teammates (photos, names, titles).
-  // Preserve face framing and left-to-right order when possible.
+  // Keep thumbnail cards in roster order with matching name/title/photo per id.
+  // Only face framing (photoFit) is preserved independently per teammate id.
   useEffect(() => {
     setMembers((prev) => {
       const fitById = new Map(prev.map((m) => [m.id, m.photoFit]));
-      const prevOrder = prev.map((m) => m.id);
-      const rosterIds = rosterPhotos.map((p) => p.id);
-      const orderedIds = [
-        ...prevOrder.filter((id) => rosterIds.includes(id)),
-        ...rosterIds.filter((id) => !prevOrder.includes(id)),
-      ];
-      const photoById = new Map(rosterPhotos.map((p) => [p.id, p]));
-      return orderedIds.map((id) => {
-        const photo = photoById.get(id)!;
-        return {
-          id: photo.id,
-          photoUrl: photo.url,
-          name: photo.name,
-          title: photo.title,
-          photoFit: fitById.get(id) ?? defaultPhotoFit(),
-        } satisfies ThumbnailMember;
-      });
+      return rosterPhotos.map(
+        (photo) =>
+          ({
+            id: photo.id,
+            photoUrl: photo.url,
+            name: photo.name,
+            title: photo.title,
+            photoFit: fitById.get(photo.id) ?? defaultPhotoFit(),
+          }) satisfies ThumbnailMember,
+      );
     });
-    // rosterKey encodes roster photo identity + fields; rosterPhotos is current.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // rosterKey encodes roster identity + fields + order; rosterPhotos is current.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync only when rosterKey changes
   }, [rosterKey, setMembers]);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -132,22 +126,9 @@ export function ThumbnailCreator({
     setDropTargetIndex(null);
   };
 
+  /** Reorder both thumbnail and Your teammates so names stay with photos. */
   const reorderMembers = (fromIndex: number, toIndex: number) => {
-    if (
-      fromIndex === toIndex ||
-      fromIndex < 0 ||
-      toIndex < 0 ||
-      fromIndex >= members.length ||
-      toIndex >= members.length
-    ) {
-      return;
-    }
-    setMembers((prev) => {
-      const next = [...prev];
-      const [moved] = next.splice(fromIndex, 1);
-      next.splice(toIndex, 0, moved);
-      return next;
-    });
+    reorderTeamSlots(fromIndex, toIndex);
   };
 
   const resetFraming = () => {
@@ -226,14 +207,15 @@ export function ThumbnailCreator({
           <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
             Optional · uses Your teammates above ·{" "}
             {THUMBNAIL_TEMPLATE.introDurationSeconds}s video opener or download
-            PNG. Frame faces here — thumbnail order can differ from intro order.
+            PNG. Frame faces here — reordering also updates Your teammates.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
           <p>
             Photos, names, and titles come from <strong>Your teammates</strong>{" "}
-            above. Edit them there — this section only frames faces and sets
-            left-to-right order on the thumbnail.
+            above. Edit them there — this section frames faces. Dragging to
+            reorder keeps each person&apos;s name and photo together in both
+            places.
           </p>
           <p>
             Optional Allego opener: shows for{" "}

@@ -35,7 +35,10 @@ import type {
   StudioStep,
   TeamPhoto,
 } from "@/lib/types";
-import type { ThumbnailMember } from "@/lib/thumbnail-template";
+import {
+  defaultPhotoFit,
+  type ThumbnailMember,
+} from "@/lib/thumbnail-template";
 import {
   clearThumbnailMembers,
   emptyThumbnailMembers,
@@ -588,25 +591,22 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         Pick<TeamPhoto, "name" | "title" | "pronoun" | "duties" | "department">
       >,
     ) => {
-      setPhotos((prev) => {
-        const index = prev.findIndex((p) => p.id === id);
-        if (index >= 0) {
-          queueMicrotask(() => {
-            setThumbnailMembers((thumbs) =>
-              thumbs.map((t, i) =>
-                i === index
-                  ? {
-                      ...t,
-                      name: patch.name !== undefined ? patch.name : t.name,
-                      title: patch.title !== undefined ? patch.title : t.title,
-                    }
-                  : t,
-              ),
-            );
-          });
-        }
-        return prev.map((p) => (p.id === id ? { ...p, ...patch } : p));
-      });
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+      );
+      // Match thumbnail cards by teammate id (not list index) so drag/reorder
+      // never writes a name/title onto the wrong headshot.
+      setThumbnailMembers((thumbs) =>
+        thumbs.map((t) =>
+          t.id === id
+            ? {
+                ...t,
+                name: patch.name !== undefined ? patch.name : t.name,
+                title: patch.title !== undefined ? patch.title : t.title,
+              }
+            : t,
+        ),
+      );
       baselineRef.current = baselineRef.current.map((p) =>
         p.id === id ? { ...p, ...patch } : p,
       );
@@ -683,6 +683,27 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         next.splice(toIndex, 0, moved);
         const arranged = autoArrangePhotos(next, outputDuration);
         baselineRef.current = arranged.map((p) => ({ ...p }));
+
+        // Keep thumbnail left-to-right order aligned with the roster reorder
+        // while preserving each person's face framing (matched by id).
+        const orderIds = arranged.map((p) => p.id);
+        queueMicrotask(() => {
+          setThumbnailMembers((thumbs) => {
+            const byId = new Map(thumbs.map((t) => [t.id, t]));
+            return orderIds.map((id) => {
+              const photo = arranged.find((p) => p.id === id)!;
+              const existing = byId.get(id);
+              return {
+                id: photo.id,
+                photoUrl: photo.url,
+                name: photo.name,
+                title: photo.title,
+                photoFit: existing?.photoFit ?? defaultPhotoFit(),
+              };
+            });
+          });
+        });
+
         return arranged;
       });
     },
