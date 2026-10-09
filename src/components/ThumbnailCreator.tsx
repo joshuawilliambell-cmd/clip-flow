@@ -9,7 +9,6 @@ import {
   GripVertical,
   ImagePlus,
   Trash2,
-  Wand2,
 } from "lucide-react";
 import { v4 as uuid } from "uuid";
 import { HelpTip } from "@/components/HelpTip";
@@ -166,52 +165,6 @@ export function ThumbnailCreator({
     );
   };
 
-  const loadPractice = async () => {
-    setBusy(true);
-    setError(null);
-    setStatus(null);
-    try {
-      const samples = [
-        { path: "/samples/team-jared.jpg", name: "Jared Thueson", title: "Total Truck Care Account Manager" },
-        {
-          path: "/samples/team-bailey.jpg",
-          name: "Bailey Ledbetter",
-          title: "Area Account Manager",
-        },
-        { path: "/samples/team-jared.jpg", name: "Josh Bell", title: "Regional Account Manager" },
-        {
-          path: "/samples/team-teresa.jpg",
-          name: "Teresa Walker",
-          title: "Fleet Account Specialist",
-        },
-      ].slice(0, slotCount);
-      const next: ThumbnailMember[] = [];
-      for (const sample of samples) {
-        const res = await fetch(sample.path);
-        if (!res.ok) throw new Error("Practice photos are missing.");
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        next.push({
-          id: uuid(),
-          photoUrl: url,
-          name: sample.name,
-          title: sample.title,
-          photoFit: defaultPhotoFit(),
-        });
-      }
-      setMembers((prev) => {
-        prev.forEach((m) => {
-          if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
-        });
-        return next;
-      });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load practice team.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const pullFromRoster = async () => {
     setBusy(true);
     setError(null);
@@ -345,15 +298,6 @@ export function ThumbnailCreator({
         >
           <ImagePlus className="h-5 w-5" />
           {busy ? "Working…" : "Use teammates from above"}
-        </button>
-        <button
-          type="button"
-          onClick={() => void loadPractice()}
-          disabled={busy}
-          className="btn-secondary"
-        >
-          <Wand2 className="h-5 w-5" />
-          {busy ? "Loading…" : "Load practice team"}
         </button>
         <button
           type="button"

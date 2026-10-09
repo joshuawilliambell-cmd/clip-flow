@@ -33,8 +33,6 @@ export function VideoUploadStep() {
     teamMemberCount,
     photos,
     addPhotosFromFiles,
-    replaceTeamPhotosFromFiles,
-    updatePhotoMeta,
     autoArrange,
     resetTimeline,
   } = useStudio();
@@ -42,8 +40,6 @@ export function VideoUploadStep() {
   const bulkRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [loadingSample, setLoadingSample] = useState(false);
-  const [loadingSampleTeam, setLoadingSampleTeam] = useState(false);
 
   const filledCount = filledTeamPhotos(photos).length;
 
@@ -65,85 +61,6 @@ export function VideoUploadStep() {
       await addPhotosFromFiles(files);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
-    }
-  };
-
-  const loadSample = async () => {
-    setLoadingSample(true);
-    setError(null);
-    try {
-      let res = await fetch("/samples/sample-intro.webm");
-      let fileName = "sample-intro.webm";
-      let mime = "video/webm";
-      if (!res.ok) {
-        res = await fetch("/samples/sample-intro.mp4");
-        fileName = "sample-intro.mp4";
-        mime = "video/mp4";
-      }
-      if (!res.ok) throw new Error("Sample video is missing.");
-      const blob = await res.blob();
-      const file = new File([blob], fileName, { type: mime });
-      await setVideoFromFile(file);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load the sample.");
-    } finally {
-      setLoadingSample(false);
-    }
-  };
-
-  const loadSampleTeam = async () => {
-    setLoadingSampleTeam(true);
-    setError(null);
-    try {
-      const samples = [
-        {
-          path: "/samples/team-jared.jpg",
-          name: "Jared",
-          title: "Total Truck Care Account Manager",
-        },
-        {
-          path: "/samples/team-bailey.jpg",
-          name: "Bailey",
-          title: "Area Account Manager",
-        },
-        {
-          path: "/samples/team-teresa.jpg",
-          name: "Teresa",
-          title: "Fleet Account Specialist",
-        },
-        {
-          path: "/samples/team-jared.jpg",
-          name: "Alex",
-          title: "Account Manager",
-        },
-      ].slice(0, teamMemberCount);
-      const files: File[] = [];
-      for (const sample of samples) {
-        const res = await fetch(sample.path);
-        if (!res.ok) throw new Error("Sample photos are missing.");
-        const blob = await res.blob();
-        files.push(
-          new File([blob], `${sample.name.toLowerCase()}.jpg`, {
-            type: "image/jpeg",
-          }),
-        );
-      }
-      const arranged = await replaceTeamPhotosFromFiles(files);
-      for (const sample of samples) {
-        const match = arranged.find(
-          (p) => p.name.toLowerCase() === sample.name.toLowerCase(),
-        );
-        if (match) {
-          updatePhotoMeta(match.id, {
-            name: sample.name,
-            title: sample.title,
-          });
-        }
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load samples.");
-    } finally {
-      setLoadingSampleTeam(false);
     }
   };
 
@@ -178,22 +95,15 @@ export function VideoUploadStep() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => void loadSampleTeam()}
-              className="btn-yellow"
-            >
-              {loadingSampleTeam ? "Loading…" : "Load practice team"}
-            </button>
-            <button
-              type="button"
               onClick={() => bulkRef.current?.click()}
               className="btn-secondary"
             >
               <ImagePlus className="h-5 w-5" /> Fill empty photo slots
             </button>
-            <HelpTip title="Practice team">
+            <HelpTip title="Photo slots">
               <p>
-                Loads sample headshots and names so you can try the teleprompter
-                and timeline without your own photos yet.
+                Choose how many teammates above, then add a headshot for each
+                person in the order you will introduce them.
               </p>
             </HelpTip>
           </div>
@@ -289,27 +199,6 @@ export function VideoUploadStep() {
             >
               <Upload className="h-5 w-5" />
               Choose video from folder
-            </button>
-          </div>
-
-          <div className="section-card flex flex-wrap items-center justify-between gap-3 bg-[var(--yellow)] px-4 py-3">
-            <p className="text-[14px] font-semibold text-[var(--ink)]">
-              Just exploring? Load a practice clip to try the rest of the flow.
-            </p>
-            <button
-              type="button"
-              id="try-practice-video"
-              data-testid="try-practice-video"
-              disabled={loadingSample}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                void loadSample();
-              }}
-              className="btn-primary"
-            >
-              <Film className="h-5 w-5" />
-              {loadingSample ? "Loading…" : "Try a practice video"}
             </button>
           </div>
 
