@@ -468,7 +468,7 @@ export function ThumbnailCreator({
                   <input
                     className="field-input"
                     value={member.title}
-                    placeholder="Example: Total Truck Care"
+                    placeholder="Example: Total Truck Care Account Manager"
                     onChange={(e) =>
                       updateMember(member.id, { title: e.target.value })
                     }

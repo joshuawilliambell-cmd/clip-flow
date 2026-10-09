@@ -137,7 +137,7 @@ export function PreviewExportStep({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">Step 3: Finish and download</h2>
+          <h2 className="step-title">Step 2: Finish and download</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             Music, volumes, preview, then export MP4.
           </p>
@@ -497,7 +497,7 @@ export function PreviewExportStep({
       </div>
 
       <div className="flex justify-start border-t-2 border-[var(--border)] pt-4">
-        <button type="button" onClick={() => setStep(2)} className="btn-secondary">
+        <button type="button" onClick={() => setStep(1)} className="btn-secondary">
           Back
         </button>
       </div>

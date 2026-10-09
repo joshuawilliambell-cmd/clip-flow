@@ -10,7 +10,6 @@ import { PurposeGuide } from "@/components/PurposeGuide";
 import { ThumbnailCreator } from "@/components/ThumbnailCreator";
 import { StartOverButton } from "@/components/StartOverButton";
 import { VideoUploadStep } from "@/components/steps/VideoUploadStep";
-import { TeamPhotosStep } from "@/components/steps/TeamPhotosStep";
 import { PreviewExportStep } from "@/components/steps/PreviewExportStep";
 
 type AppMode = "video" | "thumbnail";
@@ -189,8 +188,7 @@ function StudioShell() {
           </div>
           <section className="studio-panel animate-rise p-4 md:p-7">
             {step === 1 ? <VideoUploadStep /> : null}
-            {step === 2 ? <TeamPhotosStep /> : null}
-            {step === 3 ? (
+            {step === 2 ? (
               <PreviewExportStep
                 onCreateThumbnail={() => setMode("thumbnail")}
               />
@@ -208,7 +206,7 @@ function StudioShell() {
               active={mode === "thumbnail"}
               onAddedToVideo={() => {
                 setMode("video");
-                setStep(3);
+                setStep(2);
               }}
             />
           </section>

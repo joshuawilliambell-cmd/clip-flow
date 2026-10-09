@@ -13,20 +13,14 @@ const STEPS: Array<{
   {
     id: 1,
     label: "1. Prepare Your Video",
-    hint: "Upload your talking video",
-    tip: "Start here. Upload the video of you speaking, then shorten it if it is longer than about one minute.",
+    hint: "Team, script, record, timing",
+    tip: "Add teammates, fill the script, record or upload your talking video, then set when photos appear.",
   },
   {
     id: 2,
-    label: "2. Add Your Team",
-    hint: "Add photos and names",
-    tip: "Next, add photos of teammates. Type each person’s name and job title. Drag the colored bars to choose when each photo shows.",
-  },
-  {
-    id: 3,
-    label: "3. Finish & Download",
+    label: "2. Finish & Download",
     hint: "Music and save as MP4",
-    tip: "Last step. Pick a music track, set volumes, watch the preview, then tap Export to MP4 and download your finished video.",
+    tip: "Pick a music track, set volumes, watch the preview, then export and download your finished video.",
   },
 ];
 
@@ -44,14 +38,14 @@ export function StepIndicator({
           Workflow
         </h2>
         <HelpTip title="How the steps work">
-          <p>You only need to do three things, in order.</p>
+          <p>You only need to do two things, in order.</p>
           <p>
             Tap a step to jump there. Yellow means the step you are on now.
           </p>
           <p>If you get stuck, tap any ? for plain-language help.</p>
         </HelpTip>
       </div>
-      <ol className="grid gap-2.5 md:grid-cols-3">
+      <ol className="grid gap-2.5 md:grid-cols-2">
         {STEPS.map((item) => {
           const active = item.id === step;
           const done = item.id < step;

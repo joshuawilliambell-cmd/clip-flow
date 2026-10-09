@@ -24,7 +24,7 @@ export type MusicTrack = {
   src: string;
 };
 
-export type StudioStep = 1 | 2 | 3;
+export type StudioStep = 1 | 2;
 
 import type { PipSide } from "@/lib/template";
 

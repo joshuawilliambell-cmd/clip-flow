@@ -1,8 +1,16 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, Film, FolderOpen } from "lucide-react";
+import {
+  Film,
+  FolderOpen,
+  ImagePlus,
+  RotateCcw,
+  Upload,
+  Wand2,
+} from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
+import { VIDEO_TEMPLATE } from "@/lib/template";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
@@ -12,14 +20,31 @@ import { TeamRosterFields } from "@/components/TeamRosterFields";
 import { ScriptFillIns } from "@/components/ScriptFillIns";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
+import { PipSidePicker } from "@/components/PipSidePicker";
+import { filledTeamPhotos } from "@/lib/team-slots";
 
 export function VideoUploadStep() {
-  const { video, setVideoFromFile, clearVideo, setStep, teamMemberCount } =
-    useStudio();
+  const {
+    video,
+    setVideoFromFile,
+    clearVideo,
+    setStep,
+    teamMemberCount,
+    photos,
+    addPhotosFromFiles,
+    replaceTeamPhotosFromFiles,
+    updatePhotoMeta,
+    autoArrange,
+    resetTimeline,
+  } = useStudio();
   const inputRef = useRef<HTMLInputElement>(null);
+  const bulkRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [loadingSample, setLoadingSample] = useState(false);
+  const [loadingSampleTeam, setLoadingSampleTeam] = useState(false);
+
+  const filledCount = filledTeamPhotos(photos).length;
 
   const handleFiles = async (files: FileList | null) => {
     const file = files?.[0];
@@ -32,12 +57,20 @@ export function VideoUploadStep() {
     }
   };
 
+  const handleBulkPhotos = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setError(null);
+    try {
+      await addPhotosFromFiles(files);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
+    }
+  };
+
   const loadSample = async () => {
     setLoadingSample(true);
     setError(null);
     try {
-      // Prefer WebM for broad browser support in automation / locked-down Chromium;
-      // fall back to MP4 for environments that only have that file.
       let res = await fetch("/samples/sample-intro.webm");
       let fileName = "sample-intro.webm";
       let mime = "video/webm";
@@ -57,29 +90,80 @@ export function VideoUploadStep() {
     }
   };
 
+  const loadSampleTeam = async () => {
+    setLoadingSampleTeam(true);
+    setError(null);
+    try {
+      const samples = [
+        {
+          path: "/samples/team-jared.jpg",
+          name: "Jared",
+          title: "Total Truck Care Account Manager",
+        },
+        {
+          path: "/samples/team-bailey.jpg",
+          name: "Bailey",
+          title: "Area Account Manager",
+        },
+        {
+          path: "/samples/team-teresa.jpg",
+          name: "Teresa",
+          title: "Fleet Account Specialist",
+        },
+        {
+          path: "/samples/team-jared.jpg",
+          name: "Alex",
+          title: "Account Manager",
+        },
+      ].slice(0, teamMemberCount);
+      const files: File[] = [];
+      for (const sample of samples) {
+        const res = await fetch(sample.path);
+        if (!res.ok) throw new Error("Sample photos are missing.");
+        const blob = await res.blob();
+        files.push(
+          new File([blob], `${sample.name.toLowerCase()}.jpg`, {
+            type: "image/jpeg",
+          }),
+        );
+      }
+      const arranged = await replaceTeamPhotosFromFiles(files);
+      for (const sample of samples) {
+        const match = arranged.find(
+          (p) => p.name.toLowerCase() === sample.name.toLowerCase(),
+        );
+        if (match) {
+          updatePhotoMeta(match.id, {
+            name: sample.name,
+            title: sample.title,
+          });
+        }
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load samples.");
+    } finally {
+      setLoadingSampleTeam(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
           <h2 className="step-title">Step 1: Prepare your video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Add teammate photos, names, and titles, set the teleprompter, then
-            upload or record — trim to ~60s.
+            Build your team roster and script, record or upload, then set when
+            photos appear — about 60 seconds.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
-          <p>
-            Pick teammate count, then add each photo, name, and job title.
-          </p>
-          <p>
-            Those names fill the teleprompter. Then{" "}
-            <strong>upload</strong>, <strong>record</strong>, or load a practice
-            video.
-          </p>
-          <p>Trim with the red timeline handles, then continue.</p>
+          <p>1. Choose how many teammates and add photo, name, and title.</p>
+          <p>2. Fill in customer name and your name for the teleprompter.</p>
+          <p>3. Record or upload your talking video, then trim and time photos.</p>
         </HelpTip>
       </div>
 
+      {/* 1. Team size + roster */}
       <TeamSizePicker />
 
       {teamMemberCount === 0 ? (
@@ -88,11 +172,45 @@ export function VideoUploadStep() {
           teleprompter.
         </div>
       ) : (
-        <TeamRosterFields variant="setup" />
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void loadSampleTeam()}
+              className="btn-yellow"
+            >
+              {loadingSampleTeam ? "Loading…" : "Load practice team"}
+            </button>
+            <button
+              type="button"
+              onClick={() => bulkRef.current?.click()}
+              className="btn-secondary"
+            >
+              <ImagePlus className="h-5 w-5" /> Fill empty photo slots
+            </button>
+            <HelpTip title="Practice team">
+              <p>
+                Loads sample headshots and names so you can try the teleprompter
+                and timeline without your own photos yet.
+              </p>
+            </HelpTip>
+          </div>
+          <input
+            ref={bulkRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              void handleBulkPhotos(e.target.files);
+              e.currentTarget.value = "";
+            }}
+          />
+          <TeamRosterFields variant="setup" />
+        </>
       )}
 
-      <RecordingGuide />
-
+      {/* 2. Script fill-ins + teleprompter */}
       <ScriptFillIns />
 
       <section className="section-card space-y-3 bg-white p-4 md:p-5">
@@ -120,6 +238,9 @@ export function VideoUploadStep() {
         </div>
         <Teleprompter />
       </section>
+
+      {/* 3. Recording tips + capture */}
+      <RecordingGuide />
 
       {!video ? (
         <div className="space-y-4">
@@ -221,10 +342,6 @@ export function VideoUploadStep() {
                 file.
               </p>
               <p>
-                <strong>Record with webcam</strong> clears this clip so you can
-                record a new one.
-              </p>
-              <p>
                 <strong>Remove</strong> clears the video so you can start over.
               </p>
             </HelpTip>
@@ -260,15 +377,62 @@ export function VideoUploadStep() {
         </p>
       ) : null}
 
+      {/* 4. Preview, PIP side, and timing (from former Step 2) */}
+      {teamMemberCount > 0 ? (
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+                Photo overlays & timing
+              </h3>
+              <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+                {filledCount} of {teamMemberCount} photos · choose corner, then
+                drag timeline bars for when each face appears
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={autoArrange}
+                disabled={filledCount === 0 || !video}
+                className="btn-secondary"
+              >
+                <Wand2 className="h-5 w-5" /> Auto Arrange Photos
+              </button>
+              <button
+                type="button"
+                onClick={resetTimeline}
+                disabled={filledCount === 0 || !video}
+                className="btn-secondary"
+              >
+                <RotateCcw className="h-5 w-5" /> Reset Timeline
+              </button>
+              <HelpTip title="Photo timing">
+                <p>
+                  Photos default to{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s each. Drag the
+                  ends of a timeline bar to change length.
+                </p>
+                <p>
+                  Auto Arrange lines them up one after another from the start of
+                  your trim.
+                </p>
+              </HelpTip>
+            </div>
+          </div>
+          <PipSidePicker />
+        </section>
+      ) : null}
+
       <VideoPreview />
       <Timeline />
 
       <div className="flex flex-wrap items-center justify-end gap-3 border-t-2 border-[var(--border)] pt-4">
         <HelpTip title="Ready for the next step?">
           <p>
-            After your video is added and trimmed, tap Continue to Team Photos.
+            When your video, roster, and photo timing look good, continue to
+            Finish & Download for music and MP4 export.
           </p>
-          <p>You can always come back to this step later.</p>
         </HelpTip>
         <button
           type="button"
@@ -276,7 +440,7 @@ export function VideoUploadStep() {
           onClick={() => setStep(2)}
           className="btn-primary min-w-[14rem]"
         >
-          Continue to Team Photos
+          Continue to Finish & Download
         </button>
       </div>
     </div>
