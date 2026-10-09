@@ -136,53 +136,24 @@ export function TeamPhotosStep() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">
-            Step 2: Add your team
-          </h2>
-          <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
+          <h2 className="step-title">Step 2: Add your team</h2>
+          <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             {teamMemberCount === 0
-              ? "You chose Just me — no teammate photos needed. Continue to the next step when your video looks good."
-              : `You chose ${teamMemberCount} teammate${teamMemberCount === 1 ? "" : "s"}. Add a photo and name in each slot (${filledCount} of ${teamMemberCount} filled). Drag the grip to change who appears first.`}
+              ? "Just me — no teammate photos. Continue when ready."
+              : `${filledCount} of ${teamMemberCount} filled · drag the grip to reorder`}
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
+          <p>Add a headshot, name, and job title in each slot.</p>
+          <p>Drag the grip (or ↑ ↓) to change who appears first.</p>
           <p>
-            <strong>1.</strong> Confirm how many people (1–4) at the top if you
-            need to change it.
-          </p>
-          <p>
-            <strong>2.</strong> Tap each slot and add a portrait headshot.
-          </p>
-          <p>
-            <strong>3.</strong> Type Name and Job title for each person.
-          </p>
-          <p>
-            <strong>4.</strong> Drag the grip (or use ↑ ↓) to set the order they
-            appear in the video.
-          </p>
-          <p>
-            <strong>5.</strong> Each photo starts at{" "}
-            {VIDEO_TEMPLATE.defaultPhotoDurationSeconds} seconds on the
-            timeline — drag the ends to change length.
+            Photos default to {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s —
+            drag timeline bar ends to change length.
           </p>
         </HelpTip>
       </div>
 
       <TeamSizePicker />
-
-      {teamMemberCount === 0 ? (
-        <div className="how-banner">
-          No teammate photo slots for this video. Your teleprompter script is
-          the &quot;Just me&quot; Fleet Hub welcome. Tap Continue to next step when
-          ready.
-        </div>
-      ) : (
-        <div className="how-banner">
-          Each team photo starts at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}{" "}
-          seconds. Drag the grip on a card to reorder who shows first. Drag the
-          ends of a colored bar on the timeline to change length.
-        </div>
-      )}
 
       {!video ? (
         <p className="rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-4 py-3 text-lg font-medium text-[var(--ink)]">
@@ -268,8 +239,7 @@ export function TeamPhotosStep() {
                 : "border-[var(--border)] bg-[var(--panel-soft)]"
             }`}
           >
-            Tip: drag several photos onto this page to fill empty slots in order.
-            Drag the grip on a teammate card to change who appears first.
+            Drop photos here to fill empty slots · drag card grips to reorder
           </div>
         </>
       ) : null}

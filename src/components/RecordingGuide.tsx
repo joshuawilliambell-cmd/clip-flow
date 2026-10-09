@@ -183,16 +183,6 @@ const DEVICES: DeviceGuide[] = [
   },
 ];
 
-const CONTENT_TIPS = [
-  "Smile and greet the customer like you would on a friendly call.",
-  "Say your name and role at Love’s in the first few seconds.",
-  "Introduce each teammate by name and what they help customers with — match the order of the photos you will upload.",
-  "Keep the whole message near 60 seconds. One clear idea beats a long speech.",
-  "End with how customers can reach the team or what happens next.",
-  "You do not need a script word-for-word. Bullet notes on paper next to the camera are fine.",
-  "If you stumble, pause and start that sentence again — you can trim mistakes later.",
-];
-
 function TipList({
   heading,
   items,
@@ -214,7 +204,7 @@ function TipList({
 
 export function RecordingGuide() {
   const [openDevice, setOpenDevice] = useState<DeviceId | null>(null);
-  const [contentOpen, setContentOpen] = useState(true);
+  const [contentOpen, setContentOpen] = useState(false);
   const baseId = useId();
 
   const active = DEVICES.find((d) => d.id === openDevice) ?? null;
@@ -222,37 +212,33 @@ export function RecordingGuide() {
   return (
     <section
       aria-labelledby={`${baseId}-heading`}
-      className="section-card bg-white p-4 md:p-6"
+      className="section-card bg-white p-4 md:p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
           <div className="flex items-center gap-2">
-            <Video className="h-7 w-7 text-[var(--primary)]" aria-hidden />
+            <Video className="h-5 w-5 text-[var(--primary)]" aria-hidden />
             <h3
               id={`${baseId}-heading`}
-              className="font-display text-3xl tracking-wide text-[var(--ink)] md:text-4xl"
+              className="font-display text-xl tracking-tight text-[var(--ink)] md:text-2xl"
             >
-              How to record your video
+              Recording tips
             </h3>
           </div>
-          <p className="mt-2 text-lg text-[var(--muted)] md:text-xl">
-            New to this? Tap the device you will use. We will walk you through
-            camera, lighting, sound, and what to say.
+          <p className="mt-1 text-[14px] font-medium text-[var(--muted)]">
+            Optional — tap a device for setup help, or expand what to say.
           </p>
         </div>
         <HelpTip title="Recording help" size="lg">
           <p>
-            You can record on a computer camera, iPhone, Android phone, or a
-            separate camera.
+            Record on a computer camera, iPhone, Android, or separate camera,
+            then upload the file in Step 1.
           </p>
-          <p>
-            After you record, bring the file into Step 1 with Choose video file.
-          </p>
-          <p>Scroll down for tips on what to say in your ~60 second intro.</p>
+          <p>Landscape, eye-level, front light, quiet room works best.</p>
         </HelpTip>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {DEVICES.map((device) => {
           const selected = openDevice === device.id;
           const panelId = `${baseId}-${device.id}`;
@@ -268,20 +254,17 @@ export function RecordingGuide() {
                 )
               }
               className={clsx(
-                "flex min-h-[7.5rem] flex-col items-start gap-2 rounded-[var(--radius-md)] border px-4 py-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
+                "flex min-h-[4.25rem] items-center gap-3 rounded-[var(--radius-md)] border px-3 py-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
                 selected
                   ? "border-[var(--ink)] bg-[var(--yellow)]"
-                  : "border-[var(--ink)] bg-[var(--panel-soft)] hover:bg-[var(--yellow)]/50",
+                  : "border-[var(--hairline)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
               )}
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
                 {device.icon}
               </span>
-              <span className="text-lg font-bold leading-tight text-[var(--ink)]">
+              <span className="text-[14px] font-semibold leading-tight text-[var(--ink)]">
                 {device.shortLabel}
-              </span>
-              <span className="text-base text-[var(--muted)]">
-                {selected ? "Tap to hide tips" : "Tap for setup tips"}
               </span>
             </button>
           );
@@ -319,59 +302,45 @@ export function RecordingGuide() {
         </div>
       ) : null}
 
-      <div className="mt-5 section-card bg-[var(--yellow)]/40">
+      <div className="mt-3 section-card bg-[var(--panel-soft)]">
         <button
           type="button"
           aria-expanded={contentOpen}
           onClick={() => setContentOpen((v) => !v)}
-          className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]"
+          className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]"
         >
-          <span>
-            <span className="block text-xl font-bold text-[var(--ink)] md:text-2xl">
-              What to say in your video
-            </span>
-            <span className="mt-1 block text-base text-[var(--muted)] md:text-lg">
-              Tap to {contentOpen ? "hide" : "show"} a simple outline anyone can
-              follow
-            </span>
+          <span className="text-[15px] font-semibold tracking-tight text-[var(--ink)]">
+            What to say (~60s outline)
           </span>
           <ChevronDown
             className={clsx(
-              "h-7 w-7 shrink-0 text-[var(--ink)] transition",
+              "h-5 w-5 shrink-0 text-[var(--ink)] transition",
               contentOpen && "rotate-180",
             )}
           />
         </button>
         {contentOpen ? (
-          <div className="border-t-2 border-[var(--ink)] bg-white px-4 py-4 md:px-5">
-            <p className="text-lg font-medium leading-relaxed text-[var(--ink)]">
-              Think of this as a friendly handshake on video. Keep it near{" "}
-              <strong>60 seconds</strong>.
-            </p>
-            <ol className="mt-4 list-decimal space-y-3 pl-6 text-base leading-relaxed text-[var(--ink)] md:text-lg">
+          <div className="border-t border-[var(--hairline)] bg-white px-4 py-3.5">
+            <ol className="list-decimal space-y-2 pl-5 text-[14px] leading-relaxed text-[var(--ink)]">
               <li>
-                <strong>Hello + who you are.</strong> Name, role, and that you
-                are with Love&apos;s.
+                <strong>Hello</strong> — name, role, Love&apos;s.
               </li>
               <li>
-                <strong>Why you are reaching out.</strong> One sentence about
-                how your team helps this customer.
+                <strong>Why you&apos;re reaching out</strong> — one sentence.
               </li>
               <li>
-                <strong>Meet the team.</strong> Introduce each person while
-                their photo is on screen (name + what they do).
+                <strong>Meet the team</strong> — name + role as each photo
+                shows.
               </li>
               <li>
-                <strong>Close clearly.</strong> Thank them and say how to
-                follow up (or that more details are in the Allego sales room).
+                <strong>Close</strong> — thank them; point to Allego for details.
               </li>
             </ol>
-            <TipList heading="Extra tips" items={CONTENT_TIPS} />
-            <div className="mt-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-3 text-base leading-relaxed text-[var(--ink)] md:text-lg">
-              <strong>Example opener:</strong> “Hi, I&apos;m Alex with Love&apos;s
-              Fleet Sales. I wanted to quickly introduce our team that will
-              support your account…”
-            </div>
+            <p className="mt-3 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--panel-soft)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)]">
+              <strong>Example:</strong> “Hi, I&apos;m Alex with Love&apos;s Fleet
+              Sales. I wanted to quickly introduce our team that will support
+              your account…”
+            </p>
           </div>
         ) : null}
       </div>

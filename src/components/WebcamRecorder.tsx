@@ -284,13 +284,12 @@ export function WebcamRecorder({
         <div>
           <div className="flex items-center gap-2">
             <Camera className="h-6 w-6 text-[var(--primary)]" aria-hidden />
-            <h3 className="text-2xl font-bold text-[var(--ink)]">
-              Option B: Record with this computer’s webcam
+            <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+              Record with webcam
             </h3>
           </div>
-          <p className="mt-2 text-lg text-[var(--muted)]">
-            See yourself live while you record, and read a scrolling script
-            (teleprompter) next to the camera.
+          <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+            Live preview + teleprompter
           </p>
         </div>
         <HelpTip title="Webcam + teleprompter" size="lg">
@@ -331,8 +330,7 @@ export function WebcamRecorder({
       {live ? (
         <div className="mt-4 space-y-4">
           <div className="how-banner">
-            Live camera stays on while you record. Use the teleprompter on the
-            right (or below on phones) so you can read your script.
+            Live preview stays on · read the teleprompter while recording
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">

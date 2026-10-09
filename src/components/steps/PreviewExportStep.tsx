@@ -137,53 +137,26 @@ export function PreviewExportStep({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">
-            Step 3: Finish and download
-          </h2>
-          <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Pick a music track, set the volumes, watch the preview, then export
-            your MP4.
+          <h2 className="step-title">Step 3: Finish and download</h2>
+          <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
+            Music, volumes, preview, then export MP4.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
-          <p>
-            <strong>1.</strong> Optional: turn the opening team thumbnail on or
-            off (first {THUMBNAIL_TEMPLATE.introDurationSeconds} second only).
-          </p>
-          <p>
-            <strong>2.</strong> Tap one of the four music cards (or turn music
-            off).
-          </p>
-          <p>
-            <strong>3.</strong> Move the two volume sliders until speech is easy
-            to hear and music is softer in the background.
-          </p>
-          <p>
-            <strong>4.</strong> Tap Play to preview — the thumbnail flashes at
-            the start if enabled.
-          </p>
-          <p>
-            <strong>5.</strong> Tap Export to MP4, wait for the green progress to
-            finish, then tap Download MP4.
-          </p>
+          <p>Optional opening thumbnail ({THUMBNAIL_TEMPLATE.introDurationSeconds}s).</p>
+          <p>Pick music (or off), set voice louder than music, preview, export.</p>
         </HelpTip>
       </div>
 
-      <div className="how-banner">
-        Keep your voice louder than the music. Voice starts at 50% (raise it if
-        you need to) and music near 30%, then adjust.
-      </div>
-
-      <section className="section-card bg-white p-5">
+      <section className="section-card bg-white p-4 md:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-2">
             <div>
-              <h3 className="text-2xl font-bold text-[var(--ink)]">
-                Opening thumbnail (optional)
+              <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+                Opening thumbnail
               </h3>
-              <p className="mt-1 text-lg text-[var(--muted)]">
-                Shows for {THUMBNAIL_TEMPLATE.introDurationSeconds} second at
-                the very start when a customer presses play, then disappears.
+              <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+                Optional · {THUMBNAIL_TEMPLATE.introDurationSeconds}s at start
               </p>
             </div>
             <HelpTip title="Opening thumbnail">
@@ -278,12 +251,11 @@ export function PreviewExportStep({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-2">
             <div>
-              <h3 className="text-2xl font-bold text-[var(--ink)]">
-                Choose background music
+              <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+                Background music
               </h3>
-              <p className="mt-1 text-lg text-[var(--muted)]">
-                Tap a track to select it. Use the Play / 30s button to hear a
-                thirty-second sample.
+              <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+                Select a track · use 30s to preview
               </p>
             </div>
             <HelpTip title="Background music">

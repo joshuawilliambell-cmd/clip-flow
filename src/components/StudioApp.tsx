@@ -134,9 +134,8 @@ function StudioShell() {
           </div>
 
           <div className="flex max-w-md items-start gap-2">
-            <p className="text-right text-[14px] font-semibold leading-snug tracking-tight text-[var(--ink)] md:text-[15px]">
-              Build Allego-ready team intro videos and Love&apos;s Team
-              thumbnails.
+            <p className="text-right text-[13px] font-semibold leading-snug tracking-tight text-[var(--ink)] md:text-[14px]">
+              Allego team intros &amp; thumbnails
             </p>
             <HelpTip title="What is this tool?" size="lg">
               <p>

@@ -18,7 +18,6 @@ const LABELS: Record<TeamMemberCount, string> = {
 };
 
 type TeamSizePickerProps = {
-  /** Slightly tighter copy when embedded inside thumbnail mode. */
   compact?: boolean;
 };
 
@@ -32,41 +31,33 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
     <section className="section-card bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
-            <Users className="h-6 w-6" />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
+            <Users className="h-5 w-5" />
           </span>
           <div>
-            <h3 className="text-2xl font-semibold text-[var(--ink)]">
-              {compact
-                ? "How many people on this thumbnail?"
-                : "How many teammates will you introduce?"}
+            <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
+              {compact ? "People on thumbnail" : "Teammates to introduce"}
             </h3>
-            <p className="mt-1 text-lg font-semibold text-[var(--muted)]">
-              {compact
-                ? "Pick 1–4. The Love’s Team template shows that many portrait cards."
-                : "Pick 0–4. This sets photo slots, the thumbnail layout, and the teleprompter script."}
+            <p className="mt-0.5 text-[14px] font-medium text-[var(--muted)]">
+              {compact ? "Choose 1–4." : "Choose 0–4 (not counting you on camera)."}
             </p>
           </div>
         </div>
         <HelpTip title="Team size" size="lg">
           <p>
-            Choose how many teammates you will introduce (not counting yourself
-            on camera).
+            <strong>Just me (0)</strong> — no photo overlays; Fleet Hub script
+            with no introductions.
           </p>
           <p>
-            <strong>Just me (0)</strong> means no photo overlays — the
-            teleprompter loads the Fleet Hub script with no introductions.
-          </p>
-          <p>
-            For 1–4, the tool creates that many photo slots and loads the
-            matching script for you to read while recording.
+            For 1–4, photo slots and the matching teleprompter script update
+            automatically.
           </p>
         </HelpTip>
       </div>
 
       <div
         className={clsx(
-          "mt-4 grid gap-3",
+          "mt-3 grid gap-2.5",
           compact ? "grid-cols-2 md:grid-cols-4" : "grid-cols-2 md:grid-cols-5",
         )}
       >
@@ -78,16 +69,16 @@ export function TeamSizePicker({ compact }: TeamSizePickerProps) {
               type="button"
               onClick={() => setTeamMemberCount(count)}
               className={clsx(
-                "min-h-[5.5rem] rounded-[var(--radius-md)] border px-3 py-4 text-center transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
+                "min-h-[4.5rem] rounded-[var(--radius-md)] border px-3 py-3 text-center transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
                 selected
                   ? "border-[var(--ink)] bg-[var(--yellow-bright)]"
-                  : "border-[var(--border-strong)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
+                  : "border-[var(--hairline)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
               )}
             >
-              <span className="block text-4xl font-semibold text-[var(--ink)]">
+              <span className="block text-3xl font-semibold tabular-nums text-[var(--ink)]">
                 {count}
               </span>
-              <span className="mt-1 block text-base font-bold text-[var(--ink)]">
+              <span className="mt-0.5 block text-[13px] font-semibold text-[var(--ink)]">
                 {LABELS[count]}
                 {selected ? " ✓" : ""}
               </span>

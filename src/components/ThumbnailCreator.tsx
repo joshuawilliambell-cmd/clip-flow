@@ -276,98 +276,27 @@ export function ThumbnailCreator({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">
-            Create a Love&apos;s Team thumbnail
-          </h2>
-          <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Build a Love&apos;s red, yellow, and orange team image for{" "}
-            {slotCount} people, then optionally place it at the very start of
-            your intro video for one quick second.
+          <h2 className="step-title">Love&apos;s Team thumbnail</h2>
+          <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
+            {slotCount} people · optional {THUMBNAIL_TEMPLATE.introDurationSeconds}
+            s video opener or download PNG
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
           <p>
-            <strong>Why make a thumbnail?</strong> Customers see a clear
-            &quot;Love&apos;s Team&quot; card the moment they press play — then
-            it vanishes after one second so your talking video takes over.
+            Optional Allego opener: shows for{" "}
+            {THUMBNAIL_TEMPLATE.introDurationSeconds}s then your talking video
+            continues.
           </p>
           <p>
-            <strong>Where it goes:</strong> Optional opening frame of your Allego
-            intro video (first {THUMBNAIL_TEMPLATE.introDurationSeconds} second
-            only). You can also download a PNG for Allego or email.
+            Add headshots → drag/zoom faces → names/titles → preview → Add to
+            video or Download PNG.
           </p>
-          <p>
-            <strong>How:</strong> Pick team size (1–4) → add headshots →
-            drag/zoom faces → type names → preview → Add to video or Download PNG.
-          </p>
+          <p>Drag card grips to set left-to-right order.</p>
         </HelpTip>
       </div>
 
       <TeamSizePicker compact />
-
-      {/* Purpose */}
-      <section className="section-card bg-[var(--panel-soft)] p-4 md:p-5">
-        <h3 className="text-2xl font-bold text-[var(--ink)]">
-          Why this thumbnail matters
-        </h3>
-        <ul className="mt-3 list-disc space-y-2 pl-6 text-lg text-[var(--ink)]">
-          <li>
-            It introduces your team visually before you start speaking — helpful
-            in Allego digital sales rooms.
-          </li>
-          <li>
-            In the video, it appears at the <strong>very beginning</strong> for{" "}
-            <strong>only {THUMBNAIL_TEMPLATE.introDurationSeconds} second</strong>,
-            then disappears so customers get into your intro quickly.
-          </li>
-          <li>
-            Using a thumbnail is <strong>optional</strong>. Skip it anytime if
-            you only want the talking video.
-          </li>
-        </ul>
-      </section>
-
-      {/* How to */}
-      <section className="section-card bg-white p-4 md:p-5">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <h3 className="text-2xl font-bold text-[var(--ink)]">
-            How to use this tool
-          </h3>
-          <HelpTip title="Step-by-step">
-            <p>Follow the numbered steps on this page. Tap any yellow ? for more help.</p>
-          </HelpTip>
-        </div>
-        <ol className="mt-3 list-decimal space-y-2 pl-6 text-lg text-[var(--ink)]">
-          <li>
-            Tap <strong>Add headshot</strong> on each teammate card (1–4 people).
-          </li>
-          <li>
-            <strong>Drag</strong> the grip (or use ↑ ↓) to set left-to-right
-            order on the thumbnail.
-          </li>
-          <li>
-            <strong>Drag</strong> the photo to center the face. Use the{" "}
-            <strong>Size</strong> slider if the face is too small or too large.
-          </li>
-          <li>
-            Type each person&apos;s <strong>Name</strong> and{" "}
-            <strong>Job title</strong>.
-          </li>
-          <li>
-            Check the <strong>live preview</strong> on the right / below.
-          </li>
-          <li>
-            Tap <strong>Add to start of video</strong> (shows for 1 second when
-            someone presses play) and/or <strong>Download PNG</strong>.
-          </li>
-        </ol>
-      </section>
-
-      <div className="how-banner">
-        Tip: Use clear, well-lit head-and-shoulders photos. Drag the grip to
-        reorder people, then drag and zoom until faces sit nicely in the tall
-        portrait frames.
-      </div>
 
       <div className="flex flex-wrap gap-3">
         <button

@@ -9,13 +9,13 @@ import type { PipSide } from "@/lib/template";
 const OPTIONS: Array<{ id: PipSide; label: string; hint: string }> = [
   {
     id: "left",
-    label: "Left side",
-    hint: "Photo in the top-left corner (like the example)",
+    label: "Left",
+    hint: "Top-left corner",
   },
   {
     id: "right",
-    label: "Right side",
-    hint: "Photo in the top-right corner with the same padding",
+    label: "Right",
+    hint: "Top-right corner",
   },
 ];
 
@@ -26,12 +26,11 @@ export function PipSidePicker() {
     <section className="section-card bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-2xl font-bold text-[var(--ink)]">
-            Where should team photos appear?
+          <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+            Photo placement
           </h3>
-          <p className="mt-1 text-lg text-[var(--muted)]">
-            Photos stay portrait-shaped with automatic padding. The video is
-            always 16:9. You only choose left or right.
+          <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+            Left or right corner · portrait frame is fixed
           </p>
         </div>
         <HelpTip title="Photo placement" size="lg">

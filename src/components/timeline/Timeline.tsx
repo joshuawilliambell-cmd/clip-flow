@@ -125,10 +125,12 @@ export function Timeline() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-start gap-2">
           <div>
-            <h3 className="text-2xl font-bold text-[var(--ink)]">Timeline</h3>
-            <p className="mt-1 text-lg text-[var(--muted)]">
-              Team photos start at {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s
-              each. Drag a bar to move it; drag the ends to shorten or lengthen.
+            <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
+              Timeline
+            </h3>
+            <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+              Drag bars to move · drag ends to resize · drag the red playhead to
+              scrub
             </p>
           </div>
           <HelpTip title="How to use the timeline" size="lg">

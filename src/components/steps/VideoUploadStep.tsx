@@ -58,40 +58,29 @@ export function VideoUploadStep() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">
-            Step 1: Add your video
-          </h2>
-          <p className="mt-3 text-lg text-[var(--muted)] md:text-xl">
-            Choose a video from a folder on your computer, or record a new one
-            with this computer’s webcam. Then trim it to about 60 seconds.
+          <h2 className="step-title">Step 1: Add your video</h2>
+          <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
+            Upload, record, or try a practice clip — then trim to ~60s.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
+          <p>Pick teammate count, then add your talking video.</p>
           <p>
-            <strong>1.</strong> First choose how many teammates you will
-            introduce (1–4). That sets up the photo slots and thumbnail.
+            <strong>Upload</strong> an MP4/MOV/WebM, <strong>record</strong>{" "}
+            with the webcam, or load a practice video.
           </p>
-          <p>
-            <strong>Option A:</strong> Tap Choose video from folder and pick an
-            MP4, MOV, or WebM file you already recorded.
-          </p>
-          <p>
-            <strong>Option B:</strong> Tap Start webcam to record with this
-            computer’s camera and microphone.
-          </p>
-          <p>Watch the preview, then trim with the red timeline handles.</p>
-          <p>When it looks right, tap Continue to Team Photos.</p>
+          <p>Trim with the red timeline handles, then continue.</p>
         </HelpTip>
       </div>
 
       <TeamSizePicker />
 
-      <div className="how-banner">
-        {teamMemberCount === 0
-          ? "You selected Just me — no teammate photo overlays. The teleprompter will use the no-intro Fleet Hub script."
-          : `You selected ${teamMemberCount} teammate${teamMemberCount === 1 ? "" : "s"}. The matching Fleet Hub script loads in the webcam teleprompter.`}{" "}
-        Next, add your talking video — upload, record, or try a practice video.
-      </div>
+      {teamMemberCount === 0 ? (
+        <div className="how-banner">
+          Just me — no photo overlays. Matching Fleet Hub script in the
+          teleprompter.
+        </div>
+      ) : null}
 
       <RecordingGuide />
 
@@ -112,36 +101,24 @@ export function VideoUploadStep() {
               setDragging(false);
               void handleFiles(e.dataTransfer.files);
             }}
-            className={`flex min-h-[220px] w-full flex-col items-center justify-center rounded-3xl border-4 border-dashed px-6 py-10 transition ${
+            className={`flex min-h-[160px] w-full flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed px-6 py-8 transition ${
               dragging
                 ? "border-[var(--primary)] bg-[var(--yellow)]/40"
                 : "border-[var(--ink)] bg-[var(--panel-soft)]"
             }`}
           >
-            <div className="mb-2 flex items-center gap-2">
-              <FolderOpen className="h-7 w-7 text-[var(--primary)]" />
-              <p className="text-center text-2xl font-bold text-[var(--ink)] md:text-3xl">
-                Option A: Upload from a folder
+            <div className="mb-1 flex items-center gap-2">
+              <FolderOpen className="h-5 w-5 text-[var(--primary)]" />
+              <p className="text-center text-lg font-semibold tracking-tight text-[var(--ink)]">
+                Upload video
               </p>
               <HelpTip title="Upload from a folder">
-                <p>
-                  Tap <strong>Choose video from folder</strong>. Your computer’s
-                  file window opens.
-                </p>
-                <p>
-                  Find the video on your hard drive, Downloads folder, Desktop,
-                  USB drive, or cloud-synced folder.
-                </p>
-                <p>Select an MP4, MOV, or WebM file, then Open.</p>
-                <p>
-                  On a computer you can also drag a file from a folder and drop
-                  it onto this box.
-                </p>
+                <p>MP4, MOV, or WebM · up to about 4 GB.</p>
+                <p>Tap the button or drag a file onto this box.</p>
               </HelpTip>
             </div>
-            <p className="mb-6 max-w-xl text-center text-lg text-[var(--muted)]">
-              Use a video you already recorded on this computer, phone, or
-              camera (then copied here). MP4, MOV, or WebM · up to about 4 GB.
+            <p className="mb-4 max-w-md text-center text-[14px] font-medium text-[var(--muted)]">
+              From this computer, phone, or camera · MP4 / MOV / WebM
             </p>
             <button
               type="button"
@@ -149,18 +126,14 @@ export function VideoUploadStep() {
               className="btn-primary"
               data-testid="choose-video-folder"
             >
-              <Upload className="h-6 w-6" />
+              <Upload className="h-5 w-5" />
               Choose video from folder
             </button>
           </div>
 
-          <div className="section-card bg-[var(--yellow)] px-6 py-5 text-center">
-            <p className="text-xl font-bold text-[var(--ink)]">
-              Just exploring? Load a practice video
-            </p>
-            <p className="mt-1 text-lg text-[var(--ink)]/80">
-              No file picker — this loads a built-in sample so you can try Steps
-              2 and 3 right away.
+          <div className="section-card flex flex-wrap items-center justify-between gap-3 bg-[var(--yellow)] px-4 py-3">
+            <p className="text-[14px] font-semibold text-[var(--ink)]">
+              Just exploring? Load a practice clip to try the rest of the flow.
             </p>
             <button
               type="button"
@@ -172,10 +145,10 @@ export function VideoUploadStep() {
                 e.stopPropagation();
                 void loadSample();
               }}
-              className="btn-primary mt-4"
+              className="btn-primary"
             >
-              <Film className="h-6 w-6" />
-              {loadingSample ? "Loading practice video…" : "Try a practice video"}
+              <Film className="h-5 w-5" />
+              {loadingSample ? "Loading…" : "Try a practice video"}
             </button>
           </div>
 
@@ -233,10 +206,6 @@ export function VideoUploadStep() {
               Remove
             </button>
           </div>
-          <p className="text-base text-[var(--muted)]">
-            Want to record a new webcam clip instead? Tap Remove, then use
-            Option B: Record with webcam.
-          </p>
         </div>
       )}
 
