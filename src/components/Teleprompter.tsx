@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FileUp,
   Pause,
@@ -9,6 +9,7 @@ import {
   ScrollText,
 } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
+import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
 import {
   INTRO_SCRIPTS,
   TARGET_INTRO_SECONDS,
@@ -24,17 +25,17 @@ import {
 } from "@/lib/intro-script";
 import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import { PanelSteps } from "@/components/PanelStep";
+import { useMicLevel } from "@/hooks/useMicLevel";
 import { useTeleprompterVoiceFollow } from "@/hooks/useTeleprompterVoiceFollow";
-import {
-  TELEPROMPTER_COLUMN_CLASS,
-  TELEPROMPTER_TEXT_CLASS_COMPACT,
-  TELEPROMPTER_TEXT_CLASS_LARGE,
-  formatScriptForNaturalReading,
-} from "@/lib/teleprompter-layout";
+import { formatScriptForNaturalReading, scriptWords } from "@/lib/teleprompter-layout";
 import {
   estimateWpm,
   punctuationEaseMultiplier,
 } from "@/lib/teleprompter-pace";
+import {
+  findScriptCues,
+  wordIndexToScrollFraction,
+} from "@/lib/teleprompter-script-view";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 import { formatClock } from "@/lib/timeline";
@@ -65,12 +66,15 @@ export function Teleprompter({
     setActiveTeleprompterScript,
     teleprompterFontLarge: fontLarge,
     setTeleprompterFontLarge: setFontLarge,
+    teleprompterLineRoomy: lineRoomy,
+    setTeleprompterLineRoomy: setLineRoomy,
   } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const speedOverriddenRef = useRef(false);
   const pixelsPerTickRef = useRef(0);
   const scrollCarryRef = useRef(0);
+  const loopPracticeRef = useRef(false);
 
   const rosterKey = photos
     .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
@@ -100,9 +104,12 @@ export function Teleprompter({
   const [scrollDistancePx, setScrollDistancePx] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [loopPractice, setLoopPractice] = useState(false);
+  const [scrollHighlight, setScrollHighlight] = useState(0);
 
   speedOverriddenRef.current = speedOverridden;
   pixelsPerTickRef.current = pixelsPerTick;
+  loopPracticeRef.current = loopPractice;
   const practiceScriptRef = useRef("");
 
   // Official script tracks team size and roster names/titles.
@@ -122,6 +129,20 @@ export function Teleprompter({
   practiceScriptRef.current = practiceScript;
 
   const voiceFollow = useTeleprompterVoiceFollow(practiceScript, scrollerRef);
+  const micLevel = useMicLevel(voiceFollow.listening);
+  const totalPracticeWords = scriptWords(practiceScript).length;
+  const highlightThrough = voiceFollow.listening
+    ? voiceFollow.matchedWords
+    : scrollHighlight;
+
+  const cues = useMemo(
+    () =>
+      findScriptCues(
+        practiceScript,
+        photos.map((p) => p.name).filter((n) => n.trim().length >= 2),
+      ),
+    [practiceScript, photos],
+  );
 
   // Keep webcam overlay on the same script text (including edits).
   useEffect(() => {
@@ -235,8 +256,21 @@ export function Teleprompter({
       if (step < 1) return;
       scrollCarryRef.current -= step;
       el.scrollTop += step;
+      const words = scriptWords(practiceScriptRef.current).length;
+      if (words > 0 && maxScroll > 0) {
+        setScrollHighlight(
+          Math.round((el.scrollTop / maxScroll) * words),
+        );
+      }
       if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
-        setScrolling(false);
+        if (loopPracticeRef.current) {
+          el.scrollTop = 0;
+          scrollCarryRef.current = 0;
+          setScrollHighlight(0);
+          setElapsedSeconds(0);
+        } else {
+          setScrolling(false);
+        }
       }
     }, TELEPROMPTER_TICK_MS);
     return () => window.clearInterval(id);
@@ -247,6 +281,19 @@ export function Teleprompter({
     setScrolling(false);
     setCountdown(null);
     setElapsedSeconds(0);
+    setScrollHighlight(0);
+    voiceFollow.stop();
+  };
+
+  const jumpToCue = (wordIndex: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    const fraction = wordIndexToScrollFraction(wordIndex, totalPracticeWords);
+    el.scrollTop = fraction * Math.max(0, maxScroll);
+    setScrollHighlight(wordIndex);
+    setScrolling(false);
+    setCountdown(null);
     voiceFollow.stop();
   };
 
@@ -579,9 +626,9 @@ export function Teleprompter({
               <strong className="text-white">Space</strong> play/pause,{" "}
               <strong className="text-white">R</strong> or Home back to top.
               Optional: <strong className="text-white">Follow My Voice</strong>{" "}
-              uses your mic (Chrome/Edge) and scrolls as you speak. Tip: spell
-              out numbers in the script (&quot;sixty&quot; not &quot;60&quot;)
-              for better voice matching.
+              uses your mic (Chrome/Edge), highlights words as you say them, and
+              scrolls with you (like PromptSmart VoiceTrack). Tip: spell out
+              numbers (&quot;sixty&quot; not &quot;60&quot;) for better matching.
             </p>
           </div>
 
@@ -605,21 +652,33 @@ export function Teleprompter({
               className="h-full min-h-[12rem] overflow-y-auto px-5 py-6 text-center"
               aria-live="polite"
             >
-              <div
-                className={clsx(
-                  "mx-auto whitespace-pre-wrap text-white",
-                  TELEPROMPTER_COLUMN_CLASS,
-                  fontLarge
-                    ? TELEPROMPTER_TEXT_CLASS_LARGE
-                    : TELEPROMPTER_TEXT_CLASS_COMPACT,
-                )}
-              >
-                {practiceScript.trim() ||
-                  "Add a script above, then click Play / Scroll to practice."}
-              </div>
+              <TeleprompterHighlightedScript
+                script={practiceScript}
+                highlightThrough={highlightThrough}
+                fontLarge={fontLarge}
+                roomyLines={lineRoomy}
+              />
               <div className="h-40" aria-hidden />
             </div>
           </div>
+
+          {cues.length > 1 ? (
+            <div className="flex flex-wrap gap-1.5 border-b border-white/15 px-3 py-2">
+              <span className="w-full text-[10px] font-semibold uppercase tracking-wide text-white/60">
+                Jump To Cue
+              </span>
+              {cues.map((cue) => (
+                <button
+                  key={`${cue.label}-${cue.wordIndex}`}
+                  type="button"
+                  onClick={() => jumpToCue(cue.wordIndex)}
+                  className="rounded-md border border-white/30 bg-black/30 px-2 py-1 text-[11px] font-semibold text-white hover:border-[var(--yellow)]"
+                >
+                  Click Here · {cue.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           <div className="space-y-2 border-t border-white/20 px-3 py-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -713,6 +772,30 @@ export function Teleprompter({
               </button>
               <button
                 type="button"
+                onClick={() => setLoopPractice((v) => !v)}
+                className={clsx(
+                  "rounded-[var(--radius-sm)] border px-2.5 py-1.5 text-[12px] font-semibold",
+                  loopPractice
+                    ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                    : "border-white/35 text-white",
+                )}
+                title="Restart from the top when you reach the end"
+              >
+                {loopPractice
+                  ? "Click Here — Loop On"
+                  : "Click Here — Loop Off"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setLineRoomy(!lineRoomy)}
+                className="rounded-[var(--radius-sm)] border border-white/35 px-2.5 py-1.5 text-[12px] font-semibold text-white"
+              >
+                {lineRoomy
+                  ? "Click Here for Tighter Lines"
+                  : "Click Here for Roomy Lines"}
+              </button>
+              <button
+                type="button"
                 onClick={() => setFontLarge(!fontLarge)}
                 className="ml-auto rounded-[var(--radius-sm)] border border-white/35 px-2.5 py-1.5 text-[12px] font-semibold text-white"
               >
@@ -721,6 +804,26 @@ export function Teleprompter({
                   : "Click Here for Bigger Text"}
               </button>
             </div>
+            {voiceFollow.listening ? (
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
+                  Mic
+                </span>
+                <div
+                  className="h-2 flex-1 overflow-hidden rounded-full bg-white/15"
+                  role="meter"
+                  aria-label="Microphone level"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(micLevel * 100)}
+                >
+                  <div
+                    className="h-full rounded-full bg-[var(--yellow)] transition-[width] duration-75"
+                    style={{ width: `${Math.round(micLevel * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
             {voiceFollow.status ? (
               <p className="text-[11px] font-medium text-[var(--yellow)]">
                 {voiceFollow.status}

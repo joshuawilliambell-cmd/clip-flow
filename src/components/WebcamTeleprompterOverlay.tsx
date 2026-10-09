@@ -3,12 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { TELEPROMPTER_TICK_MS, scriptForTeam } from "@/lib/intro-script";
+import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
 import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import {
-  TELEPROMPTER_COLUMN_CLASS,
-  TELEPROMPTER_TEXT_CLASS_COMPACT,
-  TELEPROMPTER_TEXT_CLASS_LARGE,
   formatScriptForNaturalReading,
+  scriptWords,
 } from "@/lib/teleprompter-layout";
 import { punctuationEaseMultiplier } from "@/lib/teleprompter-pace";
 import { useStudio } from "@/lib/studio-context";
@@ -41,6 +40,7 @@ export function WebcamTeleprompterOverlay({
     speakerDuties,
     activeTeleprompterScript,
     teleprompterFontLarge: fontLarge,
+    teleprompterLineRoomy: lineRoomy,
     teleprompterPixelsPerTick: pixelsPerTick,
     setTeleprompterPixelsPerTick,
     setTeleprompterSpeedOverridden,
@@ -49,6 +49,7 @@ export function WebcamTeleprompterOverlay({
   const pixelsPerTickRef = useRef(0);
   const scrollCarryRef = useRef(0);
   const scriptRef = useRef("");
+  const [scrollHighlight, setScrollHighlight] = useState(0);
 
   const rosterKey = photos
     .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
@@ -135,6 +136,10 @@ export function WebcamTeleprompterOverlay({
       if (step < 1) return;
       scrollCarryRef.current -= step;
       el.scrollTop += step;
+      const words = scriptWords(scriptRef.current).length;
+      if (words > 0 && maxScroll > 0) {
+        setScrollHighlight(Math.round((el.scrollTop / maxScroll) * words));
+      }
       if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
         setScrolling(false);
       }
@@ -149,6 +154,7 @@ export function WebcamTeleprompterOverlay({
     scrollCarryRef.current = 0;
     setScrolling(false);
     setCountdown(null);
+    setScrollHighlight(0);
   };
 
   return (
@@ -193,19 +199,20 @@ export function WebcamTeleprompterOverlay({
             style={{ scrollbarWidth: "none" }}
             aria-live="polite"
           >
-            <p
-              className={clsx(
-                "mx-auto whitespace-pre-wrap text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]",
-                TELEPROMPTER_COLUMN_CLASS,
-                fontLarge
-                  ? TELEPROMPTER_TEXT_CLASS_LARGE
-                  : TELEPROMPTER_TEXT_CLASS_COMPACT,
-              )}
-            >
-              {enabled
-                ? script.trim() || "Add your script above in the teleprompter."
-                : "Teleprompter off — tap On below to show your script."}
-            </p>
+            {enabled ? (
+              <TeleprompterHighlightedScript
+                script={script}
+                highlightThrough={scrollHighlight}
+                fontLarge={fontLarge}
+                roomyLines={lineRoomy}
+                className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]"
+                emptyLabel="Add your script above in the teleprompter."
+              />
+            ) : (
+              <p className="mx-auto max-w-[28ch] text-center text-[1.15rem] font-semibold text-white/70">
+                Teleprompter off — tap On below to show your script.
+              </p>
+            )}
             <div className="h-24" aria-hidden />
           </div>
         </div>

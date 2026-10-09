@@ -92,6 +92,9 @@ type StudioContextValue = {
   /** Shared type size flag for practice + webcam teleprompters. */
   teleprompterFontLarge: boolean;
   setTeleprompterFontLarge: (large: boolean) => void;
+  /** Roomy line spacing (shared practice + webcam). */
+  teleprompterLineRoomy: boolean;
+  setTeleprompterLineRoomy: (roomy: boolean) => void;
   musicEnabled: boolean;
   musicVolume: number;
   videoVolume: number;
@@ -318,6 +321,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     useState(false);
   const [activeTeleprompterScript, setActiveTeleprompterScript] = useState("");
   const [teleprompterFontLarge, setTeleprompterFontLarge] = useState(true);
+  const [teleprompterLineRoomy, setTeleprompterLineRoomy] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolumeState] = useState<number>(
     VIDEO_TEMPLATE.defaultMusicVolume,
@@ -545,6 +549,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setTeleprompterSpeedOverridden(false);
     setActiveTeleprompterScript("");
     setTeleprompterFontLarge(true);
+    setTeleprompterLineRoomy(false);
     setMusicEnabled(true);
     setMusicVolumeState(VIDEO_TEMPLATE.defaultMusicVolume);
     setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);
@@ -999,6 +1004,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setActiveTeleprompterScript,
       teleprompterFontLarge,
       setTeleprompterFontLarge,
+      teleprompterLineRoomy,
+      setTeleprompterLineRoomy,
       musicEnabled,
       musicVolume,
       videoVolume,
@@ -1059,6 +1066,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       teleprompterSpeedOverridden,
       activeTeleprompterScript,
       teleprompterFontLarge,
+      teleprompterLineRoomy,
       musicEnabled,
       musicVolume,
       videoVolume,
