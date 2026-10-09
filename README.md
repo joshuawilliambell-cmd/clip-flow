@@ -41,8 +41,8 @@ You can also import the Git repo in the [Vercel dashboard](https://vercel.com/ne
 
 ## Employee flow
 
-1. **Prepare Your Video** — pick teammates (photos, names, titles), optionally build the Love’s Team thumbnail opener, fill script names, record or upload, trim, set PIP timing
-2. **Finish & Download** — turn the opening thumbnail on/off, choose music, set volumes, **Export to MP4**
+1. **Prepare Your Video** — pick teammates (photos, names, titles), optionally build the Love’s Team thumbnail opener, fill script names, record or upload
+2. **Finish & Download** — trim, place/time PIP photos, turn the opening thumbnail on/off, choose music, set volumes, **Export to MP4**
 
 ### Team thumbnail (in Step 1)
 After adding teammates, frame faces on the thumbnail (photos/names/titles come from Your teammates), then **Add to start of video** and/or **Download PNG**.

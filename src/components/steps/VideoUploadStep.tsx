@@ -1,17 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import {
-  Film,
-  FolderOpen,
-  RotateCcw,
-  Upload,
-  Wand2,
-} from "lucide-react";
+import { Film, FolderOpen, Upload } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
-import { VIDEO_TEMPLATE } from "@/lib/template";
-import { VideoPreview } from "@/components/VideoPreview";
-import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
 import { TeamSizePicker } from "@/components/TeamSizePicker";
@@ -20,8 +11,6 @@ import { ThumbnailCreator } from "@/components/ThumbnailCreator";
 import { ScriptFillIns } from "@/components/ScriptFillIns";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
-import { PipSidePicker } from "@/components/PipSidePicker";
-import { filledTeamPhotos } from "@/lib/team-slots";
 
 export function VideoUploadStep() {
   const {
@@ -30,15 +19,10 @@ export function VideoUploadStep() {
     clearVideo,
     setStep,
     teamMemberCount,
-    photos,
-    autoArrange,
-    resetTimeline,
   } = useStudio();
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-
-  const filledCount = filledTeamPhotos(photos).length;
 
   const handleFiles = async (files: FileList | null) => {
     const file = files?.[0];
@@ -57,8 +41,9 @@ export function VideoUploadStep() {
         <div className="max-w-3xl">
           <h2 className="step-title">Step 1: Prepare your video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Build your team roster and script, record or upload, then set when
-            photos appear. About 60 seconds is preferred; longer videos are fine.
+            Build your team roster and script, then record or upload. About 60
+            seconds is preferred; longer videos are fine. Trim, photo overlays,
+            and timing are in Step 2.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
@@ -68,7 +53,10 @@ export function VideoUploadStep() {
           </p>
           <p>2. Choose how many teammates and add their photo, name, and title.</p>
           <p>3. Optional: build the Love&apos;s Team thumbnail opener.</p>
-          <p>4. Record or upload your talking video, then trim and time photos.</p>
+          <p>
+            4. Record or upload your talking video, then continue to Finish &amp;
+            Download to trim, place photos, and export.
+          </p>
         </HelpTip>
       </div>
 
@@ -226,6 +214,10 @@ export function VideoUploadStep() {
               Remove
             </button>
           </div>
+          <div className="how-banner">
+            <strong>Next:</strong> continue to Finish &amp; Download to trim the
+            clip, place teammate photos, set music, and export your MP4.
+          </div>
         </div>
       )}
 
@@ -243,66 +235,11 @@ export function VideoUploadStep() {
         </p>
       ) : null}
 
-      {/* 4. Preview, PIP side, and timing (from former Step 2) */}
-      {teamMemberCount > 0 ? (
-        <section className="space-y-3">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-                Photo overlays & timing
-              </h3>
-              <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-                {filledCount} of {teamMemberCount} teammate PIP photos (not you
-                — your photo is thumbnail-only) · choose corner, then drag
-                timeline bars for when each face appears
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={autoArrange}
-                disabled={filledCount === 0 || !video}
-                className="btn-secondary"
-              >
-                <Wand2 className="h-5 w-5" /> Auto Arrange Photos
-              </button>
-              <button
-                type="button"
-                onClick={resetTimeline}
-                disabled={filledCount === 0 || !video}
-                className="btn-secondary"
-              >
-                <RotateCcw className="h-5 w-5" /> Reset Timeline
-              </button>
-              <HelpTip title="Photo timing">
-                <p>
-                  Defaults: teammate 1 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[0]}s, 2 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[1]}s, 3 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[2]}s, 4 at{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[3]}s — each{" "}
-                  {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s long. Drag bars
-                  or their ends anytime to change.
-                </p>
-                <p>
-                  <strong>Auto Arrange Photos</strong> restores those default
-                  cue points (or packs them on shorter videos).
-                </p>
-              </HelpTip>
-            </div>
-          </div>
-          <PipSidePicker />
-        </section>
-      ) : null}
-
-      <VideoPreview />
-      <Timeline />
-
       <div className="flex flex-wrap items-center justify-end gap-3 border-t-2 border-[var(--border)] pt-4">
         <HelpTip title="Ready for the next step?">
           <p>
-            When your video, roster, and photo timing look good, continue to
-            Finish & Download for music and MP4 export.
+            When your roster and talking video are ready, continue to Finish
+            &amp; Download to trim, time photos, add music, and export MP4.
           </p>
         </HelpTip>
         <button

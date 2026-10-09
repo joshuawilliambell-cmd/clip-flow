@@ -10,16 +10,20 @@ import {
   Music2,
   Pause,
   Play,
+  RotateCcw,
   Volume2,
   VolumeX,
+  Wand2,
 } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
-import { MUSIC_TRACKS } from "@/lib/template";
+import { MUSIC_TRACKS, VIDEO_TEMPLATE } from "@/lib/template";
 import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { exportIntroductionVideo } from "@/lib/export-video";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
+import { PipSidePicker } from "@/components/PipSidePicker";
 import { HelpTip } from "@/components/HelpTip";
+import { filledTeamPhotos } from "@/lib/team-slots";
 
 const MUSIC_SAMPLE_SECONDS = 30;
 
@@ -47,6 +51,7 @@ export function PreviewExportStep({
     autoArrange,
     resetTimeline,
     photos,
+    teamMemberCount,
   } = useStudio();
 
   const [progress, setProgress] = useState<number | null>(null);
@@ -55,6 +60,8 @@ export function PreviewExportStep({
   const [samplingTrackId, setSamplingTrackId] = useState<string | null>(null);
   const sampleAudioRef = useRef<HTMLAudioElement | null>(null);
   const sampleTimerRef = useRef<number | null>(null);
+
+  const filledCount = filledTeamPhotos(photos).length;
 
   const stopMusicSample = () => {
     if (sampleTimerRef.current !== null) {
@@ -139,11 +146,16 @@ export function PreviewExportStep({
         <div className="max-w-3xl">
           <h2 className="step-title">Step 2: Finish and download</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Music, volumes, preview, then export MP4.
+            Edit your video here — trim, place teammate photos, set music, then
+            export MP4.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
           <p>Optional opening thumbnail ({THUMBNAIL_TEMPLATE.introDurationSeconds}s).</p>
+          <p>
+            Choose photo corner, trim the clip, and drag timeline bars to time
+            each teammate photo.
+          </p>
           <p>Pick music (or off), set voice louder than music, preview, export.</p>
         </HelpTip>
       </div>
@@ -243,6 +255,63 @@ export function PreviewExportStep({
           </div>
         )}
       </section>
+
+      {/* All video editing: photo placement, timing, preview, timeline */}
+      {teamMemberCount > 0 ? (
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+                Photo overlays & timing
+              </h3>
+              <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+                {filledCount} of {teamMemberCount} teammate PIP photos (not you
+                — your photo is thumbnail-only) · choose corner, then drag
+                timeline bars for when each face appears
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={autoArrange}
+                disabled={filledCount === 0 || !video}
+                className="btn-secondary"
+              >
+                <Wand2 className="h-5 w-5" /> Auto Arrange Photos
+              </button>
+              <button
+                type="button"
+                onClick={resetTimeline}
+                disabled={filledCount === 0 || !video}
+                className="btn-secondary"
+              >
+                <RotateCcw className="h-5 w-5" /> Reset Timeline
+              </button>
+              <HelpTip title="Photo timing">
+                <p>
+                  Defaults: teammate 1 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[0]}s, 2 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[1]}s, 3 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[2]}s, 4 at{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoStartSeconds[3]}s — each{" "}
+                  {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s long. Drag bars
+                  (hand cursor) or their ends anytime to change.
+                </p>
+                <p>
+                  <strong>Auto Arrange Photos</strong> restores those default
+                  cue points (or packs them on shorter videos).
+                </p>
+              </HelpTip>
+            </div>
+          </div>
+          <PipSidePicker />
+        </section>
+      ) : (
+        <div className="how-banner">
+          No teammate photo overlays for this project. Trim your video below,
+          add music if you like, then export.
+        </div>
+      )}
 
       <VideoPreview />
       <Timeline />
@@ -403,25 +472,6 @@ export function PreviewExportStep({
           </label>
         </div>
       </section>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={autoArrange}
-          disabled={photos.length === 0}
-          className="btn-secondary"
-        >
-          Auto Arrange Photos
-        </button>
-        <button
-          type="button"
-          onClick={resetTimeline}
-          disabled={photos.length === 0}
-          className="btn-secondary"
-        >
-          Reset Timeline
-        </button>
-      </div>
 
       <div className="section-card bg-[var(--panel-soft)] p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">

@@ -16,7 +16,7 @@ type TeamRosterFieldsProps = {
 /**
  * Photo + name + job title for each teammate slot.
  * Used early in Step 1 so the teleprompter can speak real names;
- * photos and titles carry into Step 2 for PIP timing.
+ * photos and titles carry into Step 2 for PIP placement and timing.
  */
 export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
   const {

@@ -56,6 +56,10 @@ function StudioShell() {
                 In Step 1, add teammates, optionally build a Love&apos;s Team
                 thumbnail opener, then record or upload your talking video.
               </p>
+              <p>
+                In Step 2, trim the clip, place and time photos, add music, and
+                export your MP4.
+              </p>
               <p>Tap any ? button anytime for help.</p>
             </HelpTip>
           </div>

@@ -204,7 +204,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
           <p>
             Background music starts at{" "}
             {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}% so your voice
-            stays clear. You can change it in Finish &amp; Download.
+            stays clear. Change volume with the music controls on this page.
           </p>
           <p>
             Preview uses your browser&apos;s built-in video player so uploads

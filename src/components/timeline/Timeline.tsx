@@ -163,7 +163,7 @@ export function Timeline() {
               Timeline
             </h3>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Trim with red handles · photo body shows a move cursor · photo
+              Trim with red handles · photo body shows a hand cursor · photo
               edges show ↔ to change length · drag playhead to scrub
             </p>
           </div>
@@ -568,9 +568,9 @@ function PhotoBlock({
       data-photo-block
       data-photo-id={id}
       className={clsx(
-        // Body uses move (four-arrow) cursor; edge handles set ew-resize themselves.
-        "absolute top-1 bottom-1 flex cursor-move touch-none overflow-hidden rounded-md text-white shadow transition-[box-shadow,outline] active:cursor-move",
-        dragging ? "z-30 opacity-90 ring-2 ring-[var(--yellow)]" : "z-10",
+        // Body uses hand (grab) cursor; edge handles set ew-resize themselves.
+        "absolute top-1 bottom-1 flex cursor-grab touch-none overflow-hidden rounded-md text-white shadow transition-[box-shadow,outline] active:cursor-grabbing",
+        dragging ? "z-30 cursor-grabbing opacity-90 ring-2 ring-[var(--yellow)]" : "z-10",
         dropTarget && "z-20 ring-2 ring-white outline outline-2 outline-offset-2 outline-[var(--yellow)]",
       )}
       style={{
@@ -579,7 +579,7 @@ function PhotoBlock({
         backgroundColor: color,
         transform: dragging ? `translateX(${dragDx}px)` : undefined,
       }}
-      title={`${name}: ${formatTime(start)}–${formatTime(start + duration)}. Move cursor: drag to reposition or onto another photo to reorder. Edge arrows: change length.`}
+      title={`${name}: ${formatTime(start)}–${formatTime(start + duration)}. Hand cursor: drag to reposition or onto another photo to reorder. Edge arrows: change length.`}
       onPointerDown={(e) => {
         if ((e.target as HTMLElement).dataset.handle) return;
         e.preventDefault();
@@ -651,7 +651,7 @@ function PhotoBlock({
           window.addEventListener("pointerup", onUp);
         }}
       />
-      <div className="flex min-w-0 flex-1 cursor-move items-center gap-2 px-1.5">
+      <div className="flex min-w-0 flex-1 cursor-grab items-center gap-2 px-1.5 active:cursor-grabbing">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={thumb}
