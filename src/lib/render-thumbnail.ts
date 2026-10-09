@@ -137,13 +137,7 @@ function drawHeader(ctx: CanvasRenderingContext2D) {
   ctx.textBaseline = "middle";
   ctx.fillText(header.title, width / 2, header.y);
 
-  // Small Love's heart accent over the word
-  const metrics = ctx.measureText(header.title);
-  const textWidth = metrics.width;
-  const heartX = width / 2 + textWidth / 2 - 18;
-  const heartY = header.y - header.fontSize * 0.42;
-  drawMiniHeart(ctx, heartX, heartY, 22);
-
+  const textWidth = ctx.measureText(header.title).width;
   const lineY = header.y;
   const leftEnd = width / 2 - textWidth / 2 - header.lineGap;
   const rightStart = width / 2 + textWidth / 2 + header.lineGap;
@@ -182,42 +176,6 @@ function drawStripeLine(
   ctx.moveTo(mid2, y);
   ctx.lineTo(x2, y);
   ctx.stroke();
-}
-
-function drawMiniHeart(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  size: number,
-) {
-  const { colors } = THUMBNAIL_TEMPLATE;
-  ctx.save();
-  ctx.fillStyle = colors.red;
-  ctx.beginPath();
-  const topY = cy - size * 0.25;
-  ctx.moveTo(cx, cy + size * 0.35);
-  ctx.bezierCurveTo(
-    cx - size * 0.7,
-    cy + size * 0.05,
-    cx - size * 0.55,
-    topY - size * 0.35,
-    cx,
-    topY,
-  );
-  ctx.bezierCurveTo(
-    cx + size * 0.55,
-    topY - size * 0.35,
-    cx + size * 0.7,
-    cy + size * 0.05,
-    cx,
-    cy + size * 0.35,
-  );
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = colors.ink;
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.restore();
 }
 
 async function drawMemberCard(
