@@ -15,6 +15,7 @@ import { VIDEO_TEMPLATE } from "@/lib/template";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { HelpTip } from "@/components/HelpTip";
+import { JobTitleField } from "@/components/JobTitleField";
 import { PipSidePicker } from "@/components/PipSidePicker";
 import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { filledTeamPhotos } from "@/lib/team-slots";
@@ -136,15 +137,18 @@ export function TeamPhotosStep() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">Step 2: Add team photos</h2>
+          <h2 className="step-title">Step 2: Review team & timing</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             {teamMemberCount === 0
               ? "Just me — no teammate photos. Continue when ready."
-              : `${filledCount} of ${teamMemberCount} photos · names came from Step 1 · drag the grip to reorder`}
+              : `${filledCount} of ${teamMemberCount} photos from Step 1 · drag the grip to reorder · set PIP timing`}
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
-          <p>Add a headshot for each teammate. Names and titles are already set.</p>
+          <p>
+            Photos, names, and titles come from Step 1. Replace a photo or edit
+            a title here if needed.
+          </p>
           <p>Drag the grip (or ↑ ↓) to change who appears first.</p>
           <p>
             Photos default to {VIDEO_TEMPLATE.defaultPhotoDurationSeconds}s —
@@ -163,8 +167,8 @@ export function TeamPhotosStep() {
 
       {teamMemberCount > 0 ? (
         <p className="text-[14px] font-medium text-[var(--muted)]">
-          Add a photo for each person below. You can still tweak a name or title
-          if needed.
+          Confirm each headshot below, then adjust when photos appear on the
+          timeline.
         </p>
       ) : null}
 
@@ -371,27 +375,21 @@ export function TeamPhotosStep() {
                     Teammate {index + 1} of {teamMemberCount}
                   </p>
                   <label className="block">
-                    <span className="field-label">Name (from Step 1)</span>
+                    <span className="field-label">Name</span>
                     <input
                       value={photo.name}
                       onChange={(e) =>
                         updatePhotoMeta(photo.id, { name: e.target.value })
                       }
                       className="field-input"
-                      placeholder="Add in Step 1"
+                      placeholder="Example: Jared"
                     />
                   </label>
-                  <label className="block">
-                    <span className="field-label">Job title (from Step 1)</span>
-                    <input
-                      value={photo.title}
-                      onChange={(e) =>
-                        updatePhotoMeta(photo.id, { title: e.target.value })
-                      }
-                      className="field-input"
-                      placeholder="Add in Step 1"
-                    />
-                  </label>
+                  <JobTitleField
+                    id={`step2-job-title-${photo.id}`}
+                    value={photo.title}
+                    onChange={(title) => updatePhotoMeta(photo.id, { title })}
+                  />
                   {photo.url ? (
                     <button
                       type="button"

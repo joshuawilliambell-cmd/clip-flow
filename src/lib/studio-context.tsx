@@ -314,19 +314,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setTrimEnd(end > 0 ? end : VIDEO_TEMPLATE.targetDurationSeconds);
     setCurrentTime(0);
     setIsPlaying(false);
-    // Keep roster names/titles; clear headshots so Step 2 can re-attach photos.
+    // Keep Step 1 roster (names, titles, headshots); only retime PIP slots.
     setPhotos((prev) => {
-      prev.forEach((p) => revokePhotoUrl(p.url));
-      const slots = Array.from({ length: teamMemberCount }, (_, i) => {
-        const prior = prev[i];
-        return {
-          ...createEmptyTeamPhoto(),
-          name: prior?.name ?? "",
-          title: prior?.title ?? "",
-          department: prior?.department ?? "",
-        };
-      });
-      const arranged = autoArrangePhotos(slots, end > 0 ? end : VIDEO_TEMPLATE.targetDurationSeconds);
+      const duration = end > 0 ? end : VIDEO_TEMPLATE.targetDurationSeconds;
+      const arranged = autoArrangePhotos(prev, duration);
       baselineRef.current = arranged.map((p) => ({ ...p }));
       return arranged;
     });

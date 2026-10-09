@@ -62,18 +62,20 @@ export function VideoUploadStep() {
         <div className="max-w-3xl">
           <h2 className="step-title">Step 1: Add your video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Name your teammates, set the teleprompter, then upload or record —
-            trim to ~60s.
+            Add teammate photos, names, and titles, set the teleprompter, then
+            upload or record — trim to ~60s.
           </p>
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
-          <p>Pick teammate count and enter each name and job title.</p>
+          <p>
+            Pick teammate count, then add each photo, name, and job title.
+          </p>
           <p>
             Those names fill the teleprompter. Then{" "}
             <strong>upload</strong>, <strong>record</strong>, or load a practice
             video.
           </p>
-          <p>Trim with the red timeline handles, then continue to add photos.</p>
+          <p>Trim with the red timeline handles, then continue.</p>
         </HelpTip>
       </div>
 
