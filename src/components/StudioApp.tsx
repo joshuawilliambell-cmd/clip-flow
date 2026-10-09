@@ -103,8 +103,8 @@ function StudioShell() {
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[linear-gradient(165deg,#ffe34a_0%,#ffd100_42%,#efc000_100%)]" />
-        <div className="absolute inset-0 opacity-[0.045] [background-image:linear-gradient(var(--ink)_1px,transparent_1px),linear-gradient(90deg,var(--ink)_1px,transparent_1px)] [background-size:28px_28px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#f3f1ea_0%,#ebe8df_55%,#e4e0d6_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(ellipse_at_top,#ffe566_0%,transparent_62%)] opacity-55" />
       </div>
 
       <header className="border-b border-[var(--ink)] bg-[var(--yellow)]">
