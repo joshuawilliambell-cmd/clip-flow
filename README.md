@@ -42,9 +42,8 @@ You can also import the Git repo in the [Vercel dashboard](https://vercel.com/ne
 ## Employee flow
 
 ### Team intro video
-1. **Add Your Video** — pick how many teammates (1–4), then upload or record, trim, play
-2. **Add Your Team** — fill that many photo slots; drag the grip (or ↑ ↓) to reorder who appears first; each PIP still defaults to 10s (drag ends to change)
-3. **Finish & Download** — choose music, set volumes, **Export to MP4**
+1. **Prepare Your Video** — pick teammates (photos, names, titles), fill script names, record or upload, trim, set PIP timing
+2. **Finish & Download** — choose music, set volumes, **Export to MP4**
 
 ### Team thumbnail
 1. Choose **Team thumbnail** at the top of the app
