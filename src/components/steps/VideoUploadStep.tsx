@@ -17,6 +17,7 @@ import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
 import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { TeamRosterFields } from "@/components/TeamRosterFields";
+import { ThumbnailCreator } from "@/components/ThumbnailCreator";
 import { ScriptFillIns } from "@/components/ScriptFillIns";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
@@ -158,8 +159,9 @@ export function VideoUploadStep() {
         </div>
         <HelpTip title="What do I do on this page?" size="lg">
           <p>1. Choose how many teammates and add photo, name, and title.</p>
-          <p>2. Fill in customer name and your name for the teleprompter.</p>
-          <p>3. Record or upload your talking video, then trim and time photos.</p>
+          <p>2. Optional: build the Love&apos;s Team thumbnail opener.</p>
+          <p>3. Fill in customer name and your name for the teleprompter.</p>
+          <p>4. Record or upload your talking video, then trim and time photos.</p>
         </HelpTip>
       </div>
 
@@ -207,6 +209,7 @@ export function VideoUploadStep() {
             }}
           />
           <TeamRosterFields variant="setup" />
+          <ThumbnailCreator />
         </>
       )}
 

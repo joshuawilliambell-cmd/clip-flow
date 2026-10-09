@@ -14,7 +14,6 @@ import {
 import { v4 as uuid } from "uuid";
 import { HelpTip } from "@/components/HelpTip";
 import { PhotoFrameEditor } from "@/components/PhotoFrameEditor";
-import { TeamSizePicker } from "@/components/TeamSizePicker";
 import {
   exportTeamThumbnailPng,
   renderTeamThumbnail,
@@ -34,15 +33,12 @@ const SLOT_DRAG_TYPE = "application/x-loves-thumb-slot";
 
 export function ThumbnailCreator({
   onAddedToVideo,
-  active = true,
 }: {
   onAddedToVideo?: () => void;
-  /** When false, this panel is only kept mounted for state retention. */
-  active?: boolean;
 } = {}) {
   const {
     teamMemberCount,
-    setTeamMemberCount,
+    photos: rosterPhotos,
     setIntroThumbnail,
     clearIntroThumbnail,
     introThumbnailEnabled,
@@ -50,12 +46,6 @@ export function ThumbnailCreator({
     thumbnailMembers: members,
     setThumbnailMembers: setMembers,
   } = useStudio();
-
-  // Thumbnails need at least one card — only bump while this mode is active
-  // so "Just me" on the video flow is not overwritten by a hidden mount.
-  useEffect(() => {
-    if (active && teamMemberCount === 0) setTeamMemberCount(1);
-  }, [active, teamMemberCount, setTeamMemberCount]);
 
   const slotCount = Math.max(1, teamMemberCount) as 1 | 2 | 3 | 4;
 
@@ -222,6 +212,52 @@ export function ThumbnailCreator({
     }
   };
 
+  const pullFromRoster = async () => {
+    setBusy(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const next: ThumbnailMember[] = [];
+      for (let i = 0; i < slotCount; i += 1) {
+        const photo = rosterPhotos[i];
+        let photoUrl: string | null = null;
+        if (photo?.url) {
+          const res = await fetch(photo.url);
+          if (!res.ok) throw new Error("Could not copy a teammate photo.");
+          const blob = await res.blob();
+          photoUrl = URL.createObjectURL(blob);
+        }
+        next.push({
+          id: uuid(),
+          photoUrl,
+          name: photo?.name?.trim() ?? "",
+          title: photo?.title?.trim() ?? "",
+          photoFit: defaultPhotoFit(),
+        });
+      }
+      if (!next.some((m) => m.photoUrl || m.name.trim() || m.title.trim())) {
+        throw new Error(
+          "Add teammate photos or names above first, then try again.",
+        );
+      }
+      setMembers((prev) => {
+        prev.forEach((m) => {
+          if (m.photoUrl) URL.revokeObjectURL(m.photoUrl);
+        });
+        return next;
+      });
+      setStatus(
+        "Pulled photos, names, and titles from your teammates above. Adjust face framing if needed.",
+      );
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "Could not pull teammates from above.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const hasContent = () =>
     members.some((m) => m.photoUrl || m.name.trim() || m.title.trim());
 
@@ -260,7 +296,7 @@ export function ThumbnailCreator({
       const url = URL.createObjectURL(blob);
       setIntroThumbnail(url, true);
       setStatus(
-        `Added to your intro video. It will show for ${THUMBNAIL_TEMPLATE.introDurationSeconds} second at the very start, then disappear. Open Team intro video → Step 3 to turn it on or off.`,
+        `Added as a ${THUMBNAIL_TEMPLATE.introDurationSeconds}-second opener at the start of your video. You can turn it on or off in Step 2.`,
       );
       onAddedToVideo?.();
     } catch (e) {
@@ -273,13 +309,16 @@ export function ThumbnailCreator({
   };
 
   return (
-    <div className="space-y-6">
+    <section className="section-card space-y-4 bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
-          <h2 className="step-title">Love&apos;s Team thumbnail</h2>
-          <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            {slotCount} people · optional {THUMBNAIL_TEMPLATE.introDurationSeconds}
-            s video opener or download PNG
+          <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
+            Love&apos;s Team thumbnail
+          </h3>
+          <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
+            Optional · {slotCount} people · {THUMBNAIL_TEMPLATE.introDurationSeconds}
+            s video opener or download PNG. Frame faces here — order can differ
+            from the intro order above.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
@@ -289,21 +328,29 @@ export function ThumbnailCreator({
             continues.
           </p>
           <p>
-            Add headshots → drag/zoom faces → names/titles → preview → Add to
-            video or Download PNG.
+            Tap <strong>Use teammates from above</strong> to copy photos and
+            names, then drag/zoom each face. Preview → Add to video or Download
+            PNG.
           </p>
-          <p>Drag card grips to set left-to-right order.</p>
+          <p>Drag card grips to set left-to-right order on the thumbnail.</p>
         </HelpTip>
       </div>
-
-      <TeamSizePicker compact />
 
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          onClick={() => void loadPractice()}
+          onClick={() => void pullFromRoster()}
           disabled={busy}
           className="btn-yellow"
+        >
+          <ImagePlus className="h-5 w-5" />
+          {busy ? "Working…" : "Use teammates from above"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void loadPractice()}
+          disabled={busy}
+          className="btn-secondary"
         >
           <Wand2 className="h-5 w-5" />
           {busy ? "Loading…" : "Load practice team"}
@@ -490,13 +537,13 @@ export function ThumbnailCreator({
         })}
       </div>
 
-      <section className="section-card bg-white p-4 md:p-5">
+      <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--panel-soft)] p-4 md:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-2xl font-bold text-[var(--ink)]">
+            <h4 className="text-lg font-bold text-[var(--ink)]">
               Live thumbnail preview
-            </h3>
-            <p className="text-base text-[var(--muted)]">
+            </h4>
+            <p className="text-[13px] font-medium text-[var(--muted)]">
               Love&apos;s red / yellow / orange frame · {filledCount || 0} of{" "}
               {slotCount} people · {THUMBNAIL_TEMPLATE.width}×
               {THUMBNAIL_TEMPLATE.height}
@@ -543,7 +590,7 @@ export function ThumbnailCreator({
           <p className="mt-4 rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-4 py-3 text-lg font-medium text-[var(--ink)]">
             This thumbnail is set to play for{" "}
             {THUMBNAIL_TEMPLATE.introDurationSeconds} second at the start of your
-            intro video. You can turn that off in Step 3.
+            intro video. You can turn that off in Step 2.
             <button
               type="button"
               className="ml-2 underline"
@@ -569,12 +616,12 @@ export function ThumbnailCreator({
           </p>
         ) : null}
 
-        <p className="mt-4 text-base text-[var(--muted)] md:text-lg">
+        <p className="mt-4 text-[13px] font-medium text-[var(--muted)] md:text-[14px]">
           <strong>Add to start of video</strong> places this image as an optional
           opening card ({THUMBNAIL_TEMPLATE.introDurationSeconds}s).{" "}
           <strong>Download PNG</strong> saves a still image for Allego or email.
         </p>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }

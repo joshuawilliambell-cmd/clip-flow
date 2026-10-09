@@ -1,103 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { clsx } from "clsx";
-import { Clapperboard, ImageIcon } from "lucide-react";
 import { StudioProvider, useStudio } from "@/lib/studio-context";
 import { StepIndicator } from "@/components/StepIndicator";
 import { HelpTip } from "@/components/HelpTip";
 import { PurposeGuide } from "@/components/PurposeGuide";
-import { ThumbnailCreator } from "@/components/ThumbnailCreator";
 import { StartOverButton } from "@/components/StartOverButton";
 import { VideoUploadStep } from "@/components/steps/VideoUploadStep";
 import { PreviewExportStep } from "@/components/steps/PreviewExportStep";
 
-type AppMode = "video" | "thumbnail";
-
-function ModeSwitcher({
-  mode,
-  onChange,
-}: {
-  mode: AppMode;
-  onChange: (mode: AppMode) => void;
-}) {
-  return (
-    <div className="studio-panel mb-5 p-4 md:p-5">
-      <div className="mb-3 flex items-center gap-2">
-        <p className="font-display text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
-          What do you want to make?
-        </p>
-        <HelpTip title="Video or thumbnail?">
-          <p>
-            <strong>Team intro video</strong> builds the ~60 second Allego video
-            with your talking clip and teammate photo overlays.
-          </p>
-          <p>
-            <strong>Team thumbnail</strong> builds a Love&apos;s Team image with
-            up to four headshots. Download a PNG or add it as a 1-second opening
-            card on your intro video.
-          </p>
-        </HelpTip>
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => onChange("video")}
-          className={clsx(
-            "flex min-h-[5rem] items-center gap-3 border px-4 py-3.5 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
-            "rounded-[var(--radius-md)]",
-            mode === "video"
-              ? "border-[var(--ink)] bg-[var(--yellow-bright)]"
-              : "border-[var(--hairline)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
-          )}
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--primary)] text-white">
-            <Clapperboard className="h-5 w-5" />
-          </span>
-          <span>
-            <span className="block text-[17px] font-semibold tracking-tight text-[var(--ink)]">
-              Team intro video
-            </span>
-            <span className="mt-0.5 block text-[13px] font-medium text-[var(--muted)]">
-              Record or upload · photo overlays · MP4 export
-            </span>
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange("thumbnail")}
-          className={clsx(
-            "flex min-h-[5rem] items-center gap-3 border px-4 py-3.5 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
-            "rounded-[var(--radius-md)]",
-            mode === "thumbnail"
-              ? "border-[var(--ink)] bg-[var(--yellow-bright)]"
-              : "border-[var(--hairline)] bg-[var(--panel-soft)] hover:border-[var(--ink)]",
-          )}
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] bg-[var(--olive)] text-white">
-            <ImageIcon className="h-5 w-5" />
-          </span>
-          <span>
-            <span className="block text-[17px] font-semibold tracking-tight text-[var(--ink)]">
-              Team thumbnail
-            </span>
-            <span className="mt-0.5 block text-[13px] font-medium text-[var(--muted)]">
-              Headshots · names · PNG or 1-second opener
-            </span>
-          </span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function StudioShell() {
-  const { step, setStep, projectEpoch } = useStudio();
-  const [mode, setMode] = useState<AppMode>("video");
-
-  useEffect(() => {
-    if (projectEpoch > 0) setMode("video");
-  }, [projectEpoch]);
+  const { step, setStep } = useStudio();
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -142,12 +54,8 @@ function StudioShell() {
                 customers.
               </p>
               <p>
-                Use <strong>Team intro video</strong> for a ~60 second talking
-                video with timed teammate photos.
-              </p>
-              <p>
-                Use <strong>Team thumbnail</strong> for a Love&apos;s Team image
-                with headshots, names, and titles.
+                In Step 1, add teammates, optionally build a Love&apos;s Team
+                thumbnail opener, then record or upload your talking video.
               </p>
               <p>Tap any ? button anytime for help.</p>
             </HelpTip>
@@ -174,43 +82,18 @@ function StudioShell() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-5 md:px-6 md:py-7">
-        <ModeSwitcher mode={mode} onChange={setMode} />
-
-        <div
-          className={mode === "video" ? "block" : "hidden"}
-          aria-hidden={mode !== "video"}
-        >
-          <div className="animate-fade-up-delay">
-            <PurposeGuide />
-          </div>
-          <div className="mb-5">
-            <StepIndicator step={step} onChange={setStep} />
-          </div>
-          <section className="studio-panel animate-rise p-4 md:p-7">
-            {step === 1 ? <VideoUploadStep /> : null}
-            {step === 2 ? (
-              <PreviewExportStep
-                onCreateThumbnail={() => setMode("thumbnail")}
-              />
-            ) : null}
-          </section>
+        <div className="animate-fade-up-delay">
+          <PurposeGuide />
         </div>
-
-        <div
-          className={mode === "thumbnail" ? "block" : "hidden"}
-          aria-hidden={mode !== "thumbnail"}
-        >
-          <section className="studio-panel animate-rise p-4 md:p-7">
-            <ThumbnailCreator
-              key={projectEpoch}
-              active={mode === "thumbnail"}
-              onAddedToVideo={() => {
-                setMode("video");
-                setStep(2);
-              }}
-            />
-          </section>
+        <div className="mb-5">
+          <StepIndicator step={step} onChange={setStep} />
         </div>
+        <section className="studio-panel animate-rise p-4 md:p-7">
+          {step === 1 ? <VideoUploadStep /> : null}
+          {step === 2 ? (
+            <PreviewExportStep onEditThumbnail={() => setStep(1)} />
+          ) : null}
+        </section>
       </main>
 
       <footer className="mt-2 border-t border-[var(--ink)] bg-[var(--olive)]">

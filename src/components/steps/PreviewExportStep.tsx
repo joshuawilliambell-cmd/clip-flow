@@ -24,9 +24,9 @@ import { HelpTip } from "@/components/HelpTip";
 const MUSIC_SAMPLE_SECONDS = 30;
 
 export function PreviewExportStep({
-  onCreateThumbnail,
+  onEditThumbnail,
 }: {
-  onCreateThumbnail?: () => void;
+  onEditThumbnail?: () => void;
 } = {}) {
   const {
     video,
@@ -161,7 +161,7 @@ export function PreviewExportStep({
             </div>
             <HelpTip title="Opening thumbnail">
               <p>
-                This is the Love&apos;s Team image from the Team thumbnail tool.
+                This is the Love&apos;s Team image from Step 1 (Team thumbnail).
               </p>
               <p>
                 It is optional. Leave it off if you only want your talking video.
@@ -206,13 +206,13 @@ export function PreviewExportStep({
                 >
                   Remove thumbnail
                 </button>
-                {onCreateThumbnail ? (
+                {onEditThumbnail ? (
                   <button
                     type="button"
-                    onClick={onCreateThumbnail}
+                    onClick={onEditThumbnail}
                     className="btn-secondary"
                   >
-                    Edit in Team thumbnail
+                    Edit in Step 1
                   </button>
                 ) : null}
               </div>
@@ -226,18 +226,18 @@ export function PreviewExportStep({
         ) : (
           <div className="mt-4 rounded-xl border-2 border-dashed border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-5">
             <p className="text-lg text-[var(--ink)]">
-              No opening thumbnail yet. You can skip this, or create one in{" "}
-              <strong>Team thumbnail</strong> and tap{" "}
+              No opening thumbnail yet. You can skip this, or go back to Step 1,
+              build the Love&apos;s Team thumbnail, and tap{" "}
               <strong>Add to start of video</strong>.
             </p>
-            {onCreateThumbnail ? (
+            {onEditThumbnail ? (
               <button
                 type="button"
-                onClick={onCreateThumbnail}
+                onClick={onEditThumbnail}
                 className="btn-yellow mt-4"
               >
                 <ImageIcon className="h-5 w-5" />
-                Create team thumbnail
+                Go to Step 1 thumbnail
               </button>
             ) : null}
           </div>
