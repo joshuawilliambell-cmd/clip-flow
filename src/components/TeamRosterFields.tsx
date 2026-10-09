@@ -4,9 +4,9 @@ import { useRef, useState } from "react";
 import { ImagePlus, Trash2, Users } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { JobTitleField } from "@/components/JobTitleField";
+import { PronounField } from "@/components/PronounField";
 import { defaultDutiesForTitle } from "@/lib/job-titles";
 import { useStudio } from "@/lib/studio-context";
-import type { TeamPhotoPronoun } from "@/lib/types";
 
 type TeamRosterFieldsProps = {
   /** Compact copy for Step 1 before recording. */
@@ -171,23 +171,11 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                 />
               </label>
 
-              <label className="block">
-                <span className="field-label">Pronoun</span>
-                <select
-                  value={photo.pronoun}
-                  onChange={(e) =>
-                    updatePhotoMeta(photo.id, {
-                      pronoun: e.target.value as TeamPhotoPronoun,
-                    })
-                  }
-                  className="field-input"
-                >
-                  <option value="">Select…</option>
-                  <option value="he">he</option>
-                  <option value="she">she</option>
-                  <option value="they">they</option>
-                </select>
-              </label>
+              <PronounField
+                id={`pronoun-${photo.id}`}
+                value={photo.pronoun}
+                onChange={(pronoun) => updatePhotoMeta(photo.id, { pronoun })}
+              />
 
               <JobTitleField
                 id={`job-title-${photo.id}`}
