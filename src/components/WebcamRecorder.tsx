@@ -413,9 +413,20 @@ export function WebcamRecorder({
 
       {phase === "review" && reviewUrl ? (
         <div className="mt-4 space-y-4">
-          <p className="text-lg font-bold text-[var(--ink)]">
-            Review your recording ({formatClock(seconds)})
-          </p>
+          <div className="how-banner">
+            <strong>Next step:</strong> Watch your take below. If it looks and
+            sounds good, tap <strong>Use this recording</strong> to load it into
+            the studio. Want another try? Tap <strong>Record again</strong>.
+          </div>
+          <div>
+            <p className="text-lg font-bold text-[var(--ink)]">
+              Review your recording ({formatClock(seconds)})
+            </p>
+            <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
+              Your clip is not in the project yet — choose Use this recording to
+              continue with trim, photos, and export.
+            </p>
+          </div>
           <div className="overflow-hidden section-card bg-black">
             <video
               src={reviewUrl}
@@ -424,16 +435,19 @@ export function WebcamRecorder({
               className="aspect-video w-full"
             />
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] border-2 border-[var(--ink)] bg-[var(--yellow)]/40 p-3 md:p-4">
             <button
               type="button"
               disabled={busy}
               onClick={() => void useRecording()}
-              className="btn-primary"
+              className="btn-primary min-w-[14rem]"
             >
               <Check className="h-5 w-5" />
               {busy ? "Saving…" : "Use this recording"}
             </button>
+            <p className="min-w-0 flex-1 text-[14px] font-semibold text-[var(--ink)]">
+              ← Tap here to keep this take and move on
+            </p>
             <button
               type="button"
               disabled={busy}
