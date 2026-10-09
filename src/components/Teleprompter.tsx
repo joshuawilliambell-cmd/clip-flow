@@ -12,14 +12,16 @@ import { HelpTip } from "@/components/HelpTip";
 import {
   INTRO_SCRIPTS,
   TARGET_INTRO_SECONDS,
-  TELEPROMPTER_SPEEDS,
+  TELEPROMPTER_SPEED_MAX,
+  TELEPROMPTER_SPEED_MIN,
+  TELEPROMPTER_SPEED_STEP,
+  TELEPROMPTER_TICK_MS,
+  clampTeleprompterSpeed,
+  estimatedScrollSeconds,
   idealPixelsPerTickForDistance,
   isScriptUploadFile,
-  nearestSpeedForPixelsPerTick,
-  pixelsPerTickForSpeed,
   scriptForTeam,
-  suggestedSpeedForScript,
-  type TeleprompterSpeedId,
+  suggestedPixelsPerTickForScript,
 } from "@/lib/intro-script";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
@@ -61,12 +63,13 @@ export function Teleprompter({
   const [customScript, setCustomScript] = useState("");
   const [uploadName, setUploadName] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [speedId, setSpeedId] = useState<TeleprompterSpeedId>(() =>
-    suggestedSpeedForScript(officialScript),
+  const [pixelsPerTick, setPixelsPerTick] = useState(() =>
+    suggestedPixelsPerTickForScript(officialScript),
   );
   const [speedOverridden, setSpeedOverridden] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [fontLarge, setFontLarge] = useState(true);
+  const [scrollDistancePx, setScrollDistancePx] = useState(0);
 
   // Official script tracks team size and roster names/titles.
   useEffect(() => {
@@ -81,23 +84,31 @@ export function Teleprompter({
   // Default scroll speed ~60s for the active script (unless user overrode).
   useEffect(() => {
     if (speedOverridden) return;
-    const suggested = suggestedSpeedForScript(displayScript, fontLarge);
-    setSpeedId(suggested);
+    setPixelsPerTick(suggestedPixelsPerTickForScript(displayScript, fontLarge));
 
     // Refine from real layout once the scroller has overflow.
     const id = window.requestAnimationFrame(() => {
       const el = scrollerRef.current;
       if (!el || speedOverridden) return;
       const distance = el.scrollHeight - el.clientHeight;
+      setScrollDistancePx(Math.max(0, distance));
       if (distance <= 2) return;
-      setSpeedId(
-        nearestSpeedForPixelsPerTick(
-          idealPixelsPerTickForDistance(distance, TARGET_INTRO_SECONDS),
-        ),
+      setPixelsPerTick(
+        idealPixelsPerTickForDistance(distance, TARGET_INTRO_SECONDS),
       );
     });
     return () => window.cancelAnimationFrame(id);
   }, [displayScript, fontLarge, teamMemberCount, source, speedOverridden]);
+
+  // Keep estimated duration in sync with layout even after the user overrides speed.
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => {
+      const el = scrollerRef.current;
+      if (!el) return;
+      setScrollDistancePx(Math.max(0, el.scrollHeight - el.clientHeight));
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [displayScript, fontLarge, enabled]);
 
   // Auto-start scroll when recording begins; allow manual scroll while preparing.
   useEffect(() => {
@@ -112,7 +123,7 @@ export function Teleprompter({
 
   useEffect(() => {
     if (!scrolling || !enabled) return;
-    const speed = pixelsPerTickForSpeed(speedId);
+    const speed = pixelsPerTick;
     const id = window.setInterval(() => {
       const el = scrollerRef.current;
       if (!el) return;
@@ -121,9 +132,9 @@ export function Teleprompter({
       if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) {
         setScrolling(false);
       }
-    }, 40);
+    }, TELEPROMPTER_TICK_MS);
     return () => window.clearInterval(id);
-  }, [scrolling, speedId, enabled]);
+  }, [scrolling, pixelsPerTick, enabled]);
 
   const resetScroll = () => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
@@ -176,14 +187,21 @@ export function Teleprompter({
     }
   };
 
-  const selectSpeed = (id: TeleprompterSpeedId) => {
-    setSpeedId(id);
+  const onSpeedSlider = (value: number) => {
+    setPixelsPerTick(clampTeleprompterSpeed(value));
     setSpeedOverridden(true);
   };
 
   const restorePacedSpeed = () => {
     setSpeedOverridden(false);
   };
+
+  const paceSeconds = estimatedScrollSeconds(scrollDistancePx, pixelsPerTick);
+  const speedPercent = Math.round(
+    ((pixelsPerTick - TELEPROMPTER_SPEED_MIN) /
+      (TELEPROMPTER_SPEED_MAX - TELEPROMPTER_SPEED_MIN)) *
+      100,
+  );
 
   return (
     <div
@@ -223,8 +241,8 @@ export function Teleprompter({
               <strong>upload / paste</strong> your own.
             </p>
             <p>
-              Default <strong>scroll speed</strong> is paced for about{" "}
-              {TARGET_INTRO_SECONDS} seconds for your script — change it anytime.
+              Drag the <strong>scroll speed</strong> slider slower or faster.
+              Default is paced for about {TARGET_INTRO_SECONDS} seconds.
             </p>
             <p>
               Phone on a tripod? Leave this panel on your computer screen behind
@@ -388,31 +406,35 @@ export function Teleprompter({
           </div>
 
           <div className="space-y-2 border-t border-white/20 px-3 py-3">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/70">
                 Scroll speed
               </span>
-              <div className="flex flex-wrap gap-1">
-                {TELEPROMPTER_SPEEDS.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => selectSpeed(s.id)}
-                    className={clsx(
-                      "rounded-[var(--radius-sm)] border px-2.5 py-1 text-[12px] font-semibold",
-                      speedId === s.id
-                        ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                        : "border-white/35 text-white",
-                    )}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
+              <span className="text-[12px] font-semibold text-[var(--yellow)]">
+                ~{paceSeconds}s · {speedPercent}%
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="shrink-0 text-[12px] font-semibold text-white/80">
+                Slower
+              </span>
+              <input
+                type="range"
+                min={TELEPROMPTER_SPEED_MIN}
+                max={TELEPROMPTER_SPEED_MAX}
+                step={TELEPROMPTER_SPEED_STEP}
+                value={pixelsPerTick}
+                onChange={(e) => onSpeedSlider(Number(e.target.value))}
+                aria-label="Teleprompter scroll speed"
+                className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/25 accent-[var(--yellow)]"
+              />
+              <span className="shrink-0 text-[12px] font-semibold text-white/80">
+                Faster
+              </span>
             </div>
             <p className="text-[11px] font-medium text-white/65">
               {speedOverridden
-                ? "Custom speed — you chose this."
+                ? "Custom speed — drag the slider to change."
                 : `Default paced for ~${TARGET_INTRO_SECONDS}s with this script.`}
               {speedOverridden ? (
                 <>
@@ -422,7 +444,7 @@ export function Teleprompter({
                     onClick={restorePacedSpeed}
                     className="font-semibold text-[var(--yellow)] underline"
                   >
-                    Use ~{TARGET_INTRO_SECONDS}s pace
+                    Reset to ~{TARGET_INTRO_SECONDS}s pace
                   </button>
                 </>
               ) : null}

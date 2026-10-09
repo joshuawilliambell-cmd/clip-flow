@@ -143,20 +143,21 @@ export const TARGET_INTRO_SECONDS = 60;
 /** Scroll loop interval used by the teleprompter UI. */
 export const TELEPROMPTER_TICK_MS = 40;
 
-/** Scroll speed presets (pixels added every TELEPROMPTER_TICK_MS). */
-export const TELEPROMPTER_SPEEDS = [
-  { id: "slow", label: "Slow", pixelsPerTick: 0.55 },
-  { id: "medium", label: "Medium", pixelsPerTick: 1.15 },
-  { id: "fast", label: "Fast", pixelsPerTick: 2.0 },
-  { id: "very-fast", label: "Very fast", pixelsPerTick: 3.1 },
-] as const;
+/**
+ * Continuous scroll speed range (pixels added every TELEPROMPTER_TICK_MS).
+ * Min is intentionally slower than the old “Slow” preset so readers can keep up.
+ */
+export const TELEPROMPTER_SPEED_MIN = 0.1;
+export const TELEPROMPTER_SPEED_MAX = 3.5;
+export const TELEPROMPTER_SPEED_STEP = 0.05;
 
-export type TeleprompterSpeedId = (typeof TELEPROMPTER_SPEEDS)[number]["id"];
-
-export function pixelsPerTickForSpeed(id: TeleprompterSpeedId): number {
-  return (
-    TELEPROMPTER_SPEEDS.find((s) => s.id === id)?.pixelsPerTick ??
-    TELEPROMPTER_SPEEDS[1].pixelsPerTick
+export function clampTeleprompterSpeed(pixelsPerTick: number): number {
+  const stepped =
+    Math.round(pixelsPerTick / TELEPROMPTER_SPEED_STEP) *
+    TELEPROMPTER_SPEED_STEP;
+  return Math.min(
+    TELEPROMPTER_SPEED_MAX,
+    Math.max(TELEPROMPTER_SPEED_MIN, Number(stepped.toFixed(2))),
   );
 }
 
@@ -190,38 +191,35 @@ export function idealPixelsPerTickForDistance(
   durationSeconds = TARGET_INTRO_SECONDS,
 ): number {
   const ticks = (durationSeconds * 1000) / TELEPROMPTER_TICK_MS;
-  if (ticks <= 0) return TELEPROMPTER_SPEEDS[1].pixelsPerTick;
-  return Math.max(0.35, distancePx / ticks);
+  if (ticks <= 0) return clampTeleprompterSpeed(0.45);
+  return clampTeleprompterSpeed(distancePx / ticks);
 }
 
-/**
- * Preset for a px/tick target. Prefers the slowest speed that still finishes
- * by ~TARGET_INTRO_SECONDS (slightly fast rather than running long).
- */
-export function nearestSpeedForPixelsPerTick(
+/** Estimated seconds to scroll `distancePx` at this speed. */
+export function estimatedScrollSeconds(
+  distancePx: number,
   pixelsPerTick: number,
-): TeleprompterSpeedId {
-  const fastEnough = TELEPROMPTER_SPEEDS.filter(
-    (s) => s.pixelsPerTick + 0.02 >= pixelsPerTick,
-  );
-  if (fastEnough.length > 0) return fastEnough[0].id;
-  return TELEPROMPTER_SPEEDS[TELEPROMPTER_SPEEDS.length - 1].id;
+): number {
+  const speed = Math.max(TELEPROMPTER_SPEED_MIN, pixelsPerTick);
+  if (distancePx <= 0) return 0;
+  const ticks = distancePx / speed;
+  return Math.max(1, Math.round((ticks * TELEPROMPTER_TICK_MS) / 1000));
 }
 
-/** Default preset paced for ~60s for this script text. */
-export function suggestedSpeedForScript(
+/** Default continuous speed paced for ~60s for this script text. */
+export function suggestedPixelsPerTickForScript(
   script: string,
   fontLarge = true,
-): TeleprompterSpeedId {
+): number {
   const distance = estimateScrollDistancePx(script, fontLarge);
-  return nearestSpeedForPixelsPerTick(idealPixelsPerTickForDistance(distance));
+  return idealPixelsPerTickForDistance(distance);
 }
 
-/** Default preset for an official team-size script (~60s intro). */
-export function suggestedSpeedForTeamCount(
+/** Default continuous speed for an official team-size script (~60s intro). */
+export function suggestedPixelsPerTickForTeamCount(
   count: TeamMemberCount,
-): TeleprompterSpeedId {
-  return suggestedSpeedForScript(scriptForTeamCount(count));
+): number {
+  return suggestedPixelsPerTickForScript(scriptForTeamCount(count));
 }
 
 /** Accept plain-text script uploads. */
