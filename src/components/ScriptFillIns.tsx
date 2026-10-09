@@ -83,9 +83,9 @@ export function ScriptFillIns() {
             script.
           </p>
           <p>
-            <strong>Featured photo</strong> is optional for the Love&apos;s Team
-            thumbnail opener. It does not add you to the teammate photo
-            overlays.
+            <strong>Featured photo</strong> is for the Love&apos;s Team
+            thumbnail only. It does not create a PIP overlay of you in the
+            talking video — PIP photos are only for teammates you introduce.
           </p>
         </HelpTip>
       </div>
@@ -140,8 +140,11 @@ export function ScriptFillIns() {
               Featured photo for thumbnail
             </p>
             <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Optional · appears on the team thumbnail with your name and title
-              — not as a script teammate line
+              Optional · shows you on the Love&apos;s Team thumbnail with your
+              name and title. Does{" "}
+              <strong className="text-[var(--ink)]">not</strong> add a PIP
+              photo overlay during the video — only teammates below appear on
+              screen.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

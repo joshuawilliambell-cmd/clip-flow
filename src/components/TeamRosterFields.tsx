@@ -85,12 +85,17 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
             </h3>
             <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
               {variant === "setup"
-                ? "Select multiple headshots at once to fill the boxes in order, then add name, pronoun, job title, and duties for the script."
-                : "Review photos, names, and titles. Adjust PIP timing on the timeline below."}
+                ? "These people get PIP photo overlays in the video and “This is…” lines in the script. You (the speaker) are not listed here — your photo is thumbnail-only in Your introduction."
+                : "Review teammate PIP photos, names, and titles. Adjust timing on the timeline below. You are not a PIP overlay."}
             </p>
           </div>
         </div>
         <HelpTip title="Teammate photos">
+          <p>
+            These slots are for <strong>other teammates</strong> who appear as
+            picture-in-picture during the video. Your own featured photo stays
+            on the thumbnail only.
+          </p>
           <p>
             Tap <strong>Select multiple photos</strong> and choose several
             headshots (Ctrl/Cmd+click or Shift+click). They fill Teammate 1,

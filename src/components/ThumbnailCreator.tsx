@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
   Clapperboard,
   Download,
   GripVertical,
+  ImagePlus,
   RotateCcw,
 } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
@@ -37,6 +38,8 @@ export function ThumbnailCreator({
     speakerName,
     speakerTitle,
     speakerPhotoUrl,
+    setSpeakerPhotoFromFile,
+    clearSpeakerPhoto,
     setIntroThumbnail,
     clearIntroThumbnail,
     introThumbnailEnabled,
@@ -44,6 +47,8 @@ export function ThumbnailCreator({
     thumbnailMembers: members,
     setThumbnailMembers: setMembers,
   } = useStudio();
+  const speakerPhotoRef = useRef<HTMLInputElement>(null);
+  const [speakerPhotoBusy, setSpeakerPhotoBusy] = useState(false);
 
   const slotCount = Math.min(
     THUMBNAIL_TEMPLATE.maxMembers,
@@ -221,21 +226,21 @@ export function ThumbnailCreator({
             Love&apos;s Team thumbnail
           </h3>
           <p className="mt-0.5 max-w-2xl text-[13px] font-medium text-[var(--muted)]">
-            Optional · you first, then teammates ·{" "}
+            Optional · you first on the still image, then teammates ·{" "}
             {THUMBNAIL_TEMPLATE.introDurationSeconds}s video opener or download
-            PNG. Your card uses Your introduction above — not a script teammate
-            line.
+            PNG. Your photo is for this thumbnail only — not a PIP overlay in
+            the talking video.
           </p>
         </div>
         <HelpTip title="Thumbnail help" size="lg">
           <p>
             The first card is <strong>you</strong> (featured photo, name, and
-            title from Your introduction). Extra cards come from{" "}
-            <strong>Your teammates</strong>.
+            title). Extra cards come from <strong>Your teammates</strong>.
           </p>
           <p>
-            You are only introduced once in the script opening — the thumbnail
-            can still show your photo with the team.
+            <strong>Thumbnail ≠ PIP:</strong> including your photo here does
+            not put a picture-in-picture of you over the video. Only teammate
+            slots become on-screen PIP photos.
           </p>
           <p>
             Optional Allego opener: shows for{" "}
@@ -243,6 +248,12 @@ export function ThumbnailCreator({
             continues.
           </p>
         </HelpTip>
+      </div>
+
+      <div className="how-banner">
+        <strong>You on the thumbnail, not as PIP.</strong> Your featured card
+        appears on this still image only. Teammate cards can also show as
+        picture-in-picture during the video.
       </div>
 
       {filledCount === 0 ? (
@@ -381,18 +392,20 @@ export function ThumbnailCreator({
                   {isSpeaker ? (
                     <>
                       <p>
-                        Your featured card for the thumbnail. Name, title, and
-                        photo come from Your introduction.
+                        Your featured card for the thumbnail still image. Add
+                        or replace your photo here or in Your introduction.
                       </p>
                       <p>
-                        This does not add a second intro line in the script —
-                        you already introduce yourself at the start.
+                        This is <strong>not</strong> a PIP overlay in the
+                        talking video. You introduce yourself in the script
+                        opening; teammates get the on-screen photos.
                       </p>
                     </>
                   ) : (
                     <>
                       <p>
-                        Name and title come from Your teammates. Drag or zoom
+                        Name and title come from Your teammates. These people
+                        can appear as PIP overlays in the video. Drag or zoom
                         the face so it fills the tall frame.
                       </p>
                       <p>
@@ -402,6 +415,12 @@ export function ThumbnailCreator({
                   )}
                 </HelpTip>
               </div>
+
+              {isSpeaker ? (
+                <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-[var(--primary)]">
+                  Thumbnail only · not a video PIP
+                </p>
+              ) : null}
 
               {member.photoUrl ? (
                 <PhotoFrameEditor
@@ -413,11 +432,8 @@ export function ThumbnailCreator({
                 <div className="rounded-xl border-2 border-dashed border-[var(--ink)] bg-white px-3 py-6 text-center text-[14px] font-medium text-[var(--muted)]">
                   {isSpeaker ? (
                     <>
-                      Add your featured photo in{" "}
-                      <strong className="text-[var(--ink)]">
-                        Your introduction
-                      </strong>{" "}
-                      above.
+                      Add your featured headshot for the thumbnail (not used as
+                      a PIP overlay in the video).
                     </>
                   ) : (
                     <>
@@ -430,6 +446,58 @@ export function ThumbnailCreator({
                   )}
                 </div>
               )}
+
+              {isSpeaker ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={speakerPhotoBusy}
+                    onClick={() => speakerPhotoRef.current?.click()}
+                    className="btn-secondary"
+                  >
+                    <ImagePlus className="h-5 w-5" />
+                    {speakerPhotoBusy
+                      ? "Adding…"
+                      : member.photoUrl
+                        ? "Replace your photo"
+                        : "Add your photo"}
+                  </button>
+                  {member.photoUrl ? (
+                    <button
+                      type="button"
+                      onClick={clearSpeakerPhoto}
+                      className="btn-secondary text-[var(--primary)]"
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                  <input
+                    ref={speakerPhotoRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setSpeakerPhotoBusy(true);
+                      void setSpeakerPhotoFromFile(file)
+                        .catch((err) => {
+                          setError(
+                            err instanceof Error
+                              ? err.message
+                              : "Could not use that photo.",
+                          );
+                        })
+                        .finally(() => {
+                          setSpeakerPhotoBusy(false);
+                          if (speakerPhotoRef.current) {
+                            speakerPhotoRef.current.value = "";
+                          }
+                        });
+                    }}
+                  />
+                </div>
+              ) : null}
             </article>
           );
         })}
