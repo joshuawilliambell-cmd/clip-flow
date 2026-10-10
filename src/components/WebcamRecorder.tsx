@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Camera,
   Circle,
@@ -17,6 +18,7 @@ import { HelpTip } from "@/components/HelpTip";
 import { PanelSteps, StepCircle } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
 import { useIsLandscape, useIsMobile } from "@/hooks/useIsMobile";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { useStudio } from "@/lib/studio-context";
 import {
   frameAspectClass,
@@ -130,6 +132,11 @@ export function WebcamRecorder({
   const [facingMode, setFacingMode] = useState<FacingMode>("user");
   const [recordingPaused, setRecordingPaused] = useState(false);
   const [switchingCamera, setSwitchingCamera] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   const stopTracks = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -169,12 +176,20 @@ export function WebcamRecorder({
   const attachLivePreview = useCallback(async (stream: MediaStream) => {
     const el = videoRef.current;
     if (!el) return;
+    el.setAttribute("playsinline", "true");
+    el.setAttribute("webkit-playsinline", "true");
+    el.muted = true;
+    el.defaultMuted = true;
+    el.playsInline = true;
     if (el.srcObject !== stream) {
       el.srcObject = stream;
     }
-    el.muted = true;
-    el.playsInline = true;
-    await el.play().catch(() => undefined);
+    // iOS often needs play() after metadata is ready.
+    const tryPlay = () => el.play().catch(() => undefined);
+    await tryPlay();
+    el.onloadedmetadata = () => {
+      void tryPlay();
+    };
   }, []);
 
   const closeCamera = useCallback(() => {
@@ -209,12 +224,13 @@ export function WebcamRecorder({
   }, []);
 
   // Keep the live preview attached whenever we are in preview or recording.
+  // Re-run when mobile/desktop layout swaps so the remounted <video> gets the stream.
   useEffect(() => {
     if (phase !== "preview" && phase !== "recording") return;
     const stream = streamRef.current;
     if (!stream) return;
     void attachLivePreview(stream);
-  }, [phase, attachLivePreview]);
+  }, [phase, attachLivePreview, isMobile]);
 
   const live = phase === "preview" || phase === "recording";
 
@@ -233,6 +249,7 @@ export function WebcamRecorder({
   }, [wantLandscape, phase, facingMode]);
 
   const mobileStudio = isMobile === true;
+  const viewport = useVisualViewport(live && mobileStudio);
   /** Phone orientation does not match the chosen video format. */
   const mobileOrientationMismatch =
     mobileStudio &&
@@ -242,10 +259,21 @@ export function WebcamRecorder({
   // Mobile fullscreen selfie studio — lock page scroll while active.
   useEffect(() => {
     if (!live || !mobileStudio) return;
-    const prev = document.body.style.overflow;
+    const prevOverflow = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const prevTop = document.body.style.top;
+    const prevWidth = document.body.style.width;
+    const scrollY = window.scrollY;
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
+      document.body.style.position = prevPosition;
+      document.body.style.top = prevTop;
+      document.body.style.width = prevWidth;
+      window.scrollTo(0, scrollY);
     };
   }, [live, mobileStudio]);
 
@@ -673,52 +701,141 @@ export function WebcamRecorder({
             </p>
           )}
 
-          {/* Spacer so the page does not collapse under the fixed mobile studio. */}
-          {mobileStudio ? <div className="h-[50vh]" aria-hidden /> : null}
+          {/* Spacer so the page does not collapse while the portaled studio is open. */}
+          {mobileStudio ? <div className="h-[70vh]" aria-hidden /> : null}
 
-          <div className="space-y-3">
-            <div
-              className={clsx(
-                "bg-black",
-                mobileStudio
-                  ? "fixed inset-0 z-[80] flex flex-col"
-                  : "relative overflow-hidden section-card",
-              )}
-            >
-              {/* Mobile: teleprompter + Follow My Voice in the top strip. */}
-              {mobileStudio ? (
+          {/*
+            Mobile studio is portaled to document.body and sized to the visual
+            viewport. Otherwise iOS Safari traps position:fixed inside
+            overflow-x-hidden ancestors and only a black middle band shows.
+          */}
+          {mobileStudio && portalReady
+            ? createPortal(
                 <div
-                  className={clsx(
-                    "shrink-0",
-                    // Landscape phone: shorter strip so the camera stays large.
-                    isLandscape
-                      ? "h-[20%] min-h-[5rem] max-h-[26vh]"
-                      : "h-[24%] min-h-[9.5rem] max-h-[30vh]",
-                  )}
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Webcam recorder"
+                  className="fixed z-[9999] grid grid-rows-[minmax(7.5rem,28%)_minmax(0,1fr)_auto] bg-black text-white"
+                  style={{
+                    top: viewport.top,
+                    left: viewport.left,
+                    width: viewport.width,
+                    height: viewport.height,
+                  }}
                 >
-                  <WebcamTeleprompterOverlay
-                    active={live}
-                    recording={phase === "recording"}
-                  />
-                </div>
-              ) : null}
+                  <div className="min-h-0 overflow-hidden border-b border-white/20 bg-black">
+                    <WebcamTeleprompterOverlay
+                      active={live}
+                      recording={phase === "recording"}
+                      forceMobile
+                    />
+                  </div>
 
-              <div
-                className={clsx(
-                  "relative",
-                  mobileStudio
-                    ? "flex min-h-0 flex-1 items-center justify-center bg-black"
-                    : frameAspectClass(videoOrientation, "webcam"),
-                )}
-              >
+                  <div className="relative min-h-[40%] bg-black">
+                    <video
+                      ref={videoRef}
+                      muted
+                      playsInline
+                      autoPlay
+                      className={clsx(
+                        "absolute inset-0 h-full w-full object-cover bg-black",
+                        mirrorPreview && "scale-x-[-1]",
+                      )}
+                    />
+                    {cameraChrome}
+                    {mobileOrientationMismatch ? null : (
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent px-3 pb-3 pt-8 text-center text-[12px] font-semibold text-white/90">
+                        {facingMode === "user" ? "Selfie camera" : "Rear camera"}{" "}
+                        · {orientationLabel(videoOrientation)}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="shrink-0 space-y-2 border-t border-white/30 bg-black px-3 py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                    {phase === "preview" ? (
+                      <div className="flex flex-col gap-2">
+                        <div className="grid grid-cols-[4.5rem_1fr_4.5rem] items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={switchingCamera}
+                            onClick={() => void switchCamera()}
+                            className="inline-flex min-h-12 flex-col items-center justify-center rounded-xl border-2 border-white/60 bg-white/15 px-1 text-[11px] font-bold text-white"
+                          >
+                            <SwitchCamera className="h-5 w-5" />
+                            Flip
+                          </button>
+                          <button
+                            type="button"
+                            onClick={startRecording}
+                            className="btn-primary min-h-12 w-full"
+                          >
+                            <Circle className="h-5 w-5 fill-current" />
+                            Start Recording
+                          </button>
+                          <button
+                            type="button"
+                            onClick={closeCamera}
+                            className="inline-flex min-h-12 flex-col items-center justify-center rounded-xl border-2 border-white/60 bg-white/15 px-1 text-[11px] font-bold text-white"
+                            aria-label="Cancel webcam"
+                          >
+                            <X className="h-5 w-5" />
+                            Close
+                          </button>
+                        </div>
+                        <p className="text-center text-[12px] font-semibold text-white/85">
+                          Selfie by default · Flip for rear camera
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          {recordingPaused ? (
+                            <button
+                              type="button"
+                              onClick={resumeRecording}
+                              className="btn-yellow min-h-12 w-full"
+                            >
+                              <Play className="h-5 w-5 fill-current" />
+                              Resume
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={pauseRecording}
+                              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-md)] border-2 border-white/60 bg-white/15 px-4 text-[15px] font-semibold text-white"
+                            >
+                              <Pause className="h-5 w-5" />
+                              Pause
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={stopRecording}
+                            className="btn-primary min-h-12 w-full"
+                          >
+                            <Square className="h-5 w-5 fill-current" />
+                            Stop
+                          </button>
+                        </div>
+                        <p className="text-center text-[14px] font-bold text-white">
+                          {recordingPaused ? "Paused" : "Recording"}…{" "}
+                          {formatClock(seconds)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>,
+                document.body,
+              )
+            : null}
+
+          {!mobileStudio ? (
+            <div className="space-y-3">
+              <div className="relative overflow-hidden section-card bg-black">
                 <div
                   className={clsx(
                     "relative overflow-hidden bg-black",
-                    mobileStudio
-                      ? wantLandscape
-                        ? "aspect-video w-full max-h-full"
-                        : "aspect-[9/16] h-full max-w-full"
-                      : "h-full w-full",
+                    frameAspectClass(videoOrientation, "webcam"),
                   )}
                 >
                   <video
@@ -731,178 +848,91 @@ export function WebcamRecorder({
                       mirrorPreview && "scale-x-[-1]",
                     )}
                   />
-                  {!mobileStudio ? (
-                    <WebcamTeleprompterOverlay
-                      active={live}
-                      recording={phase === "recording"}
-                    />
-                  ) : null}
+                  <WebcamTeleprompterOverlay
+                    active={live}
+                    recording={phase === "recording"}
+                  />
                   {cameraChrome}
                 </div>
               </div>
 
-              {/* Mobile: always-visible camera control dock. */}
-              {mobileStudio ? (
-                <div className="z-[90] shrink-0 space-y-2 border-t border-white/25 bg-black/95 px-3 py-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.45)]">
-                  {phase === "preview" ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={switchingCamera}
-                          onClick={() => void switchCamera()}
-                          className="inline-flex min-h-12 min-w-12 flex-col items-center justify-center rounded-xl border-2 border-white/50 bg-white/10 px-2 text-[11px] font-bold text-white"
-                        >
-                          <SwitchCamera className="h-5 w-5" />
-                          Flip
-                        </button>
-                        <span className="inline-flex w-full items-center gap-2">
-                          <StepCircle n={2} label="Step 2" tone="dark" />
-                          <button
-                            type="button"
-                            onClick={startRecording}
-                            className="btn-primary min-h-12 flex-1"
-                          >
-                            <Circle className="h-5 w-5 fill-current" />
-                            Start Recording
-                          </button>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={closeCamera}
-                          className="inline-flex min-h-12 min-w-12 flex-col items-center justify-center rounded-xl border-2 border-white/50 bg-white/10 px-2 text-[11px] font-bold text-white"
-                          aria-label="Cancel webcam"
-                        >
-                          <X className="h-5 w-5" />
-                          Close
-                        </button>
-                      </div>
-                      <p className="text-center text-[12px] font-semibold text-white/80">
-                        Selfie camera by default · Flip to use the rear camera
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        {recordingPaused ? (
-                          <button
-                            type="button"
-                            onClick={resumeRecording}
-                            className="btn-yellow min-h-12 w-full"
-                          >
-                            <Play className="h-5 w-5 fill-current" />
-                            Resume
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={pauseRecording}
-                            className="btn-secondary min-h-12 w-full border-white/50 bg-white/10 text-white"
-                          >
-                            <Pause className="h-5 w-5" />
-                            Pause
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={stopRecording}
-                          className="btn-primary min-h-12 w-full"
-                        >
-                          <Square className="h-5 w-5 fill-current" />
-                          Stop
-                        </button>
-                      </div>
-                      <p className="text-center text-[14px] font-bold text-white">
-                        {recordingPaused ? "Paused" : "Recording"}…{" "}
-                        {formatClock(seconds)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-            </div>
-
-            {/* Desktop controls under the preview. */}
-            {!mobileStudio ? (
-              <>
-                <div className="flex flex-wrap items-center gap-3">
-                  {phase === "preview" ? (
-                    <>
-                      <span className="inline-flex items-center gap-2">
-                        <StepCircle n={2} label="Step 2" />
-                        <button
-                          type="button"
-                          onClick={startRecording}
-                          className="btn-primary"
-                        >
-                          <Circle className="h-5 w-5 fill-current" />
-                          Step 2 — Click Here to Start Recording
-                        </button>
-                      </span>
+              <div className="flex flex-wrap items-center gap-3">
+                {phase === "preview" ? (
+                  <>
+                    <span className="inline-flex items-center gap-2">
+                      <StepCircle n={2} label="Step 2" />
                       <button
                         type="button"
-                        disabled={switchingCamera}
-                        onClick={() => void switchCamera()}
-                        className="btn-secondary"
-                      >
-                        <SwitchCamera className="h-5 w-5" />
-                        {switchingCamera
-                          ? "Switching…"
-                          : facingMode === "user"
-                            ? "Flip to Rear Camera"
-                            : "Flip to Selfie Camera"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={closeCamera}
-                        className="btn-secondary"
-                      >
-                        Click Here to Cancel Webcam
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {recordingPaused ? (
-                        <button
-                          type="button"
-                          onClick={resumeRecording}
-                          className="btn-yellow"
-                        >
-                          <Play className="h-5 w-5 fill-current" />
-                          Resume Recording
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={pauseRecording}
-                          className="btn-secondary"
-                        >
-                          <Pause className="h-5 w-5" />
-                          Pause Recording
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={stopRecording}
+                        onClick={startRecording}
                         className="btn-primary"
                       >
-                        <Square className="h-5 w-5 fill-current" />
-                        Click Here to Stop Recording
+                        <Circle className="h-5 w-5 fill-current" />
+                        Step 2 — Click Here to Start Recording
                       </button>
-                      <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
-                        {recordingPaused ? "Paused" : "Recording"}…{" "}
-                        {formatClock(seconds)}
-                      </span>
-                    </>
-                  )}
-                </div>
-                <p className="text-base text-[var(--muted)]">
-                  About 60 seconds is preferred; 2+ minutes is fine. Trim on the
-                  timeline after you save.
-                </p>
-              </>
-            ) : null}
-          </div>
+                    </span>
+                    <button
+                      type="button"
+                      disabled={switchingCamera}
+                      onClick={() => void switchCamera()}
+                      className="btn-secondary"
+                    >
+                      <SwitchCamera className="h-5 w-5" />
+                      {switchingCamera
+                        ? "Switching…"
+                        : facingMode === "user"
+                          ? "Flip to Rear Camera"
+                          : "Flip to Selfie Camera"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={closeCamera}
+                      className="btn-secondary"
+                    >
+                      Click Here to Cancel Webcam
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {recordingPaused ? (
+                      <button
+                        type="button"
+                        onClick={resumeRecording}
+                        className="btn-yellow"
+                      >
+                        <Play className="h-5 w-5 fill-current" />
+                        Resume Recording
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={pauseRecording}
+                        className="btn-secondary"
+                      >
+                        <Pause className="h-5 w-5" />
+                        Pause Recording
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={stopRecording}
+                      className="btn-primary"
+                    >
+                      <Square className="h-5 w-5 fill-current" />
+                      Click Here to Stop Recording
+                    </button>
+                    <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
+                      {recordingPaused ? "Paused" : "Recording"}…{" "}
+                      {formatClock(seconds)}
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="text-base text-[var(--muted)]">
+                About 60 seconds is preferred; 2+ minutes is fine. Trim on the
+                timeline after you save.
+              </p>
+            </div>
+          ) : null}
         </div>
       ) : null}
 

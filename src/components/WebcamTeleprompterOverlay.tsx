@@ -17,6 +17,8 @@ type WebcamTeleprompterOverlayProps = {
   active: boolean;
   /** Recording in progress. */
   recording: boolean;
+  /** Force the mobile sheet layout (portaled phone studio). */
+  forceMobile?: boolean;
 };
 
 /**
@@ -27,8 +29,10 @@ type WebcamTeleprompterOverlayProps = {
 export function WebcamTeleprompterOverlay({
   active,
   recording,
+  forceMobile = false,
 }: WebcamTeleprompterOverlayProps) {
-  const isMobile = useIsMobile();
+  const isMobileHook = useIsMobile();
+  const isMobile = forceMobile || isMobileHook;
   const {
     teamMemberCount,
     photos,
