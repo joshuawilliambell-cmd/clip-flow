@@ -56,12 +56,18 @@ export function HelpTip({
         aria-controls={tipId}
         onClick={() => setOpen((v) => !v)}
         className={clsx(
-          "inline-flex items-center justify-center rounded-[var(--radius-sm)] border border-[var(--ink)] bg-[var(--yellow)] text-[var(--ink)] transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
+          "inline-flex items-center justify-center rounded-full text-[var(--ink)] transition hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--olive)]",
           size === "lg" ? "h-9 w-9" : "h-8 w-8",
         )}
         title={`Help: ${title}`}
       >
-        <HelpCircle className="h-4 w-4" />
+        <HelpCircle
+          className={clsx(
+            "fill-[var(--yellow)] text-[var(--ink)]",
+            size === "lg" ? "h-6 w-6" : "h-5 w-5",
+          )}
+          strokeWidth={2}
+        />
         <span className="sr-only">Help: {title}</span>
       </button>
 
