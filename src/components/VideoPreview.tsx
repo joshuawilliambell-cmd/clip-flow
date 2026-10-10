@@ -313,13 +313,95 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setCurrentTime, setIsPlaying, trimStart]);
 
+  // iOS native fullscreen plays element audio (GainNode voice is paused).
+  useEffect(() => {
+    const el = videoRef.current as
+      | (HTMLVideoElement & {
+          webkitDisplayingFullscreen?: boolean;
+        })
+      | null;
+    if (!el || !video) return;
+
+    const onBegin = () => {
+      voiceRef.current?.pause();
+      // Native player ignores volume fader, but must not stay muted.
+      el.muted = false;
+      try {
+        el.volume = 1;
+      } catch {
+        /* ignore */
+      }
+    };
+    const onEnd = () => {
+      if (voiceDecoded) {
+        el.muted = true;
+        el.volume = 0;
+        if (isPlaying) {
+          voiceRef.current?.setVolume(videoVolume);
+          void voiceRef.current?.playFrom(el.currentTime);
+        }
+      } else {
+        el.muted = false;
+        el.volume = Math.min(1, Math.max(0, videoVolume));
+      }
+    };
+
+    el.addEventListener("webkitbeginfullscreen", onBegin);
+    el.addEventListener("webkitendfullscreen", onEnd);
+    return () => {
+      el.removeEventListener("webkitbeginfullscreen", onBegin);
+      el.removeEventListener("webkitendfullscreen", onEnd);
+    };
+  }, [video, voiceDecoded, isPlaying, videoVolume]);
+
   const fullScreen = useCallback(async () => {
-    const el = shellRef.current;
-    if (!el) return;
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-    } else {
-      await el.requestFullscreen();
+    const shell = shellRef.current;
+    const videoEl = videoRef.current;
+    if (!shell && !videoEl) return;
+
+    type FsDoc = Document & {
+      webkitFullscreenElement?: Element | null;
+      webkitExitFullscreen?: () => Promise<void> | void;
+    };
+    type FsEl = HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void> | void;
+    };
+    type FsVideo = HTMLVideoElement & {
+      webkitEnterFullscreen?: () => void;
+    };
+
+    const doc = document as FsDoc;
+    const inFs = Boolean(doc.fullscreenElement || doc.webkitFullscreenElement);
+
+    try {
+      if (inFs) {
+        if (doc.exitFullscreen) await doc.exitFullscreen();
+        else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
+        return;
+      }
+
+      // iPhone/iPad: only <video> can go fullscreen (not a wrapper div).
+      const iosVideo = videoEl as FsVideo | null;
+      if (iosVideo && typeof iosVideo.webkitEnterFullscreen === "function") {
+        // Hand off audio to the native player for the fullscreen session.
+        voiceRef.current?.pause();
+        iosVideo.muted = false;
+        try {
+          iosVideo.volume = 1;
+        } catch {
+          /* ignore */
+        }
+        iosVideo.webkitEnterFullscreen();
+        return;
+      }
+
+      const target = (shell ?? videoEl) as FsEl | null;
+      if (!target) return;
+      if (target.requestFullscreen) await target.requestFullscreen();
+      else if (target.webkitRequestFullscreen)
+        await target.webkitRequestFullscreen();
+    } catch (e) {
+      console.warn("Fullscreen failed", e);
     }
   }, []);
 
@@ -584,8 +666,9 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
             jump.
           </p>
           <p>
-            Full screen makes the preview fill your screen. Press Escape or use
-            your device’s back control to exit.
+            <strong>Full screen</strong> expands the preview to fill your phone
+            or computer screen so it is easier to watch. On iPhone it uses the
+            built-in video full screen. Tap Done or swipe down to exit.
           </p>
         </HelpTip>
       </div>
