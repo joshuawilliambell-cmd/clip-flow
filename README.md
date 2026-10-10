@@ -4,14 +4,20 @@ Browser-based, template-driven introduction video creator for Love's employees. 
 
 This is a **Phase 1 working prototype** — not a full video editor. Presentation (portrait PIP size, corner padding, fades, export settings) comes from a central template; employees choose left or right corner, content, and timing. The canvas is always 16:9 (1920×1080).
 
-## Quick start
+## Open the app
+
+**Production (use this on your computer):** [https://clip-flow-green.vercel.app](https://clip-flow-green.vercel.app)
+
+Cloud Agent `http://127.0.0.1:43123` links only work inside the agent VM — they will not open in your local browser.
+
+## Quick start (local)
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
+Then open [http://127.0.0.1:43123](http://127.0.0.1:43123) on the same machine that is running `npm run dev`.
 
 `npm run dev` uses webpack (more reliable than Turbopack in some preview environments). For a production-style local run: `npm run build && npm start`.
 

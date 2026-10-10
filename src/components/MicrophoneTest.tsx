@@ -132,11 +132,11 @@ export function MicrophoneTest() {
           Open{" "}
           <a
             className="font-bold underline"
-            href="http://127.0.0.1:43123"
+            href="https://clip-flow-green.vercel.app"
             target="_blank"
             rel="noreferrer"
           >
-            http://127.0.0.1:43123
+            https://clip-flow-green.vercel.app
           </a>{" "}
           in <strong>Chrome or Edge</strong> on your computer, then run this
           test again.

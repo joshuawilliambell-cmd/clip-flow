@@ -49,14 +49,14 @@ export function micDenialMessage(
     case "unsupported":
       return "This browser cannot use a microphone. Open Chrome or Edge on your computer.";
     case "insecure":
-      return "Microphone needs a secure page (https or localhost). Open http://127.0.0.1:43123 in Chrome or Edge.";
+      return "Microphone needs a secure page (https). Open https://clip-flow-green.vercel.app in Chrome or Edge.";
     case "denied":
       return embedded
-        ? "Microphone permission was blocked. Cursor’s in-app preview usually cannot use your computer mic — open this site in Chrome or Edge, click the lock icon, allow Microphone, then reload."
+        ? "Microphone permission was blocked. Cursor’s in-app preview usually cannot use your computer mic — open https://clip-flow-green.vercel.app in Chrome or Edge, click the lock icon, allow Microphone, then reload."
         : "Microphone permission was blocked. Click the lock icon in the address bar → Site settings → Microphone → Allow, then reload.";
     case "not-found":
       return embedded
-        ? "No microphone found in this preview. Your mic works in system settings, but Cursor’s browser cannot hear it. Open http://127.0.0.1:43123 (or the Vercel link) in Chrome or Edge on your computer."
+        ? "No microphone found in this preview. Your mic works in system settings, but Cursor’s browser cannot hear it. Open https://clip-flow-green.vercel.app in Chrome or Edge on your computer."
         : "No microphone was found. Choose the correct input in system sound settings, then try again.";
     case "busy":
       return "Microphone is busy in another app. Close Zoom/Teams/Meet or other apps using the mic, then try again.";
