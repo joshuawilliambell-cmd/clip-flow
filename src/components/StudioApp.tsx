@@ -53,8 +53,8 @@ function StudioShell() {
           <div className="flex shrink-0 items-start justify-end">
             <HelpTip title="What is this tool?" size="lg">
               <p>
-                This tool helps Love&apos;s sales reps make a short video for
-                customers — without needing to be techy.
+                This tool helps Love&apos;s Enterprise Sales Team members make a
+                short video for customers — without needing to be techy.
               </p>
               <p>
                 You record yourself (or upload a clip). If you want teammate
