@@ -74,7 +74,7 @@ function StudioShell() {
             <p className="mx-auto max-w-6xl text-[15px] font-semibold leading-snug text-[var(--ink)] md:text-[16px]">
               Make a short video for your customers the easy way. You talk on
               camera — and if you want, we&apos;ll put teammate photos in the
-              corner for you.
+              corner and build a Love&apos;s Team thumbnail for you too.
             </p>
           </div>
         ) : null}

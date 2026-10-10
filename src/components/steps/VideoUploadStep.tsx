@@ -60,7 +60,8 @@ export function VideoUploadStep() {
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             Fill in a few blanks, add teammates if you want, then record or
             upload. We handle the hard parts — like placing photos in the
-            corner. About 60 seconds is preferred; longer is fine.
+            corner and building a team thumbnail. About 60 seconds is preferred;
+            longer is fine.
           </p>
         </div>
         <HelpTip title="What Do I Do On This Page?" size="lg">
