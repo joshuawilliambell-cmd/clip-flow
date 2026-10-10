@@ -286,9 +286,9 @@ export function WebcamRecorder({
   const startCamera = async (facing: FacingMode = facingMode) => {
     setLocalError(null);
     if (!navigator.mediaDevices?.getUserMedia) {
-      reportError(
-        "This browser cannot use the webcam here. Please upload a video file instead, or try Chrome or Edge on a computer.",
-      );
+        reportError(
+          "This browser cannot use the camera here. Please upload a video file instead, or try Chrome or Edge.",
+        );
       return;
     }
 
@@ -334,7 +334,7 @@ export function WebcamRecorder({
         );
       } else {
         reportError(
-          "Could not start the webcam here. Open the site in Chrome or Edge, or upload a video file instead.",
+          "Could not start the camera here. Open the site in Chrome, Edge, or Safari, or upload a video file instead.",
         );
       }
     }
@@ -359,7 +359,7 @@ export function WebcamRecorder({
     setLocalError(null);
     const stream = streamRef.current;
     if (!stream) {
-      reportError("Camera is not ready yet. Tap Start webcam again.");
+      reportError("Camera is not ready yet. Tap Start Camera again.");
       return;
     }
 
@@ -585,15 +585,15 @@ export function WebcamRecorder({
           <div className="flex items-center gap-2">
             <Camera className="h-6 w-6 text-[var(--primary)]" aria-hidden />
             <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              Record With Webcam
+              Record With Camera
             </h3>
           </div>
         </div>
-        <HelpTip title="Record With Webcam" size="lg">
+        <HelpTip title="Record With Camera" size="lg">
           <p>
-            <strong>Best way to record:</strong> use this webcam with the
-            on-screen teleprompter. The script stays near your camera so you can
-            look natural while you read.
+            <strong>Best way to record:</strong> use your computer webcam or
+            phone camera right here with the on-screen teleprompter. The script
+            stays near the lens so you can look natural while you read.
           </p>
           <p>
             Starts on the <strong>selfie (front) camera</strong>. Tap{" "}
@@ -601,8 +601,8 @@ export function WebcamRecorder({
           </p>
           <p>
             <strong>Follow My Voice</strong> listens as you speak and scrolls the
-            script for you. Step 1 turns that on; Step 2 starts the real
-            recording. While recording you can Pause or Stop.
+            script for you. Then Start Recording for the real take. While
+            recording you can Pause or Stop.
           </p>
           <p>
             Script text is only for you while you talk — it is not saved into
@@ -612,55 +612,33 @@ export function WebcamRecorder({
       </div>
 
       <div className="how-banner mt-4">
-        <strong>Computer webcam:</strong> record here with your webcam and
-        teleprompter — easiest on a laptop or desktop. Selfie camera opens
-        first; use Flip to switch. For a phone Camera app instead, see{" "}
-        <strong>Recording Tips → Phone Camera</strong> above.
+        <strong>Record here</strong> with your camera and teleprompter — works
+        with a <strong>computer webcam</strong> or your <strong>phone
+        camera</strong>. Selfie opens first; use <strong>Flip</strong> to
+        switch. Prefer the phone&apos;s built-in Camera app instead? See{" "}
+        <strong>Recording Tips → Phone Camera</strong>, then upload the file.
       </div>
 
-      {/* Desktop-only webcam setup steps (phone uses the fullscreen studio tips). */}
-      {isMobile !== true ? (
-        <PanelSteps
-          className="mt-4"
-          steps={[
-            <>
-              <strong>Webcam setup:</strong> place this window at the{" "}
-              <strong>top of your monitor</strong>, near the webcam lens. Scoot
-              back — frame from about your waist to the top of your head. Shape
-              is <strong>{orientationLabel(videoOrientation)}</strong>.
-            </>,
-            <>
-              Click <strong>Start Webcam</strong> and allow the computer camera
-              and microphone when asked. Selfie camera opens by default — use{" "}
-              <strong>Flip</strong> for the rear camera if needed.
-            </>,
-            <>
-              <strong>Step 1 — Follow My Voice</strong> (computer mic), then{" "}
-              <strong>Step 2 — Start Recording</strong>. Pause or Stop anytime.
-            </>,
-          ]}
-        />
-      ) : (
-        <PanelSteps
-          className="mt-4"
-          steps={[
-            <>
-              <strong>On your phone:</strong> video format is{" "}
-              <strong>{orientationLabel(videoOrientation)}</strong>. Hold the
-              phone to match (upright for portrait 4:3, sideways for landscape).
-            </>,
-            <>
-              Tap <strong>Start Webcam</strong>, allow camera and mic, then use{" "}
-              <strong>Flip</strong> if you need the rear camera.
-            </>,
-            <>
-              <strong>Follow My Voice</strong>, then{" "}
-              <strong>Start Recording</strong>. Pause or Stop from the bottom
-              controls.
-            </>,
-          ]}
-        />
-      )}
+      <PanelSteps
+        className="mt-4"
+        steps={[
+          <>
+            Match <strong>{orientationLabel(videoOrientation)}</strong>: on a
+            computer, place this window near the webcam lens; on a phone, hold
+            it upright (portrait 4:3) or sideways (landscape). Frame waist to
+            top of head.
+          </>,
+          <>
+            Tap <strong>Start Camera</strong> and allow camera + microphone.
+            Selfie opens first — use <strong>Flip</strong> for the rear camera
+            if you need it.
+          </>,
+          <>
+            <strong>Follow My Voice</strong>, then{" "}
+            <strong>Start Recording</strong>. Use Pause or Stop anytime.
+          </>,
+        ]}
+      />
 
       {phase === "idle" ? (
         <div className="mt-4 flex flex-wrap gap-3">
@@ -671,7 +649,7 @@ export function WebcamRecorder({
             className="btn-primary"
           >
             <Camera className="h-5 w-5" />
-            Click Here to Start Webcam
+            Click Here to Start Camera
           </button>
         </div>
       ) : null}
@@ -718,8 +696,8 @@ export function WebcamRecorder({
             )
           ) : (
             <p className="text-[14px] font-medium text-[var(--muted)]">
-              Camera is open fullscreen on your phone. Flip camera, Follow My
-              Voice, then Start / Pause / Stop at the bottom.
+              Camera is open fullscreen. Flip if needed, Follow My Voice, then
+              Start / Pause / Stop at the bottom.
             </p>
           )}
 
@@ -736,7 +714,7 @@ export function WebcamRecorder({
                 <div
                   role="dialog"
                   aria-modal="true"
-                  aria-label="Webcam recorder"
+                  aria-label="Camera recorder"
                   className="fixed z-[9999] grid grid-rows-[minmax(12rem,38%)_minmax(0,1fr)_auto] bg-black text-white"
                   style={{
                     top: viewport.top,
@@ -798,7 +776,7 @@ export function WebcamRecorder({
                             type="button"
                             onClick={closeCamera}
                             className="inline-flex min-h-12 flex-col items-center justify-center rounded-xl border-2 border-white/60 bg-white/15 px-1 text-[11px] font-bold text-white"
-                            aria-label="Cancel webcam"
+                            aria-label="Close camera"
                           >
                             <X className="h-5 w-5" />
                             Close
@@ -910,7 +888,7 @@ export function WebcamRecorder({
                       onClick={closeCamera}
                       className="btn-secondary"
                     >
-                      Click Here to Cancel Webcam
+                      Click Here to Cancel Camera
                     </button>
                   </>
                 ) : (

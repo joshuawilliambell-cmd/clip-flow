@@ -53,7 +53,7 @@ export function VideoUploadStep() {
           <p>
             Work through each panel in order. Practice with{" "}
             <strong>Follow My Voice</strong>, then record with the{" "}
-            <strong>webcam and teleprompter</strong> — that is the easiest path.
+            <strong>camera and teleprompter</strong> — that is the easiest path.
           </p>
           <p>
             When your roster and talking video are ready, save and move to the
@@ -95,14 +95,14 @@ export function VideoUploadStep() {
             <p>
               Use <strong>Follow My Voice</strong> to practice: the computer
               listens and scrolls the script as you read out loud. Then record
-              with the webcam using the same button.
+              with the camera using the same button.
             </p>
           </HelpTip>
         </div>
         <div className="how-banner">
           Practice with <strong>Follow My Voice</strong> here first. When you
-          are ready, use <strong>Record With Webcam</strong> below — webcam +
-          teleprompter is the easiest way to make this video.
+          are ready, use <strong>Record With Camera</strong> below — camera +
+          teleprompter works on a computer webcam or your phone.
         </div>
         <Teleprompter />
       </section>
@@ -135,10 +135,10 @@ export function VideoUploadStep() {
         </h3>
         {!video ? (
           <div className="how-banner">
-            Prefer to skip the webcam? If you already have a video file from
-            your phone or another camera, upload it here — match the{" "}
+            Prefer to skip recording here? If you already have a video file from
+            your phone Camera app or another camera, upload it here — match the{" "}
             <strong>Video Format</strong> you picked (landscape or portrait).
-            Otherwise, use <strong>Record With Webcam</strong> above — that is
+            Otherwise, use <strong>Record With Camera</strong> above — that is
             the recommended path with the teleprompter.
           </div>
         ) : null}
@@ -150,7 +150,7 @@ export function VideoUploadStep() {
                 computer in the same shape as Video Format.
               </>,
               <>
-                Otherwise go back up to <strong>Record With Webcam</strong> —
+                Otherwise go back up to <strong>Record With Camera</strong> —
                 easiest with the teleprompter and Follow My Voice.
               </>,
             ]}

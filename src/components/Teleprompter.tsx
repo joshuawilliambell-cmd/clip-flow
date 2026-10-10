@@ -231,7 +231,7 @@ export function Teleprompter({
             </li>
             <li>
               When you feel ready, go to{" "}
-              <strong className="text-white">Record With Webcam</strong> and use
+              <strong className="text-white">Record With Camera</strong> and use
               Follow My Voice the same way for your real take.
             </li>
           </ol>
@@ -348,8 +348,8 @@ export function Teleprompter({
                 feels natural (Chrome or Edge works best).
               </>,
               <>
-                Then record with the <strong>webcam + teleprompter</strong>{" "}
-                below — same Follow My Voice button for your real take.
+                Then record with <strong>Record With Camera</strong> below
+                (computer webcam or phone) — same Follow My Voice button.
               </>,
               <>
                 Edit the script below anytime if you want different wording.

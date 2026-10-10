@@ -50,13 +50,13 @@ const DEVICES: DeviceGuide[] = [
       "A headset mic often sounds clearer than a laptop mic.",
     ],
     recordSteps: [
-      "On a computer, under Record With Webcam, click Start Webcam.",
+      "Under Record With Camera, click Start Camera.",
       "Allow the computer camera and microphone when the browser asks.",
       "Step 1: click Follow My Voice, then read out loud so the script scrolls with you.",
       "Step 2: click Start Recording for the real take; use Pause or Stop as needed.",
     ],
     getIntoTool: [
-      "Your webcam recording loads into the studio when you finish.",
+      "Your recording loads into the studio when you finish.",
       "Only use Upload A Saved Video if you already recorded somewhere else.",
     ],
   },
@@ -83,7 +83,7 @@ const DEVICES: DeviceGuide[] = [
       "If you use Follow My Voice in Safari/Chrome on the phone, allow the microphone.",
     ],
     recordSteps: [
-      "Option A — this studio on your phone: Start Webcam → Follow My Voice → Start Recording (Pause/Stop at the bottom).",
+      "Option A — this studio on your phone: Start Camera → Follow My Voice → Start Recording (Pause/Stop at the bottom).",
       "Option B — Camera app: choose Video, record in the matching shape, then stop.",
     ],
     getIntoTool: [
@@ -164,16 +164,17 @@ export function RecordingGuide() {
         <HelpTip title="Recording Tips" size="lg">
           <p>
             Optional setup help. The easiest path is{" "}
-            <strong>Record With Webcam</strong> with Follow My Voice on the
-            teleprompter.
+            <strong>Record With Camera</strong> with Follow My Voice on the
+            teleprompter (computer webcam or phone).
           </p>
         </HelpTip>
       </div>
 
       <div className="how-banner mt-3">
-        On a computer, use <strong>Computer Webcam</strong> tips + Record With
-        Webcam below. On a phone, open <strong>Phone Camera</strong> tips (studio
-        on phone, or Camera app then upload).
+        Use <strong>Record With Camera</strong> below on a computer or phone.
+        Open tips for <strong>Computer Webcam</strong> or{" "}
+        <strong>Phone Camera</strong> if you want device-specific advice (or the
+        Camera app upload path).
       </div>
 
       <button
@@ -195,16 +196,16 @@ export function RecordingGuide() {
           <PanelSteps
             steps={[
               <>
-                On a computer, choose <strong>Computer Webcam</strong> — webcam +
-                teleprompter + Follow My Voice.
+                On a computer, choose <strong>Computer Webcam</strong> for
+                monitor and mic setup tips.
               </>,
               <>
-                On a phone, choose <strong>Phone Camera</strong> for phone-specific
-                steps (studio on phone or Camera app).
+                On a phone, choose <strong>Phone Camera</strong> for studio-on-phone
+                or Camera app + upload tips.
               </>,
               <>
-                Then record with <strong>Record With Webcam</strong> below, or
-                upload a file from your phone Camera app.
+                Then use <strong>Record With Camera</strong> below, or upload a
+                saved file.
               </>,
             ]}
           />
