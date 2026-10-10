@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { scriptWords } from "@/lib/teleprompter-layout";
 import { probeMicrophone } from "@/lib/mic-access";
+import { advanceVoiceFollowIndex } from "@/lib/voice-follow-match";
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -51,6 +52,9 @@ export function useTeleprompterVoiceFollow(
   const wordIndexRef = useRef(0);
   const wordsRef = useRef<string[]>([]);
   const wantListenRef = useRef(false);
+  /** Last heard token list we already applied (avoids re-advancing on interim growth). */
+  const appliedHeardRef = useRef("");
+  const lastResultIndexRef = useRef(0);
 
   useEffect(() => {
     setSupported(Boolean(getSpeechRecognitionCtor()));
@@ -68,8 +72,8 @@ export function useTeleprompterVoiceFollow(
       if (!el || total <= 0) return;
       const maxScroll = el.scrollHeight - el.clientHeight;
       if (maxScroll <= 0) return;
-      // Keep a little lead so the next line sits near the reading guide.
-      const progress = Math.min(1, Math.max(0, (wordIndex + 2) / total));
+      // Stay on the spoken word — no +N lead (felt like skipping ahead).
+      const progress = Math.min(1, Math.max(0, wordIndex / total));
       el.scrollTop = progress * maxScroll;
     },
     [scrollerRef],
@@ -103,6 +107,8 @@ export function useTeleprompterVoiceFollow(
     stop();
     wantListenRef.current = true;
     wordIndexRef.current = 0;
+    appliedHeardRef.current = "";
+    lastResultIndexRef.current = 0;
     setMatchedWords(0);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     setStatus("Asking for microphone access…");
@@ -128,33 +134,43 @@ export function useTeleprompterVoiceFollow(
       recognitionRef.current = rec;
 
       rec.onresult = (event) => {
+        // New recognition slot — start fresh interim-prefix tracking.
+        if (event.resultIndex > lastResultIndexRef.current) {
+          appliedHeardRef.current = "";
+          lastResultIndexRef.current = event.resultIndex;
+        }
+
+        // Build transcript from changed results (finals + current interim).
         let chunk = "";
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          chunk += ` ${event.results[i][0].transcript}`;
+          const result = event.results[i];
+          if (!result) continue;
+          chunk += ` ${result[0].transcript}`;
         }
         const heard = scriptWords(chunk);
         if (heard.length === 0) return;
 
-        const words = wordsRef.current;
-        let idx = wordIndexRef.current;
-        for (const token of heard) {
-          // Look ahead a few words so filler (“um”, mishears) does not stall.
-          const windowEnd = Math.min(words.length, idx + 6);
-          let hit = -1;
-          for (let i = idx; i < windowEnd; i++) {
-            if (
-              words[i] === token ||
-              words[i]?.startsWith(token) ||
-              token.startsWith(words[i] ?? "")
-            ) {
-              hit = i;
-              break;
-            }
-          }
-          if (hit >= 0) {
-            idx = hit + 1;
-          }
+        // Interim results grow ("hi" → "hi there"). Only feed tokens we
+        // have not already applied from this growing phrase.
+        const heardKey = heard.join(" ");
+        const prevKey = appliedHeardRef.current;
+        let tokensToApply = heard;
+        if (prevKey && heardKey.startsWith(prevKey)) {
+          const prevCount = prevKey.split(" ").filter(Boolean).length;
+          tokensToApply = heard.slice(prevCount);
+        } else if (prevKey && prevKey.startsWith(heardKey)) {
+          // ASR shortened/corrected — do not move backward; wait for more.
+          return;
         }
+        appliedHeardRef.current = heardKey;
+        if (tokensToApply.length === 0) return;
+
+        const words = wordsRef.current;
+        const idx = advanceVoiceFollowIndex(
+          words,
+          wordIndexRef.current,
+          tokensToApply,
+        );
         if (idx !== wordIndexRef.current) {
           wordIndexRef.current = idx;
           setMatchedWords(idx);
