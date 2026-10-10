@@ -4,6 +4,7 @@ import { clsx } from "clsx";
 import { PanelLeft, PanelRight } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { PanelSteps } from "@/components/PanelStep";
+import { TeamPhotoSilhouette } from "@/components/TeamPhotoSilhouette";
 import { useStudio } from "@/lib/studio-context";
 import type { PipSide } from "@/lib/template";
 
@@ -106,14 +107,20 @@ export function PipSidePicker() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[#334155] to-[#0f172a]" />
             <div
-              className="absolute rounded-md border-2 border-white bg-[#cbd5e1]"
+              className="absolute flex flex-col items-stretch"
               style={{
                 top: "6%",
                 [option.id === "left" ? "left" : "right"]: "5%",
-                width: "15.2%",
-                height: "36%",
+                width: "18%",
               }}
-            />
+            >
+              <div className="aspect-[4/5] overflow-hidden rounded-md border-2 border-white bg-[#cbd5e1] shadow-md">
+                <TeamPhotoSilhouette />
+              </div>
+              <p className="mt-1 truncate rounded-sm bg-black/75 px-1 py-0.5 text-center text-[9px] font-semibold leading-tight text-white md:text-[10px]">
+                Job Title
+              </p>
+            </div>
             <p className="absolute bottom-2 left-0 right-0 text-center text-sm font-semibold text-white">
               Example · {option.label.toLowerCase()}
             </p>
