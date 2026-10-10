@@ -56,7 +56,7 @@ export const PRESET_JOB_DUTIES: Record<PresetJobTitle, string> = {
   "Senior Manager of Fleet Sales":
     "fleet sales strategy, team coverage, and making sure the right people support your account",
   "Fleet Account Specialist":
-    "account details, contracts and billing questions, and fast follow-up on fleet needs",
+    "account details, agreements and billing questions, and providing billing statements for you",
   "Inside Sales Account Manager":
     "phone support for Total Truck Care, fuel and tire programs, and smaller-fleet account growth",
   "Inside Sales Account Manager Fleet Sales":
