@@ -58,9 +58,9 @@ function StudioShell() {
               </p>
               <p>
                 You record yourself (or upload a clip). If you want teammate
-                photos in the corner or a team thumbnail cover, have a clear
-                headshot ready for each person — including yourself for the
-                thumbnail.
+                photos in the corner or a team thumbnail cover, have a
+                professional-looking headshot ready for each person — including
+                yourself for the thumbnail.
               </p>
               <p>
                 Then trim, add quiet music if you want, and download an MP4 to
@@ -81,8 +81,8 @@ function StudioShell() {
               </p>
               <p className="text-[14px] font-medium text-[var(--ink)]/80 md:text-[15px]">
                 Tip: If you want a thumbnail cover and/or corner photos, gather
-                a clear headshot of each teammate first — and one of yourself if
-                you&apos;ll appear on the thumbnail.
+                a professional-looking headshot of each teammate first — and one
+                of yourself if you&apos;ll appear on the thumbnail.
               </p>
             </div>
           </div>

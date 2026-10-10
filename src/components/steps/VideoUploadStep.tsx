@@ -71,8 +71,8 @@ export function VideoUploadStep() {
           </p>
           <p>
             Want a team thumbnail or small photos in the corner of the video?
-            You&apos;ll need a clear headshot of each teammate, plus one of you
-            for the thumbnail cover.
+            You&apos;ll need a professional-looking headshot of each teammate,
+            plus one of you for the thumbnail cover.
           </p>
           <p>
             When your roster and talking video are ready, save and move to the
