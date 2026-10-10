@@ -26,15 +26,25 @@ export function VideoUploadStep() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const handleFiles = async (files: FileList | null) => {
     const file = files?.[0];
+    // Allow picking the same iPhone album clip again after a failed attempt.
+    if (inputRef.current) inputRef.current.value = "";
     if (!file) return;
     setError(null);
+    setUploading(true);
     try {
       await setVideoFromFile(file);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed. Please try again.");
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Could not add that video. Try again or use Record With Camera.",
+      );
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -135,11 +145,11 @@ export function VideoUploadStep() {
         </h3>
         {!video ? (
           <div className="how-banner">
-            Prefer to skip recording here? If you already have a video file from
-            your phone Camera app or another camera, upload it here — match the{" "}
-            <strong>Video Format</strong> you picked (landscape or portrait).
-            Otherwise, use <strong>Record With Camera</strong> above — that is
-            the recommended path with the teleprompter.
+            Prefer to skip recording here? Choose a video from your phone photo
+            album or computer — match the <strong>Video Format</strong> you
+            picked (landscape or portrait). On iPhone, wait a moment after you
+            pick the clip. Otherwise, use <strong>Record With Camera</strong>{" "}
+            above.
           </div>
         ) : null}
         {!video ? (
@@ -187,17 +197,31 @@ export function VideoUploadStep() {
                 </p>
               </div>
               <p className="mb-4 max-w-md text-center text-[14px] font-medium text-[var(--muted)]">
-                From this computer · MP4 / MOV / WebM
+                Phone photo album or computer · MP4 / MOV / WebM
               </p>
               <button
                 type="button"
+                disabled={uploading}
                 onClick={() => inputRef.current?.click()}
                 className="btn-primary"
                 data-testid="choose-video-folder"
               >
                 <Upload className="h-5 w-5" />
-                Click Here to Choose Video From File
+                {uploading
+                  ? "Adding your video…"
+                  : "Click Here to Choose Video From File"}
               </button>
+              {uploading ? (
+                <p className="mt-3 text-center text-[14px] font-semibold text-[var(--ink)]">
+                  Loading from your album — this can take a few seconds on
+                  iPhone…
+                </p>
+              ) : null}
+              {error ? (
+                <p className="mt-3 rounded-xl border-2 border-[var(--primary)] bg-red-50 px-4 py-3 text-base font-medium text-[var(--primary-dark)]">
+                  {error}
+                </p>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -238,12 +262,13 @@ export function VideoUploadStep() {
       <input
         ref={inputRef}
         type="file"
-        accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
+        accept="video/*,video/mp4,video/quicktime,video/x-m4v,.mp4,.mov,.m4v,.webm"
         className="hidden"
         onChange={(e) => void handleFiles(e.target.files)}
       />
 
-      {error ? (
+      {/* Errors while a video is already loaded (replace failed). Fresh-pick errors show in the upload box. */}
+      {error && video ? (
         <p className="rounded-xl border-2 border-[var(--primary)] bg-red-50 px-4 py-3 text-lg font-medium text-[var(--primary-dark)]">
           {error}
         </p>

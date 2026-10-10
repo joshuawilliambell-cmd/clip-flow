@@ -185,9 +185,11 @@ type LoadVideoOptions = {
 
 /**
  * Read width/height/duration for an uploaded or webcam-captured file.
- * Always seek-probes past the end — WebM often reports Infinity or a false
- * ~60s finite duration even when the file is longer. Never fall back to the
- * 60s guidance target as a hard cap.
+ *
+ * iPhone Photos library files often break if we seek to extreme times
+ * (e.g. 1e101) — Safari can leave dimensions at 0 and never fire onseeked.
+ * Prefer metadata first; only soft-probe when duration is missing/Infinity
+ * (common with MediaRecorder WebM).
  */
 function loadVideoMetadata(
   file: File,
@@ -198,7 +200,10 @@ function loadVideoMetadata(
     const el = document.createElement("video");
     el.preload = "auto";
     el.muted = true;
+    el.defaultMuted = true;
     el.playsInline = true;
+    el.setAttribute("playsinline", "true");
+    el.setAttribute("webkit-playsinline", "true");
     let settled = false;
     let probing = false;
     let estimatedFromSeek = 0;
@@ -210,73 +215,119 @@ function loadVideoMetadata(
         ? options.durationHintSeconds
         : 0;
 
-    const bestDuration = () => {
+    const reportedDuration = () => {
       const raw = el.duration;
-      const reported =
-        Number.isFinite(raw) && raw > 0 && raw !== Infinity ? raw : 0;
-      return Math.max(reported, estimatedFromSeek, hint, 0);
+      return Number.isFinite(raw) && raw > 0 && raw !== Infinity ? raw : 0;
     };
 
-    const succeed = () => {
+    const bestDuration = () =>
+      Math.max(reportedDuration(), estimatedFromSeek, hint, 0);
+
+    const cleanupElement = () => {
+      try {
+        el.removeAttribute("src");
+        el.load();
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const succeed = (allowMissingFrame = false) => {
       if (settled) return;
-      if (!el.videoWidth || !el.videoHeight) {
-        settled = true;
-        URL.revokeObjectURL(url);
-        reject(
-          new Error(
-            "This browser cannot display that video (often iPhone HEVC). Export or convert to an H.264 MP4, or use Record with webcam.",
-          ),
-        );
-        return;
+      const w = el.videoWidth;
+      const h = el.videoHeight;
+      if (!w || !h) {
+        if (!allowMissingFrame) return;
+        // Last resort: keep the file in the studio with canvas defaults so
+        // iPhone album picks are not discarded after a flaky metadata probe.
       }
       settled = true;
       resolve({
         url,
-        fileName: file.name,
+        fileName: file.name?.trim() || "phone-video.mov",
         durationSeconds: Math.max(bestDuration(), 0.5),
-        width: el.videoWidth || VIDEO_TEMPLATE.width,
-        height: el.videoHeight || VIDEO_TEMPLATE.height,
+        width: w || VIDEO_TEMPLATE.width,
+        height: h || VIDEO_TEMPLATE.height,
       });
+      cleanupElement();
     };
 
-    const probeEnd = () => {
-      if (probing || settled) return;
-      probing = true;
-      const reported =
-        Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 0;
-      // Always seek past reported length — under-reported WebM is common.
-      const target = Math.max(reported + 3600, hint + 180, 1e101);
-      try {
-        el.currentTime = target;
-      } catch {
-        succeed();
-      }
-    };
-
-    el.onloadedmetadata = () => {
-      probeEnd();
-    };
-    el.onseeked = () => {
-      if (!probing || settled) return;
-      if (el.currentTime > estimatedFromSeek) {
-        estimatedFromSeek = el.currentTime;
-      }
-      probing = false;
-      succeed();
-    };
-    el.onerror = () => {
+    const fail = (message: string) => {
       if (settled) return;
       settled = true;
       URL.revokeObjectURL(url);
-      reject(
-        new Error(
-          "Could not read that video in this browser. Try another MP4 (H.264) or record with the webcam option.",
-        ),
+      cleanupElement();
+      reject(new Error(message));
+    };
+
+    const softProbeDuration = () => {
+      if (probing || settled) return;
+      const reported = reportedDuration();
+      // Finite duration + frame size → done (typical iPhone .MOV / .MP4).
+      if (reported > 0 && el.videoWidth > 0 && el.videoHeight > 0) {
+        succeed();
+        return;
+      }
+      // Only probe when duration is unknown/Infinity (WebM) — never seek to 1e101
+      // on iOS; that path often breaks Photos-library videos.
+      probing = true;
+      const target = Math.max(
+        reported > 0 ? reported + 120 : 0,
+        hint > 0 ? hint + 30 : 0,
+        600,
+      );
+      const onSeeked = () => {
+        el.removeEventListener("seeked", onSeeked);
+        if (settled) return;
+        if (el.currentTime > estimatedFromSeek) {
+          estimatedFromSeek = el.currentTime;
+        }
+        probing = false;
+        succeed(true);
+      };
+      el.addEventListener("seeked", onSeeked);
+      try {
+        el.currentTime = target;
+      } catch {
+        el.removeEventListener("seeked", onSeeked);
+        probing = false;
+        succeed(true);
+      }
+      window.setTimeout(() => {
+        if (probing && !settled) {
+          el.removeEventListener("seeked", onSeeked);
+          probing = false;
+          succeed(true);
+        }
+      }, 2500);
+    };
+
+    el.onloadedmetadata = () => {
+      softProbeDuration();
+    };
+    el.onloadeddata = () => {
+      if (settled) return;
+      if (el.videoWidth > 0 && reportedDuration() > 0) {
+        succeed();
+      }
+    };
+    el.onerror = () => {
+      fail(
+        "Could not read that video. On iPhone, try a video recorded as Most Compatible (H.264), or use Record With Camera in this studio.",
       );
     };
+
     window.setTimeout(() => {
-      if (!settled) succeed();
-    }, 8000);
+      if (settled) return;
+      if (el.videoWidth > 0 || bestDuration() > 0) {
+        succeed(true);
+        return;
+      }
+      fail(
+        "That video did not load in time. Try again, pick a shorter clip, use Record With Camera here, or export the album video as H.264 MP4.",
+      );
+    }, 15000);
+
     el.src = url;
   });
 }
@@ -430,18 +481,28 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       file: File,
       options?: { durationHintSeconds?: number },
     ) => {
+      // iPhone Photos often sends empty MIME and odd names — allow any video/*
+      // plus common extensions, and non-empty files with no type from the album.
       const typeOk =
+        !file.type ||
         VIDEO_TEMPLATE.uploads.videoAccept.includes(file.type) ||
         /^video\//i.test(file.type) ||
-        /\.(mp4|mov|webm)$/i.test(file.name);
+        /\.(mp4|m4v|mov|qt|webm|mpeg|mpg)$/i.test(file.name);
       if (!typeOk) {
-        throw new Error("Please upload an MP4, MOV, or WebM video.");
+        throw new Error(
+          "Please choose a video from your album (MP4 or MOV). If it still fails, use Record With Camera in this studio.",
+        );
       }
       if (file.size > VIDEO_TEMPLATE.uploads.maxVideoBytes) {
         const maxGb =
           VIDEO_TEMPLATE.uploads.maxVideoBytes / (1024 * 1024 * 1024);
         throw new Error(
           `Video is too large. Please use a file under ${maxGb} GB, or trim/export a shorter clip first.`,
+        );
+      }
+      if (file.size < 256) {
+        throw new Error(
+          "That file looks empty. Pick the video again from your photo album.",
         );
       }
 
