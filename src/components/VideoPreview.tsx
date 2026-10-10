@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Maximize2, Pause, Play, RotateCcw } from "lucide-react";
+import { Maximize2, RotateCcw } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 import { getPipLayout, VIDEO_TEMPLATE } from "@/lib/template";
@@ -16,8 +16,8 @@ import {
   orientationLabel,
 } from "@/lib/orientation-ui";
 import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
-import { formatClock } from "@/lib/timeline";
 import { HelpTip } from "@/components/HelpTip";
+import { VideoFilmstripBar } from "@/components/VideoFilmstripBar";
 import { filledTeamPhotos } from "@/lib/team-slots";
 import { createQuietAudio, type QuietAudio } from "@/lib/quiet-audio";
 
@@ -270,7 +270,10 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
             {orientationLabel(videoOrientation)}). Change it above if needed.
           </p>
           <p>Team photos and names appear when it is their turn.</p>
-          <p>Tap the big Play button to watch and listen.</p>
+          <p>
+            Tap play on the bar under the video to watch and listen, or tap the
+            video itself.
+          </p>
           <p>
             Background music starts at{" "}
             {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}% (max{" "}
@@ -285,232 +288,205 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         </HelpTip>
       </div>
 
-      <div
-        ref={shellRef}
-        className="relative overflow-hidden section-card bg-black"
-      >
-        <div
-          className={clsx(
-            frameAspectClass(videoOrientation, "preview"),
-            compact && videoOrientation === "portrait" && "max-w-xs",
-          )}
-        >
-          {video ? (
-            <>
-              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-              <video
-                key={video.url}
-                ref={videoRef}
-                src={video.url}
-                playsInline
-                preload="auto"
-                className="h-full w-full object-contain bg-black"
-                onLoadedData={() => {
-                  setHasFrame(true);
-                  const el = videoRef.current;
-                  if (el) {
-                    try {
-                      el.currentTime = sourceTime(currentTime);
-                    } catch {
-                      /* ignore */
+      {/* Video + filmstrip transport as one flush unit (iOS Photos–style). */}
+      <div className="overflow-hidden rounded-[var(--radius-md)] border-2 border-[var(--ink)] bg-black">
+        <div ref={shellRef} className="relative bg-black">
+          <div
+            className={clsx(
+              frameAspectClass(videoOrientation, "preview"),
+              compact && videoOrientation === "portrait" && "max-w-xs",
+            )}
+          >
+            {video ? (
+              <>
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <video
+                  key={video.url}
+                  ref={videoRef}
+                  src={video.url}
+                  playsInline
+                  preload="auto"
+                  className="h-full w-full object-contain bg-black"
+                  onLoadedData={() => {
+                    setHasFrame(true);
+                    const el = videoRef.current;
+                    if (el) {
+                      try {
+                        el.currentTime = sourceTime(currentTime);
+                      } catch {
+                        /* ignore */
+                      }
                     }
+                  }}
+                  onLoadedMetadata={() => {
+                    const el = videoRef.current;
+                    if (el && el.videoWidth > 0) setHasFrame(true);
+                    // WebM duration may resolve after first load — extend past any
+                    // mistaken ~60s fallback so 2+ minute clips stay full length.
+                    if (
+                      el &&
+                      Number.isFinite(el.duration) &&
+                      el.duration > 0
+                    ) {
+                      reconcileVideoDuration(el.duration);
+                    }
+                  }}
+                  onDurationChange={() => {
+                    const el = videoRef.current;
+                    if (
+                      el &&
+                      Number.isFinite(el.duration) &&
+                      el.duration > 0
+                    ) {
+                      reconcileVideoDuration(el.duration);
+                    }
+                  }}
+                  onSeeked={() => setHasFrame(true)}
+                  onTimeUpdate={onTimeUpdate}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => {
+                    /* only sync if user paused via element; timeline drives pause */
+                  }}
+                  onError={() =>
+                    setNativeError(
+                      "This browser cannot decode that video. Export as H.264 MP4, or record with the webcam option.",
+                    )
                   }
-                }}
-                onLoadedMetadata={() => {
-                  const el = videoRef.current;
-                  if (el && el.videoWidth > 0) setHasFrame(true);
-                  // WebM duration may resolve after first load — extend past any
-                  // mistaken ~60s fallback so 2+ minute clips stay full length.
-                  if (
-                    el &&
-                    Number.isFinite(el.duration) &&
-                    el.duration > 0
-                  ) {
-                    reconcileVideoDuration(el.duration);
-                  }
-                }}
-                onDurationChange={() => {
-                  const el = videoRef.current;
-                  if (
-                    el &&
-                    Number.isFinite(el.duration) &&
-                    el.duration > 0
-                  ) {
-                    reconcileVideoDuration(el.duration);
-                  }
-                }}
-                onSeeked={() => setHasFrame(true)}
-                onTimeUpdate={onTimeUpdate}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => {
-                  /* only sync if user paused via element; timeline drives pause */
-                }}
-                onError={() =>
-                  setNativeError(
-                    "This browser cannot decode that video. Export as H.264 MP4, or record with the webcam option.",
-                  )
-                }
-                onClick={togglePlay}
-              />
+                  onClick={togglePlay}
+                />
 
-              {!hasFrame && !nativeError ? (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/80">
-                  <p className="text-lg font-semibold text-white">
-                    Loading video preview…
-                  </p>
-                </div>
-              ) : null}
+                {!hasFrame && !nativeError ? (
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/80">
+                    <p className="text-lg font-semibold text-white">
+                      Loading video preview…
+                    </p>
+                  </div>
+                ) : null}
 
-              {nativeError ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/90 px-6 text-center">
-                  <p className="max-w-lg text-lg font-semibold text-white">
-                    {nativeError}
-                  </p>
-                </div>
-              ) : null}
+                {nativeError ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/90 px-6 text-center">
+                    <p className="max-w-lg text-lg font-semibold text-white">
+                      {nativeError}
+                    </p>
+                  </div>
+                ) : null}
 
-              {/* Team photo PIP overlays */}
-              {activePhotos.map((photo) => {
-                if (!photo.url) return null;
-                const labelLines = [photo.title, photo.department]
-                  .filter(Boolean)
-                  .join(" · ");
-                return (
-                  <div
-                    key={photo.id}
-                    className="pointer-events-none absolute inset-0"
-                  >
+                {/* Team photo PIP overlays */}
+                {activePhotos.map((photo) => {
+                  if (!photo.url) return null;
+                  const labelLines = [photo.title, photo.department]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return (
                     <div
-                      className="absolute overflow-hidden"
-                      style={{
-                        left: `${layout.xPercent}%`,
-                        top: `${layout.yPercent}%`,
-                        width: `${layout.widthPercent}%`,
-                        height: `${layout.heightPercent}%`,
-                        borderRadius: VIDEO_TEMPLATE.pip.borderRadiusPx,
-                        border: `${VIDEO_TEMPLATE.pip.borderWidthPx}px solid ${VIDEO_TEMPLATE.pip.borderColor}`,
-                        boxShadow: VIDEO_TEMPLATE.pip.shadow,
-                        backgroundColor: "#111",
-                      }}
+                      key={photo.id}
+                      className="pointer-events-none absolute inset-0"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={photo.url}
-                        alt={photo.name || "Teammate"}
-                        className="h-full w-full object-cover object-[center_22%]"
-                      />
-                    </div>
-                    {(photo.name || labelLines) && (
                       <div
-                        className="absolute box-border"
+                        className="absolute overflow-hidden"
                         style={{
                           left: `${layout.xPercent}%`,
-                          top: `calc(${layout.yPercent}% + ${layout.heightPercent}% + ${VIDEO_TEMPLATE.pip.label.belowGapPx}px)`,
+                          top: `${layout.yPercent}%`,
                           width: `${layout.widthPercent}%`,
-                          background: VIDEO_TEMPLATE.pip.label.background,
-                          color: VIDEO_TEMPLATE.pip.label.textColor,
-                          padding: `${VIDEO_TEMPLATE.pip.label.paddingY}px ${VIDEO_TEMPLATE.pip.label.paddingX}px`,
-                          borderRadius: VIDEO_TEMPLATE.pip.label.borderRadiusPx,
+                          height: `${layout.heightPercent}%`,
+                          borderRadius: VIDEO_TEMPLATE.pip.borderRadiusPx,
+                          border: `${VIDEO_TEMPLATE.pip.borderWidthPx}px solid ${VIDEO_TEMPLATE.pip.borderColor}`,
+                          boxShadow: VIDEO_TEMPLATE.pip.shadow,
+                          backgroundColor: "#111",
                         }}
                       >
-                        {photo.name ? (
-                          <div
-                            style={{
-                              fontSize: Math.max(
-                                12,
-                                VIDEO_TEMPLATE.pip.label.nameSizePx * 0.45,
-                              ),
-                              fontWeight: VIDEO_TEMPLATE.pip.label.nameWeight,
-                              lineHeight: 1.2,
-                            }}
-                          >
-                            {photo.name}
-                          </div>
-                        ) : null}
-                        {labelLines ? (
-                          <div
-                            style={{
-                              marginTop: 2,
-                              fontSize: Math.max(
-                                11,
-                                VIDEO_TEMPLATE.pip.label.titleSizePx * 0.45,
-                              ),
-                              fontWeight: VIDEO_TEMPLATE.pip.label.titleWeight,
-                              opacity: 0.92,
-                              lineHeight: 1.25,
-                            }}
-                          >
-                            {labelLines}
-                          </div>
-                        ) : null}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={photo.url}
+                          alt={photo.name || "Teammate"}
+                          className="h-full w-full object-cover object-[center_22%]"
+                        />
                       </div>
+                      {(photo.name || labelLines) && (
+                        <div
+                          className="absolute box-border"
+                          style={{
+                            left: `${layout.xPercent}%`,
+                            top: `calc(${layout.yPercent}% + ${layout.heightPercent}% + ${VIDEO_TEMPLATE.pip.label.belowGapPx}px)`,
+                            width: `${layout.widthPercent}%`,
+                            background: VIDEO_TEMPLATE.pip.label.background,
+                            color: VIDEO_TEMPLATE.pip.label.textColor,
+                            padding: `${VIDEO_TEMPLATE.pip.label.paddingY}px ${VIDEO_TEMPLATE.pip.label.paddingX}px`,
+                            borderRadius:
+                              VIDEO_TEMPLATE.pip.label.borderRadiusPx,
+                          }}
+                        >
+                          {photo.name ? (
+                            <div
+                              style={{
+                                fontSize: Math.max(
+                                  12,
+                                  VIDEO_TEMPLATE.pip.label.nameSizePx * 0.45,
+                                ),
+                                fontWeight: VIDEO_TEMPLATE.pip.label.nameWeight,
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              {photo.name}
+                            </div>
+                          ) : null}
+                          {labelLines ? (
+                            <div
+                              style={{
+                                marginTop: 2,
+                                fontSize: Math.max(
+                                  11,
+                                  VIDEO_TEMPLATE.pip.label.titleSizePx * 0.45,
+                                ),
+                                fontWeight:
+                                  VIDEO_TEMPLATE.pip.label.titleWeight,
+                                opacity: 0.92,
+                                lineHeight: 1.25,
+                              }}
+                            >
+                              {labelLines}
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Optional 1s opener thumbnail (letterbox on portrait canvas). */}
+                {showIntro && introThumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={introThumbnailUrl}
+                    alt="Team thumbnail opener"
+                    className={clsx(
+                      "pointer-events-none absolute inset-0 h-full w-full bg-[var(--yellow)]",
+                      videoOrientation === "portrait"
+                        ? "object-contain"
+                        : "object-cover",
                     )}
-                  </div>
-                );
-              })}
-
-              {/* Optional 1s opener thumbnail (letterbox on portrait canvas). */}
-              {showIntro && introThumbnailUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={introThumbnailUrl}
-                  alt="Team thumbnail opener"
-                  className={clsx(
-                    "pointer-events-none absolute inset-0 h-full w-full bg-[var(--yellow)]",
-                    videoOrientation === "portrait"
-                      ? "object-contain"
-                      : "object-cover",
-                  )}
-                />
-              ) : null}
-
-              <div
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-1.5"
-                style={{
-                  background: `linear-gradient(90deg, ${VIDEO_TEMPLATE.branding.primary} 0%, ${VIDEO_TEMPLATE.branding.accent} 100%)`,
-                }}
-              />
-            </>
-          ) : (
-            <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#ed2024_0%,#000000_55%,#997b1d_100%)] px-6 text-center">
-              <div>
-                <p className="font-display text-4xl tracking-wide text-white">
-                  Your preview will show here
-                </p>
-                <p className="mt-3 text-lg text-white">
-                  First, upload a video in Step 1.
-                </p>
+                  />
+                ) : null}
+              </>
+            ) : (
+              <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#ed2024_0%,#000000_55%,#997b1d_100%)] px-6 text-center">
+                <div>
+                  <p className="font-display text-4xl tracking-wide text-white">
+                    Your preview will show here
+                  </p>
+                  <p className="mt-3 text-lg text-white">
+                    First, upload a video in Step 1.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+
+        {video ? <VideoFilmstripBar /> : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={togglePlay}
-          disabled={!video}
-          className="btn-primary min-w-[11rem] text-xl"
-        >
-          {isPlaying ? (
-            <>
-              <Pause className="h-6 w-6" /> Pause
-            </>
-          ) : (
-            <>
-              <Play className="h-6 w-6 fill-current" /> Play
-            </>
-          )}
-        </button>
-        <HelpTip title="Play and Pause">
-          <p>
-            <strong>Play</strong> starts the preview.
-          </p>
-          <p>
-            <strong>Pause</strong> stops it so you can look at one moment.
-          </p>
-        </HelpTip>
         {musicEnabled && musicSrc ? (
           <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-2 text-[13px] font-bold text-[var(--ink)]">
             Music {Math.round(musicVolume * 100)}%
@@ -532,16 +508,17 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         >
           <Maximize2 className="h-5 w-5" /> Full screen
         </button>
-        <HelpTip title="Full screen">
-          <p>Makes the preview fill your screen so it is easier to see.</p>
+        <HelpTip title="Scrub, trim, and full screen">
           <p>
-            Press Escape on a keyboard, or use your device’s back control, to
-            exit.
+            Use the dark bar under the video to play, scrub, and trim — drag the
+            white edges to shorten the start or end, and drag the filmstrip to
+            jump.
+          </p>
+          <p>
+            Full screen makes the preview fill your screen. Press Escape or use
+            your device’s back control to exit.
           </p>
         </HelpTip>
-        <div className="ml-auto rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-3 py-2 text-lg font-bold text-[var(--ink)]">
-          {formatClock(currentTime)} / {formatClock(outputDuration)}
-        </div>
       </div>
     </div>
   );

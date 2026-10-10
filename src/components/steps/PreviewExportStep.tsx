@@ -163,8 +163,9 @@ export function PreviewExportStep({
         </div>
         <HelpTip title="What Do I Do On This Page?" size="lg">
           <p>
-            Start with the <strong>video preview and timeline</strong> right
-            under it — trim your talking video and move photo bars there.
+            Start with the <strong>video preview</strong>. The dark bar right
+            under it trims and scrubs your talking video. Use the timeline below
+            for teammate photo bars.
           </p>
           <p>
             Teammate photos are timed to when their name appears in your script.
@@ -175,8 +176,8 @@ export function PreviewExportStep({
 
       <VideoOrientationPicker compact />
 
-      {/* Preview + timeline — frame shape follows Video Format (desktop + mobile). */}
-      <section className="section-card space-y-2 bg-white p-3 md:p-4">
+      {/* Preview (filmstrip flush under video) + photo timeline. */}
+      <section className="section-card space-y-4 bg-white p-3 md:p-4">
         <VideoPreview />
         <Timeline />
       </section>

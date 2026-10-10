@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Pause, Play } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { VIDEO_TEMPLATE } from "@/lib/template";
 import {
@@ -34,7 +33,6 @@ export function Timeline() {
     trimEnd,
     photos,
     currentTime,
-    isPlaying,
     outputDuration,
     setCurrentTime,
     setIsPlaying,
@@ -51,7 +49,6 @@ export function Timeline() {
     () => sortPhotosByStart(filledTeamPhotos(photos)),
     [photos],
   );
-  const trimOrigin = useRef({ start: 0, end: 0 });
   const scrubbingRef = useRef(false);
   const [dragPhotoId, setDragPhotoId] = useState<string | null>(null);
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
@@ -124,18 +121,6 @@ export function Timeline() {
     window.addEventListener("pointerup", onUp);
   };
 
-  const togglePlay = () => {
-    if (!video) return;
-    if (isPlaying) {
-      setIsPlaying(false);
-      return;
-    }
-    if (currentTime >= outputDuration - 0.05) {
-      setCurrentTime(0);
-    }
-    setIsPlaying(true);
-  };
-
   if (!video) {
     return (
       <div className="rounded-[var(--radius-md)] border border-dashed border-[var(--ink)] bg-[var(--panel-soft)] px-4 py-8 text-center text-lg text-[var(--muted)]">
@@ -148,8 +133,6 @@ export function Timeline() {
     trackWidth - 8,
     Math.max(sourceDuration, 1) * pxPerSecond + TIMELINE_END_PAD_PX,
   );
-  const keptLeft = trimStart * pxPerSecond;
-  const keptWidth = Math.max(40, outputDuration * pxPerSecond);
   const playheadLeft = (trimStart + currentTime) * pxPerSecond;
   const cutStartSec = roundToSecond(trimStart);
   const cutEndSec = roundToSecond(Math.max(0, sourceDuration - trimEnd));
@@ -161,21 +144,19 @@ export function Timeline() {
 
   return (
     <div className="space-y-2">
-      {/* Compact bar — tracks sit directly under the video like an NLE. */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-2">
         <div className="flex items-center gap-2">
           <h3 className="text-base font-semibold tracking-tight text-[var(--ink)] md:text-lg">
-            Timeline
+            Photo Timeline
           </h3>
           <HelpTip title="How To Use The Timeline">
             <p>
-              <strong>Track 1 — Your Video:</strong> the black bar is your
-              recording. Drag the <strong>red handles</strong> on the ends (or
-              use Cut Start / Cut End) to shorten the beginning or end. Gray
-              areas are cut out.
+              <strong>Trim your video</strong> with the dark filmstrip bar
+              directly under the preview — drag the white edges or use Cut Start
+              / Cut End below.
             </p>
             <p>
-              <strong>Track 2 — Team Photos:</strong> each colored bar is one
+              <strong>Team Photos:</strong> each colored bar is one
               teammate&apos;s small corner photo. Bars start near when that
               person&apos;s name is said in your script. Drag the middle of a
               bar to move when the photo shows. Drag the edges to change how
@@ -189,34 +170,15 @@ export function Timeline() {
             Finished {formatClock(outputDuration)}
           </span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={togglePlay}
-            className="btn-primary !min-h-0 !px-3 !py-1.5 text-[13px]"
-            aria-label={isPlaying ? "Pause preview" : "Play preview"}
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="h-4 w-4" /> Click Here to Pause
-              </>
-            ) : (
-              <>
-                <Play className="h-4 w-4 fill-current" /> Click Here to Play
-              </>
-            )}
-          </button>
-          <div className="rounded-md border border-[var(--ink)] bg-white px-2.5 py-1 text-[13px] font-bold tabular-nums text-[var(--ink)]">
-            {formatClock(currentTime)} / {formatClock(outputDuration)}
-          </div>
+        <div className="rounded-md border border-[var(--ink)] bg-white px-2.5 py-1 text-[13px] font-bold tabular-nums text-[var(--ink)]">
+          {formatClock(currentTime)} / {formatClock(outputDuration)}
         </div>
       </div>
 
-      {/* Cut controls + tracks — immediately under the video playback. */}
       <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-2.5 md:p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-            Track 1 · Your Video (Trim)
+            Fine-tune trim (±1s)
           </div>
           <div className="flex flex-wrap gap-1.5">
             <button
@@ -226,7 +188,7 @@ export function Timeline() {
               disabled={outputDuration <= 3}
               title="Remove 1 second from the beginning"
             >
-              Click Here to Cut Start +1s
+              Cut Start +1s
             </button>
             <button
               type="button"
@@ -235,7 +197,7 @@ export function Timeline() {
               disabled={trimStart <= 0}
               title="Put 1 second back at the beginning"
             >
-              Click Here to Undo Start −1s
+              Undo Start −1s
             </button>
             <button
               type="button"
@@ -244,7 +206,7 @@ export function Timeline() {
               disabled={outputDuration <= 3}
               title="Remove 1 second from the end"
             >
-              Click Here to Cut End +1s
+              Cut End +1s
             </button>
             <button
               type="button"
@@ -253,10 +215,22 @@ export function Timeline() {
               disabled={trimEnd >= sourceDuration}
               title="Put 1 second back at the end"
             >
-              Click Here to Undo End −1s
+              Undo End −1s
             </button>
           </div>
         </div>
+        {(cutStartSec > 0 || cutEndSec > 0) && (
+          <p className="text-[12px] font-medium text-[var(--muted)]">
+            Keeping {formatClock(outputDuration)} of{" "}
+            {formatClock(sourceDuration)}
+            {cutStartSec > 0
+              ? ` · cut ${formatClock(cutStartSec)} from start`
+              : ""}
+            {cutEndSec > 0
+              ? ` · cut ${formatClock(cutEndSec)} from end`
+              : ""}
+          </p>
+        )}
 
       <div
         ref={measure}
@@ -290,83 +264,9 @@ export function Timeline() {
             ))}
           </div>
 
-          <div className="mb-3">
-            <div
-              className="relative h-16 touch-none rounded-lg bg-[#d9d4c4]"
-              style={{ width: Math.max(sourceDuration, 1) * pxPerSecond }}
-              onPointerDown={(e) => {
-                if ((e.target as HTMLElement).dataset.handle) return;
-                beginScrub(e);
-              }}
-            >
-              {/* Discarded regions */}
-              {cutStartSec > 0 ? (
-                <div
-                  className="pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center bg-black/25"
-                  style={{ width: keptLeft }}
-                >
-                  <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-white/90">
-                    Cut {formatClock(cutStartSec)}
-                  </span>
-                </div>
-              ) : null}
-              {cutEndSec > 0 ? (
-                <div
-                  className="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center bg-black/25"
-                  style={{ width: cutEndSec * pxPerSecond }}
-                >
-                  <span className="px-1 text-[10px] font-bold uppercase tracking-wide text-white/90">
-                    Cut {formatClock(cutEndSec)}
-                  </span>
-                </div>
-              ) : null}
-
-              {/* Kept selection — moves when you drag the red handles */}
-              <div
-                className="absolute top-1 bottom-1 rounded-md bg-[var(--track-video)] text-white shadow-md ring-2 ring-[var(--primary)]"
-                style={{ left: keptLeft, width: keptWidth }}
-              >
-                <div className="flex h-full items-center justify-between gap-2 px-4 text-xs font-medium">
-                  <span className="min-w-0 truncate">
-                    Keep {formatTime(trimStart)}–{formatTime(trimEnd)}
-                  </span>
-                  <span className="shrink-0 font-bold text-[var(--yellow)]">
-                    {formatClock(outputDuration)}
-                  </span>
-                </div>
-                <EdgeDrag
-                  side="left"
-                  onPointerDownCapture={() => {
-                    trimOrigin.current = { start: trimStart, end: trimEnd };
-                  }}
-                  onDeltaSeconds={(delta) => {
-                    setTrim("start", trimOrigin.current.start + delta);
-                  }}
-                  pxPerSecond={pxPerSecond}
-                />
-                <EdgeDrag
-                  side="right"
-                  onPointerDownCapture={() => {
-                    trimOrigin.current = { start: trimStart, end: trimEnd };
-                  }}
-                  onDeltaSeconds={(delta) => {
-                    setTrim("end", trimOrigin.current.end + delta);
-                  }}
-                  pxPerSecond={pxPerSecond}
-                />
-              </div>
-            </div>
-            <p className="mt-1.5 text-[12px] font-medium text-[var(--muted)]">
-              Original {formatClock(sourceDuration)}
-              {cutStartSec > 0 || cutEndSec > 0
-                ? ` · keeping ${formatClock(outputDuration)} (cut ${formatClock(cutStartSec)} from start, ${formatClock(cutEndSec)} from end)`
-                : " · drag the red handles inward to shorten"}
-            </p>
-          </div>
-
           <div>
             <div className="mb-1 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-              Track 2 · Team Photos
+              Team Photos
             </div>
             <div
               className="relative h-16 touch-none rounded-lg bg-black/5"
@@ -462,57 +362,6 @@ export function Timeline() {
         <strong className="text-[var(--ink)]">?</strong> above for more help.
       </p>
     </div>
-  );
-}
-
-function EdgeDrag({
-  side,
-  onDeltaSeconds,
-  onPointerDownCapture,
-  pxPerSecond,
-}: {
-  side: "left" | "right";
-  onDeltaSeconds: (delta: number) => void;
-  onPointerDownCapture: () => void;
-  pxPerSecond: number;
-}) {
-  return (
-    <button
-      type="button"
-      data-handle={side}
-      aria-label={side === "left" ? "Trim start" : "Trim end"}
-      title={
-        side === "left"
-          ? "Drag to cut or restore time at the start"
-          : "Drag to cut or restore time at the end"
-      }
-      className={clsx(
-        "absolute top-0 z-40 h-full w-7 cursor-ew-resize touch-none bg-[var(--primary)] shadow-md",
-        side === "left"
-          ? "left-0 rounded-l-md"
-          : "right-0 rounded-r-md",
-      )}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onPointerDownCapture();
-        const originX = e.clientX;
-        const target = e.currentTarget;
-        target.setPointerCapture(e.pointerId);
-        const onMove = (ev: PointerEvent) => {
-          onDeltaSeconds((ev.clientX - originX) / pxPerSecond);
-        };
-        const onUp = () => {
-          target.releasePointerCapture(e.pointerId);
-          window.removeEventListener("pointermove", onMove);
-          window.removeEventListener("pointerup", onUp);
-        };
-        window.addEventListener("pointermove", onMove);
-        window.addEventListener("pointerup", onUp);
-      }}
-    >
-      <span className="pointer-events-none absolute inset-y-2 left-1/2 w-0.5 -translate-x-1/2 rounded bg-white/80" />
-    </button>
   );
 }
 
