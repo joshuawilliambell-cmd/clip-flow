@@ -58,7 +58,8 @@ function StudioShell() {
               </p>
               <p>
                 You record yourself (or upload a clip). If you add teammates,
-                we can place their photos in the corner of the video for you.
+                we can place their photos in the corner and help you build a
+                Love&apos;s Team thumbnail card.
               </p>
               <p>
                 Then trim, add quiet music if you want, and download an MP4 to
