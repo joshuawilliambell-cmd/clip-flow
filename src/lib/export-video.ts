@@ -1,6 +1,6 @@
 import { renderMediaOnWeb } from "@remotion/web-renderer";
 import { IntroductionVideo } from "@/remotion/IntroductionVideo";
-import { VIDEO_TEMPLATE } from "@/lib/template";
+import { getCanvasSize, VIDEO_TEMPLATE } from "@/lib/template";
 import type { CompositionProps } from "@/lib/types";
 
 export type ExportProgress = {
@@ -18,14 +18,15 @@ export async function exportIntroductionVideo(
     1,
     Math.round(props.durationInSeconds * VIDEO_TEMPLATE.fps),
   );
+  const canvas = getCanvasSize(props.orientation);
 
   const result = await renderMediaOnWeb({
     composition: {
       component: IntroductionVideo,
       durationInFrames,
       fps: VIDEO_TEMPLATE.fps,
-      width: VIDEO_TEMPLATE.width,
-      height: VIDEO_TEMPLATE.height,
+      width: canvas.width,
+      height: canvas.height,
       id: "LovesTeamIntro",
       defaultProps: props,
     },

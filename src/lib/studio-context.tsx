@@ -14,6 +14,7 @@ import {
   VIDEO_TEMPLATE,
   type PipSide,
   type TeamMemberCount,
+  type VideoOrientation,
 } from "@/lib/template";
 import {
   clampTeleprompterSpeed,
@@ -100,6 +101,8 @@ type StudioContextValue = {
   videoVolume: number;
   musicTrackId: string;
   pipSide: PipSide;
+  /** Landscape 16:9 (default) or portrait 9:16 — PIP + export canvas follow this. */
+  videoOrientation: VideoOrientation;
   introThumbnailUrl: string | null;
   introThumbnailEnabled: boolean;
   currentTime: number;
@@ -149,6 +152,7 @@ type StudioContextValue = {
   setVideoVolume: (volume: number) => void;
   setMusicTrackId: (id: string) => void;
   setPipSide: (side: PipSide) => void;
+  setVideoOrientation: (orientation: VideoOrientation) => void;
   setIntroThumbnail: (url: string, enabled?: boolean) => void;
   setIntroThumbnailEnabled: (enabled: boolean) => void;
   clearIntroThumbnail: () => void;
@@ -340,6 +344,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [musicTrackId, setMusicTrackId] = useState<string>(MUSIC_TRACKS[0].id);
   const [pipSide, setPipSide] = useState<PipSide>(
     VIDEO_TEMPLATE.pip.defaultSide,
+  );
+  const [videoOrientation, setVideoOrientation] = useState<VideoOrientation>(
+    VIDEO_TEMPLATE.defaultOrientation,
   );
   const [introThumbnailUrl, setIntroThumbnailUrl] = useState<string | null>(
     null,
@@ -555,6 +562,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setVideoVolume(VIDEO_TEMPLATE.defaultVideoVolume);
     setMusicTrackId(MUSIC_TRACKS[0].id);
     setPipSide(VIDEO_TEMPLATE.pip.defaultSide);
+    setVideoOrientation(VIDEO_TEMPLATE.defaultOrientation);
     setIntroThumbnailUrl((prev) => {
       if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
       return null;
@@ -955,6 +963,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         durationSeconds: p.durationSeconds,
       })),
       pipSide,
+      orientation: videoOrientation,
       introThumbnailSrc: introThumbnailEnabled ? introThumbnailUrl : null,
       introThumbnailEnabled,
       videoVolume,
@@ -972,6 +981,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     videoVolume,
     musicTrackId,
     pipSide,
+    videoOrientation,
     introThumbnailUrl,
     introThumbnailEnabled,
   ]);
@@ -1011,6 +1021,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       videoVolume,
       musicTrackId,
       pipSide,
+      videoOrientation,
       introThumbnailUrl,
       introThumbnailEnabled,
       currentTime,
@@ -1042,6 +1053,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setVideoVolume,
       setMusicTrackId,
       setPipSide,
+      setVideoOrientation,
       setIntroThumbnail,
       setIntroThumbnailEnabled,
       clearIntroThumbnail,
@@ -1072,6 +1084,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       videoVolume,
       musicTrackId,
       pipSide,
+      videoOrientation,
       introThumbnailUrl,
       introThumbnailEnabled,
       currentTime,

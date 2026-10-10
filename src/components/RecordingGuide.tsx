@@ -66,9 +66,9 @@ const DEVICES: DeviceGuide[] = [
     shortLabel: "Phone Camera",
     icon: <Smartphone className="h-6 w-6" aria-hidden />,
     summary:
-      "Optional path. Webcam + teleprompter in this studio is usually easier. If you use a phone: hold it sideways (landscape), prop it steady, face the light, and record in a quiet room.",
+      "Optional path. Webcam + teleprompter in this studio is usually easier. If you use a phone: match the Video Format you picked (landscape or portrait), prop it steady, face the light, and record in a quiet room.",
     camera: [
-      "Turn the phone sideways (landscape).",
+      "Match Video Format: sideways for landscape, upright for portrait.",
       "Prop it at eye level so it does not shake.",
       "Frame from about waist up to the top of your head.",
     ],
@@ -82,7 +82,7 @@ const DEVICES: DeviceGuide[] = [
     ],
     recordSteps: [
       "Open the Camera app and choose Video.",
-      "Record in landscape, then stop when finished.",
+      "Record in the same shape as Video Format, then stop when finished.",
     ],
     getIntoTool: [
       "Send the file to your computer (AirDrop, email, Drive, etc.).",
@@ -97,7 +97,7 @@ const DEVICES: DeviceGuide[] = [
     summary:
       "Use a camcorder or DSLR on a tripod at eye level in a quiet room.",
     camera: [
-      "Tripod at eye level, landscape 16:9 if available.",
+      "Tripod at eye level; match Video Format (16:9 landscape or 9:16 portrait).",
       "Frame mid-chest or waist up with a little space above your head.",
     ],
     lighting: ["Face soft light (window or lamp)."],

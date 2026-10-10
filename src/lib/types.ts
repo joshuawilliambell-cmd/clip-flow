@@ -32,7 +32,7 @@ export type MusicTrack = {
 
 export type StudioStep = 1 | 2;
 
-import type { PipSide } from "@/lib/template";
+import type { PipSide, VideoOrientation } from "@/lib/template";
 
 export type CompositionProps = {
   videoSrc: string;
@@ -48,6 +48,8 @@ export type CompositionProps = {
     durationSeconds: number;
   }>;
   pipSide: PipSide;
+  /** Landscape 16:9 or portrait 9:16 — drives canvas size and PIP %. */
+  orientation: VideoOrientation;
   /** Optional Love's Team thumbnail shown for the first second. */
   introThumbnailSrc: string | null;
   introThumbnailEnabled: boolean;

@@ -13,6 +13,7 @@ import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
 import { MicrophoneTest } from "@/components/MicrophoneTest";
 import { PanelSteps } from "@/components/PanelStep";
+import { VideoOrientationPicker } from "@/components/VideoOrientationPicker";
 
 export function VideoUploadStep() {
   const {
@@ -107,6 +108,8 @@ export function VideoUploadStep() {
       </section>
 
       <RecordingGuide />
+
+      <VideoOrientationPicker />
 
       {!video ? (
         <WebcamRecorder

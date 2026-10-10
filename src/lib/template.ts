@@ -6,16 +6,52 @@
 
 export type PipSide = "left" | "right";
 
+/** Finished video frame shape — PIP geometry is keyed off this. */
+export type VideoOrientation = "landscape" | "portrait";
+
 /** How many teammates the employee plans to introduce (drives slots, thumbnail, script). */
 export type TeamMemberCount = 0 | 1 | 2 | 3 | 4;
 
 export const TEAM_MEMBER_COUNT_OPTIONS: TeamMemberCount[] = [0, 1, 2, 3, 4];
 
+/** Canvas size for each orientation (export + Remotion metadata). */
+export const ORIENTATION_CANVAS = {
+  landscape: { width: 1920, height: 1080 },
+  portrait: { width: 1080, height: 1920 },
+} as const;
+
+/**
+ * Fixed PIP region per canvas.
+ * Landscape: ~3:4 photo on 16:9 (~292×389 px on 1920×1080).
+ * Portrait: same absolute photo size on 9:16 (~292×389 px on 1080×1920).
+ */
+export const PIP_BY_ORIENTATION = {
+  landscape: {
+    paddingTopPercent: 6,
+    paddingSidePercent: 5,
+    widthPercent: 15.2,
+    heightPercent: 36,
+  },
+  portrait: {
+    paddingTopPercent: 5,
+    paddingSidePercent: 5,
+    widthPercent: 27,
+    heightPercent: 20.3,
+  },
+} as const;
+
+export function getCanvasSize(
+  orientation: VideoOrientation = "landscape",
+): { width: number; height: number } {
+  return ORIENTATION_CANVAS[orientation];
+}
+
 export const VIDEO_TEMPLATE = {
   id: "loves-team-intro-v1",
   name: "Love's Team Introduction",
-  width: 1920,
-  height: 1080,
+  width: ORIENTATION_CANVAS.landscape.width,
+  height: ORIENTATION_CANVAS.landscape.height,
+  defaultOrientation: "landscape" as VideoOrientation,
   fps: 30,
   /**
    * Preferred Allego intro length (guidance + teleprompter pacing default).
@@ -73,18 +109,12 @@ export const VIDEO_TEMPLATE = {
     ],
   },
   /**
-   * Fixed picture-in-picture region on a 16:9 canvas.
+   * Fixed picture-in-picture region — percentages come from PIP_BY_ORIENTATION.
    * Photos are always portrait (taller than wide) with safe-zone padding.
    * Users may choose left or right; they cannot drag/scale the frame.
    */
   pip: {
-    /** Top inset from frame edge (~matches Allego-style screenshot). */
-    paddingTopPercent: 6,
-    /** Outer side inset (left edge when side=left, right edge when side=right). */
-    paddingSidePercent: 5,
-    /** Portrait box: ~3:4 on 1920×1080 (width ≈ 15.2%, height 36%). */
-    widthPercent: 15.2,
-    heightPercent: 36,
+    ...PIP_BY_ORIENTATION.landscape,
     defaultSide: "left" as PipSide,
     borderRadiusPx: 8,
     borderWidthPx: 3,
@@ -117,16 +147,24 @@ export const VIDEO_TEMPLATE = {
   },
 };
 
-/** Resolve absolute PIP box for a chosen side on the 16:9 canvas. */
-export function getPipLayout(side: PipSide = VIDEO_TEMPLATE.pip.defaultSide) {
-  const { paddingTopPercent, paddingSidePercent, widthPercent, heightPercent } =
-    VIDEO_TEMPLATE.pip;
+/** Resolve absolute PIP box for a chosen side on the active canvas. */
+export function getPipLayout(
+  side: PipSide = VIDEO_TEMPLATE.pip.defaultSide,
+  orientation: VideoOrientation = VIDEO_TEMPLATE.defaultOrientation,
+) {
+  const {
+    paddingTopPercent,
+    paddingSidePercent,
+    widthPercent,
+    heightPercent,
+  } = PIP_BY_ORIENTATION[orientation];
   const xPercent =
     side === "left"
       ? paddingSidePercent
       : 100 - paddingSidePercent - widthPercent;
   return {
     side,
+    orientation,
     xPercent,
     yPercent: paddingTopPercent,
     widthPercent,

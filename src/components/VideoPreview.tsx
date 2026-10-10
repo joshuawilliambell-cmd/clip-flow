@@ -9,6 +9,7 @@ import {
 } from "react";
 import { Maximize2, Pause, Play, RotateCcw } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
+import { clsx } from "clsx";
 import { getPipLayout, VIDEO_TEMPLATE } from "@/lib/template";
 import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { formatClock } from "@/lib/timeline";
@@ -30,6 +31,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     setIsPlaying,
     photos,
     pipSide,
+    videoOrientation,
     introThumbnailUrl,
     introThumbnailEnabled,
     videoVolume,
@@ -47,7 +49,10 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
   const [hasFrame, setHasFrame] = useState(false);
 
   const musicSrc = compositionProps?.musicSrc ?? null;
-  const layout = useMemo(() => getPipLayout(pipSide), [pipSide]);
+  const layout = useMemo(
+    () => getPipLayout(pipSide, videoOrientation),
+    [pipSide, videoOrientation],
+  );
   const activePhotos = useMemo(() => {
     return filledTeamPhotos(photos).filter(
       (p) =>
@@ -279,7 +284,14 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         ref={shellRef}
         className="relative overflow-hidden section-card bg-black"
       >
-        <div className={compact ? "aspect-video" : "aspect-video"}>
+        <div
+          className={clsx(
+            videoOrientation === "portrait"
+              ? "mx-auto aspect-[9/16] w-full max-w-md"
+              : "aspect-video",
+            compact && videoOrientation === "portrait" && "max-w-xs",
+          )}
+        >
           {video ? (
             <>
               {/* eslint-disable-next-line jsx-a11y/media-has-caption */}

@@ -1,5 +1,10 @@
 import { AbsoluteFill, Img, interpolate, useCurrentFrame } from "remotion";
-import { getPipLayout, VIDEO_TEMPLATE, type PipSide } from "@/lib/template";
+import {
+  getPipLayout,
+  VIDEO_TEMPLATE,
+  type PipSide,
+  type VideoOrientation,
+} from "@/lib/template";
 
 type PhotoOverlayProps = {
   src: string;
@@ -9,6 +14,7 @@ type PhotoOverlayProps = {
   startFrame: number;
   durationFrames: number;
   pipSide?: PipSide;
+  orientation?: VideoOrientation;
 };
 
 export function PhotoOverlay({
@@ -19,10 +25,11 @@ export function PhotoOverlay({
   startFrame,
   durationFrames,
   pipSide = VIDEO_TEMPLATE.pip.defaultSide,
+  orientation = VIDEO_TEMPLATE.defaultOrientation,
 }: PhotoOverlayProps) {
   const frame = useCurrentFrame();
   const { fps, fadeInSeconds, fadeOutSeconds, pip } = VIDEO_TEMPLATE;
-  const layout = getPipLayout(pipSide);
+  const layout = getPipLayout(pipSide, orientation);
   const fadeIn = Math.max(1, Math.round(fadeInSeconds * fps));
   const fadeOut = Math.max(1, Math.round(fadeOutSeconds * fps));
   const local = frame - startFrame;

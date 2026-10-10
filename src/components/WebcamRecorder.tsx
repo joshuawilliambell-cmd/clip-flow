@@ -7,6 +7,7 @@ import { HelpTip } from "@/components/HelpTip";
 import { PanelSteps, StepCircle } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
 import { useIsLandscape, useIsMobile } from "@/hooks/useIsMobile";
+import { useStudio } from "@/lib/studio-context";
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
@@ -45,6 +46,8 @@ export function WebcamRecorder({
   onError,
   disabled,
 }: WebcamRecorderProps) {
+  const { videoOrientation } = useStudio();
+  const wantLandscape = videoOrientation === "landscape";
   const isMobile = useIsMobile();
   const isLandscape = useIsLandscape();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -130,7 +133,11 @@ export function WebcamRecorder({
   const live = phase === "preview" || phase === "recording";
 
   const mobileStudio = isMobile === true;
-  const mobilePortrait = mobileStudio && isLandscape === false;
+  /** Phone orientation does not match the chosen video format. */
+  const mobileOrientationMismatch =
+    mobileStudio &&
+    isLandscape !== null &&
+    wantLandscape !== isLandscape;
 
   // Mobile fullscreen selfie studio — lock page scroll while active.
   useEffect(() => {
@@ -166,14 +173,14 @@ export function WebcamRecorder({
     setMimeType(mime || "video/webm");
 
     try {
-      // Prefer a landscape 16:9 capture (matches the finished video).
+      // Match the studio Video Format (landscape 16:9 or portrait 9:16).
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: {
           facingMode: "user",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          aspectRatio: { ideal: 16 / 9 },
+          width: { ideal: wantLandscape ? 1280 : 720 },
+          height: { ideal: wantLandscape ? 720 : 1280 },
+          aspectRatio: { ideal: wantLandscape ? 16 / 9 : 9 / 16 },
         },
       });
       streamRef.current = stream;
@@ -469,15 +476,19 @@ export function WebcamRecorder({
                   "relative",
                   mobileStudio
                     ? "flex min-h-0 flex-1 items-center justify-center bg-black"
-                    : "aspect-video",
+                    : wantLandscape
+                      ? "aspect-video"
+                      : "mx-auto aspect-[9/16] max-h-[70vh] w-full max-w-md",
                 )}
               >
-                {/* Mobile: always frame the camera as landscape 16:9 (letterboxed). */}
+                {/* Frame the camera to the chosen format (letterboxed on mobile). */}
                 <div
                   className={clsx(
                     "relative overflow-hidden bg-black",
                     mobileStudio
-                      ? "aspect-video w-full max-h-full"
+                      ? wantLandscape
+                        ? "aspect-video w-full max-h-full"
+                        : "aspect-[9/16] h-full max-w-full"
                       : "h-full w-full",
                   )}
                 >
@@ -501,13 +512,25 @@ export function WebcamRecorder({
                     </div>
                   ) : (
                     <div className="absolute right-3 top-3 z-30 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
-                      Live preview · landscape 16:9
+                      Live preview ·{" "}
+                      {wantLandscape ? "landscape 16:9" : "portrait 9:16"}
                     </div>
                   )}
-                  {mobilePortrait ? (
+                  {mobileOrientationMismatch ? (
                     <div className="absolute inset-x-2 bottom-2 z-30 rounded-md border border-[var(--yellow)]/70 bg-black/80 px-2 py-1.5 text-center text-[11px] font-semibold leading-snug text-white">
-                      Turn your phone <strong className="text-[var(--yellow)]">sideways</strong>{" "}
-                      (landscape) for the best recording — same as the finished video.
+                      {wantLandscape ? (
+                        <>
+                          Turn your phone{" "}
+                          <strong className="text-[var(--yellow)]">sideways</strong>{" "}
+                          (landscape) — matches your Video Format.
+                        </>
+                      ) : (
+                        <>
+                          Hold your phone{" "}
+                          <strong className="text-[var(--yellow)]">upright</strong>{" "}
+                          (portrait) — matches your Video Format.
+                        </>
+                      )}
                     </div>
                   ) : null}
                 </div>
@@ -624,7 +647,11 @@ export function WebcamRecorder({
               src={reviewUrl}
               controls
               playsInline
-              className="aspect-video w-full"
+              className={
+                wantLandscape
+                  ? "aspect-video w-full"
+                  : "mx-auto aspect-[9/16] max-h-[70vh] w-full max-w-md"
+              }
             />
           </div>
           <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] border-2 border-[var(--ink)] bg-[var(--yellow)]/40 p-3 md:p-4">

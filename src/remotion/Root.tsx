@@ -3,7 +3,7 @@ import {
   defaultCompositionProps,
   IntroductionVideo,
 } from "@/remotion/IntroductionVideo";
-import { VIDEO_TEMPLATE } from "@/lib/template";
+import { getCanvasSize, VIDEO_TEMPLATE } from "@/lib/template";
 import type { CompositionProps } from "@/lib/types";
 
 export const INTRO_COMPOSITION_ID = "LovesTeamIntro";
@@ -26,11 +26,12 @@ export function RemotionRoot() {
           1,
           props.durationInSeconds || VIDEO_TEMPLATE.targetDurationSeconds,
         );
+        const canvas = getCanvasSize(props.orientation);
         return {
           durationInFrames: Math.round(durationInSeconds * VIDEO_TEMPLATE.fps),
           fps: VIDEO_TEMPLATE.fps,
-          width: VIDEO_TEMPLATE.width,
-          height: VIDEO_TEMPLATE.height,
+          width: canvas.width,
+          height: canvas.height,
         };
       }}
     />

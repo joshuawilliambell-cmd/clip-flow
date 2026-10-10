@@ -275,7 +275,8 @@ export function PreviewExportStep({
           <PanelSteps
             steps={[
               <>
-                Choose left or right for the small teammate photo in the corner.
+                Choose left or right for the small teammate photo — size follows
+                your landscape or portrait Video Format.
               </>,
               <>
                 On the timeline above, colored bars show when each face appears.
