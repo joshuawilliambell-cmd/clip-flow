@@ -50,27 +50,34 @@ function StudioShell() {
             </div>
           </div>
 
-          <div className="flex max-w-md items-start gap-2">
-            <p className="text-right text-[13px] font-semibold leading-snug tracking-tight text-[var(--ink)] md:text-[14px]">
-              Team intros &amp; thumbnails
-            </p>
+          <div className="flex shrink-0 items-start justify-end">
             <HelpTip title="What is this tool?" size="lg">
               <p>
-                This tool helps Love&apos;s employees introduce their team to
-                customers.
+                This tool helps Love&apos;s sales reps make a short video for
+                customers — without needing to be techy.
               </p>
               <p>
-                In Step 1, add teammates, optionally build a Love&apos;s Team
-                thumbnail opener, then record or upload your talking video.
+                You record yourself (or upload a clip). If you add teammates,
+                we can place their photos in the corner of the video for you.
               </p>
               <p>
-                In Step 2, trim the clip, place and time photos, add music, and
-                export your MP4.
+                Then trim, add quiet music if you want, and download an MP4 to
+                share.
               </p>
               <p>Tap any ? button anytime for help.</p>
             </HelpTip>
           </div>
         </div>
+
+        {step === 1 ? (
+          <div className="border-t border-black/15 px-4 py-3 md:px-6">
+            <p className="mx-auto max-w-6xl text-[15px] font-semibold leading-snug text-[var(--ink)] md:text-[16px]">
+              Make a short video for your customers the easy way. You talk on
+              camera — and if you want, we&apos;ll put teammate photos in the
+              corner for you.
+            </p>
+          </div>
+        ) : null}
 
         <div className="border-t border-black/20 bg-[var(--olive)]">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 md:px-6 md:text-xs">

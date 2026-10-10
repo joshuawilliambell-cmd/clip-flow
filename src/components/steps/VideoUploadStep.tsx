@@ -58,9 +58,9 @@ export function VideoUploadStep() {
         <div className="max-w-3xl">
           <h2 className="step-title">Step 1: Prepare Your Video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Fill in the blanks as you go. Each blank builds your talking script.
-            You can change any blank anytime. About 60 seconds is preferred;
-            longer videos (2+ minutes) are fine.
+            Fill in a few blanks, add teammates if you want, then record or
+            upload. We handle the hard parts — like placing photos in the
+            corner. About 60 seconds is preferred; longer is fine.
           </p>
         </div>
         <HelpTip title="What Do I Do On This Page?" size="lg">
