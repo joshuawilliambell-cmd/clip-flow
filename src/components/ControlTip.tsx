@@ -61,10 +61,16 @@ export function ControlTip({
         setOpen(false);
       }}
       onClick={(e) => {
-        // Tap on the wrapper (not only the button) can toggle on touch.
-        // Ignore if the click is on a nested interactive that handles itself —
-        // we still open so users see the tip when they press the control.
-        if (e.detail === 0) return; // keyboard "click" already covered by focus
+        // Don't steal clicks from nested buttons/inputs — those must keep
+        // working (e.g. Bigger/Smaller Text). Tip still opens on hover/focus.
+        const target = e.target;
+        if (
+          target instanceof Element &&
+          target.closest("button, a, input, textarea, select, label")
+        ) {
+          return;
+        }
+        if (e.detail === 0) return;
         setOpen(true);
       }}
     >

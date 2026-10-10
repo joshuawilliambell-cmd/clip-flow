@@ -276,7 +276,10 @@ export function Teleprompter({
               <ControlTip tip="Adds more space between lines so your eyes can move down the page more easily.">
                 <button
                   type="button"
-                  onClick={() => setLineRoomy(!lineRoomy)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLineRoomy(!lineRoomy);
+                  }}
                   className="rounded-full border border-[var(--ink)] bg-white px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]"
                 >
                   {lineRoomy
@@ -287,7 +290,11 @@ export function Teleprompter({
               <ControlTip tip="Makes the words larger or smaller. Pick what is easiest to read on your screen.">
                 <button
                   type="button"
-                  onClick={() => setFontLarge(!fontLarge)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFontLarge(!fontLarge);
+                  }}
+                  aria-pressed={fontLarge}
                   className="rounded-full border border-[var(--ink)] bg-white px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]"
                 >
                   {fontLarge

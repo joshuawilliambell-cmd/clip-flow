@@ -14,10 +14,10 @@ export const TELEPROMPTER_COLUMN_CLASS = "max-w-[28ch]";
  * feels the same when the user records.
  */
 export const TELEPROMPTER_TEXT_CLASS_LARGE =
-  "text-[1.35rem] md:text-[1.5rem] font-semibold leading-snug tracking-wide";
+  "text-[1.65rem] md:text-[1.85rem] font-semibold leading-snug tracking-wide";
 
 export const TELEPROMPTER_TEXT_CLASS_COMPACT =
-  "text-[1.15rem] md:text-[1.25rem] font-semibold leading-snug tracking-wide";
+  "text-[1.1rem] md:text-[1.2rem] font-semibold leading-snug tracking-wide";
 
 /** Phone studio: slightly smaller so at least two script lines stay in view. */
 export const TELEPROMPTER_TEXT_CLASS_MOBILE =

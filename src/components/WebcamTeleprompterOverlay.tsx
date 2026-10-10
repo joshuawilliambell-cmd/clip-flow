@@ -257,7 +257,11 @@ export function WebcamTeleprompterOverlay({
                 <ControlTip tip="Makes the words larger or smaller. Pick what is easiest to read on your screen.">
                   <button
                     type="button"
-                    onClick={() => setFontLarge(!fontLarge)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFontLarge(!fontLarge);
+                    }}
+                    aria-pressed={fontLarge}
                     className={clsx(
                       "rounded-full border px-3 py-1.5 text-[12px] font-bold",
                       "border-white/40 bg-black/50 text-white",
