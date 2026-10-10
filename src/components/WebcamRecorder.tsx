@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, Trash2, Check } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
-import { PanelSteps } from "@/components/PanelStep";
+import { PanelSteps, StepCircle } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
 import { formatClock } from "@/lib/timeline";
 
@@ -320,8 +320,9 @@ export function WebcamRecorder({
             lens — not left to right across the screen.
           </p>
           <p>
-            Scoot back so the camera sees from about your waist up to the top
-            of your head.
+            After the webcam is on: <strong>Step 1</strong> is Follow My Voice,
+            then <strong>Step 2</strong> is Start Recording when you are ready
+            for the real take.
           </p>
           <p>
             Script text is preview-only and is not saved into the video file.
@@ -334,15 +335,16 @@ export function WebcamRecorder({
         steps={[
           <>
             Place this browser window so the preview sits at the{" "}
-            <strong>top of your monitor</strong>, near the webcam.
+            <strong>top of your monitor</strong>, near the webcam. Scoot back —
+            frame from about your waist to the top of your head.
           </>,
           <>
-            <strong>Scoot back</strong> — frame from about your waist to the top
-            of your head so it does not look like you are reading a script.
+            Click <strong>Start Webcam</strong> and allow camera and microphone
+            when asked.
           </>,
           <>
-            Click <strong>Start Webcam</strong>, practice, then record. Allow
-            camera and microphone when asked.
+            On the teleprompter, do <strong>Step 1 — Follow My Voice</strong>,
+            then under the preview do <strong>Step 2 — Start Recording</strong>.
           </>,
         ]}
       />
@@ -369,11 +371,36 @@ export function WebcamRecorder({
 
       {live ? (
         <div className="mt-4 space-y-4">
-          <div className="how-banner">
-            <strong>Practice first.</strong> Do one or two short takes and
-            adjust speed only after a full pass. Script text is not saved into
-            the video.
-          </div>
+          {phase === "preview" ? (
+            <div className="how-banner space-y-2">
+              <p>
+                <strong>Do these in order</strong> — do not start recording
+                before Follow My Voice:
+              </p>
+              <PanelSteps
+                steps={[
+                  <>
+                    On the teleprompter above, click{" "}
+                    <strong>Follow My Voice</strong> (circled{" "}
+                    <strong>1</strong>). Allow the mic, then read out loud so
+                    the script follows you.
+                  </>,
+                  <>
+                    When you are ready for the real take, click{" "}
+                    <strong>Start Recording</strong> below (circled{" "}
+                    <strong>2</strong>). Keep reading. Script text is not saved
+                    into the video.
+                  </>,
+                ]}
+              />
+            </div>
+          ) : (
+            <div className="how-banner">
+              <strong>You are recording.</strong> Keep reading with Follow My
+              Voice. Click <strong>Stop Recording</strong> when you finish.
+              Script text is not saved into the video.
+            </div>
+          )}
 
           <div className="space-y-3">
             <div className="relative overflow-hidden section-card bg-black">
@@ -403,14 +430,17 @@ export function WebcamRecorder({
             <div className="flex flex-wrap items-center gap-3">
               {phase === "preview" ? (
                 <>
-                  <button
-                    type="button"
-                    onClick={startRecording}
-                    className="btn-primary"
-                  >
-                    <Circle className="h-5 w-5 fill-current" />
-                    Click Here to Start Recording
-                  </button>
+                  <span className="inline-flex items-center gap-2">
+                    <StepCircle n={2} label="Step 2" />
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      className="btn-primary"
+                    >
+                      <Circle className="h-5 w-5 fill-current" />
+                      Step 2 — Click Here to Start Recording
+                    </button>
+                  </span>
                   <button
                     type="button"
                     onClick={closeCamera}
@@ -436,9 +466,8 @@ export function WebcamRecorder({
               )}
             </div>
             <p className="text-base text-[var(--muted)]">
-              About 60 seconds is preferred; 2+ minutes is fine. Frame
-              yourself, check the first lines of the script, then record —
-              scroll starts automatically. Trim on the timeline after you save.
+              About 60 seconds is preferred; 2+ minutes is fine. Trim on the
+              timeline after you save.
             </p>
           </div>
         </div>

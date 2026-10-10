@@ -191,13 +191,22 @@ export function WebcamTeleprompterOverlay({
       <div className="relative z-20 mx-auto flex w-full max-w-[min(100%,36rem)] flex-col px-2 pt-2 md:pt-3">
         {!recording ? (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
-            Same controls as Practice Here. Start with{" "}
+            <strong className="text-[var(--yellow)]">Step 1</strong> — click{" "}
             <strong className="text-[var(--yellow)]">Follow My Voice</strong>,
-            then read out loud. Keep this text near the top of your monitor,
-            close to the webcam. Scoot back so we see from about your waist to
-            the top of your head. Hover any button for a tip.
+            allow the mic, and read out loud.{" "}
+            <strong className="text-[var(--yellow)]">Step 2</strong> is{" "}
+            <strong>Start Recording</strong> under the preview when you are
+            ready for the real take. Keep this text near the top of your
+            monitor, close to the webcam.
           </p>
-        ) : null}
+        ) : (
+          <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
+            Recording now — keep reading with{" "}
+            <strong className="text-[var(--yellow)]">Follow My Voice</strong>.
+            Click <strong>Stop Recording</strong> under the preview when you
+            finish.
+          </p>
+        )}
 
         <div className="relative h-44 overflow-hidden rounded-xl border border-white/30 bg-black/50 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-[2px] md:h-52">
           <div
@@ -262,6 +271,7 @@ export function WebcamTeleprompterOverlay({
           voiceFollow={{
             listening: voiceFollow.listening,
             supported: voiceFollow.supported,
+            step: recording ? undefined : 1,
             onToggle: () => {
               setScrolling(false);
               setCountdown(null);

@@ -2,6 +2,7 @@
 
 import { Mic, Pause, Play, RotateCcw } from "lucide-react";
 import { ControlTip } from "@/components/ControlTip";
+import { StepCircle } from "@/components/PanelStep";
 import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import { clsx } from "clsx";
 
@@ -9,6 +10,8 @@ export type VoiceFollowControls = {
   listening: boolean;
   supported: boolean;
   onToggle: () => void;
+  /** Circled step number (webcam recording order). */
+  step?: number;
 };
 
 type TeleprompterControlBarProps = {
@@ -48,27 +51,36 @@ export function TeleprompterControlBar({
         {voiceFollow ? (
           <ControlTip
             tip={
-              voiceFollow.supported
-                ? "Best way to practice. Click this, allow the microphone when asked, then read out loud. The script moves with you as you talk. Works best in Chrome or Edge on your computer."
-                : "This needs Chrome or Edge on your computer so it can listen while you read."
+              voiceFollow.step
+                ? `Step ${voiceFollow.step}: click this first. Allow the microphone when asked, then read out loud. The script moves with you as you talk. After you are comfortable, go to Step 2 and start recording. Works best in Chrome or Edge.`
+                : voiceFollow.supported
+                  ? "Best way to practice. Click this, allow the microphone when asked, then read out loud. The script moves with you as you talk. Works best in Chrome or Edge on your computer."
+                  : "This needs Chrome or Edge on your computer so it can listen while you read."
             }
           >
-            <button
-              type="button"
-              disabled={!enabled || !voiceFollow.supported}
-              onClick={voiceFollow.onToggle}
-              className={clsx(
-                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[12px] font-bold shadow-sm disabled:opacity-40",
-                voiceFollow.listening
-                  ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                  : "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)] ring-2 ring-[var(--yellow)]/40",
-              )}
-            >
-              <Mic className="h-3.5 w-3.5" aria-hidden />
-              {voiceFollow.listening
-                ? "Click Here to Stop Voice Follow"
-                : "Click Here to Follow My Voice"}
-            </button>
+            <span className="inline-flex items-center gap-1.5">
+              {voiceFollow.step ? (
+                <StepCircle n={voiceFollow.step} tone="dark" label={`Step ${voiceFollow.step}`} />
+              ) : null}
+              <button
+                type="button"
+                disabled={!enabled || !voiceFollow.supported}
+                onClick={voiceFollow.onToggle}
+                className={clsx(
+                  "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[12px] font-bold shadow-sm disabled:opacity-40",
+                  voiceFollow.listening
+                    ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                    : "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)] ring-2 ring-[var(--yellow)]/40",
+                )}
+              >
+                <Mic className="h-3.5 w-3.5" aria-hidden />
+                {voiceFollow.listening
+                  ? "Click Here to Stop Voice Follow"
+                  : voiceFollow.step
+                    ? `Step ${voiceFollow.step} — Click Here to Follow My Voice`
+                    : "Click Here to Follow My Voice"}
+              </button>
+            </span>
           </ControlTip>
         ) : null}
 

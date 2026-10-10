@@ -2,6 +2,35 @@ import { clsx } from "clsx";
 
 type PanelTone = "light" | "dark";
 
+/** Circled step number next to a button (webcam: Step 1 → Step 2). */
+export function StepCircle({
+  n,
+  className,
+  tone = "light",
+  label,
+}: {
+  n: number;
+  className?: string;
+  tone?: PanelTone;
+  /** Accessible name, e.g. "Step 1". */
+  label?: string;
+}) {
+  return (
+    <span
+      aria-label={label ?? `Step ${n}`}
+      className={clsx(
+        "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[12px] font-bold leading-none",
+        tone === "dark"
+          ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+          : "border-[var(--ink)] bg-[var(--olive)] text-[var(--yellow)]",
+        className,
+      )}
+    >
+      {n}
+    </span>
+  );
+}
+
 /** Numbered cue used inside each studio panel (Step 1 → Step 2 → Step 3). */
 export function PanelStep({
   n,
