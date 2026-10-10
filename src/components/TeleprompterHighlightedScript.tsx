@@ -29,7 +29,7 @@ export function TeleprompterHighlightedScript({
   fontLarge,
   roomyLines,
   className,
-  emptyLabel = "Add a script above, then click Play / Scroll to practice.",
+  emptyLabel = "Add a script above, then click Follow My Voice to practice.",
 }: TeleprompterHighlightedScriptProps) {
   const text = script.trim();
   if (!text) {
