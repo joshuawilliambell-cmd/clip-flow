@@ -50,12 +50,13 @@ export function VideoUploadStep() {
         </div>
         <HelpTip title="What Do I Do On This Page?" size="lg">
           <p>
-            Work through each panel in order. Numbered steps inside every panel
-            show what to click next.
+            Work through each panel in order. Practice with{" "}
+            <strong>Follow My Voice</strong>, then record with the{" "}
+            <strong>webcam and teleprompter</strong> — that is the easiest path.
           </p>
           <p>
-            When your roster and talking video are ready, continue to Finish
-            &amp; Download to trim, place photos, add music, and export.
+            When your roster and talking video are ready, save and move to the
+            next step to trim, place photos, add music, and export.
           </p>
         </HelpTip>
       </div>
@@ -91,38 +92,66 @@ export function VideoUploadStep() {
               it, replace it, or upload your own.
             </p>
             <p>
-              Start with <strong>Follow My Voice</strong> — allow the mic, then
-              read out loud so the script follows you. Hover any button for a
-              plain-language tip.
+              Use <strong>Follow My Voice</strong> to practice: the computer
+              listens and scrolls the script as you read out loud. Then record
+              with the webcam using the same button.
             </p>
           </HelpTip>
+        </div>
+        <div className="how-banner">
+          Practice with <strong>Follow My Voice</strong> here first. When you
+          are ready, use <strong>Record With Webcam</strong> below — webcam +
+          teleprompter is the easiest way to make this video.
         </div>
         <Teleprompter />
       </section>
 
       <RecordingGuide />
 
+      {!video ? (
+        <WebcamRecorder
+          onCaptured={async (file, options) => {
+            setError(null);
+            await setVideoFromFile(file, options);
+          }}
+          onError={setError}
+        />
+      ) : null}
+
+      {!video ? (
+        <div className="flex items-center gap-3 px-1">
+          <div className="h-0.5 flex-1 bg-[var(--ink)]" />
+          <p className="text-lg font-bold text-[var(--ink)]">or</p>
+          <div className="h-0.5 flex-1 bg-[var(--ink)]" />
+        </div>
+      ) : null}
+
       <section className="section-card space-y-3 bg-white p-4 md:p-5">
         <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-          Upload A Saved Video
+          {video ? "Your Talking Video" : "Upload A Saved Video (Optional)"}
         </h3>
-        <div className="how-banner">
-          If you have already created a video from your computer, phone, or
-          camera and have it saved as a file, you can upload it here.
-          Otherwise, continue to the next step to record your video here.
-        </div>
-        <PanelSteps
-          steps={[
-            <>
-              Click <strong>Choose Video From File</strong> (or drag a file
-              into the box) if you already have a saved recording.
-            </>,
-            <>
-              Otherwise, skip this box and continue to{" "}
-              <strong>Record With Webcam</strong> below.
-            </>,
-          ]}
-        />
+        {!video ? (
+          <div className="how-banner">
+            Prefer to skip the webcam? If you already have a video file from
+            your phone or another camera, upload it here. Otherwise, use{" "}
+            <strong>Record With Webcam</strong> above — that is the recommended
+            path with the teleprompter.
+          </div>
+        ) : null}
+        {!video ? (
+          <PanelSteps
+            steps={[
+              <>
+                Only use this if you already have a saved recording on this
+                computer.
+              </>,
+              <>
+                Otherwise go back up to <strong>Record With Webcam</strong> —
+                easiest with the teleprompter and Follow My Voice.
+              </>,
+            ]}
+          />
+        ) : null}
 
         {!video ? (
           <div className="space-y-4">
@@ -195,29 +224,12 @@ export function VideoUploadStep() {
               </button>
             </div>
             <div className="how-banner">
-              <strong>Next:</strong> continue to Finish &amp; Download to trim
-              the clip, place teammate photos, set music, and export your MP4.
+              <strong>Next:</strong> save and move to the next step to trim the
+              clip, place teammate photos, set music, and export your MP4.
             </div>
           </div>
         )}
       </section>
-
-      {!video ? (
-        <>
-          <div className="flex items-center gap-3 px-1">
-            <div className="h-0.5 flex-1 bg-[var(--ink)]" />
-            <p className="text-lg font-bold text-[var(--ink)]">or</p>
-            <div className="h-0.5 flex-1 bg-[var(--ink)]" />
-          </div>
-          <WebcamRecorder
-            onCaptured={async (file, options) => {
-              setError(null);
-              await setVideoFromFile(file, options);
-            }}
-            onError={setError}
-          />
-        </>
-      ) : null}
 
       <input
         ref={inputRef}

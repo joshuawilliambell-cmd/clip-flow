@@ -34,7 +34,7 @@ const DEVICES: DeviceGuide[] = [
     shortLabel: "Computer Camera",
     icon: <Laptop className="h-6 w-6" aria-hidden />,
     summary:
-      "Best at a desk. This studio opens your webcam and microphone in the browser — no Teams or Zoom needed.",
+      "Recommended. Record in this studio with the webcam and on-screen teleprompter — easiest way to read your script and look at the camera. No Teams or Zoom needed.",
     camera: [
       "Sit so the camera is at eye level.",
       "Scoot back so we see from about your waist up to the top of your head.",
@@ -52,11 +52,12 @@ const DEVICES: DeviceGuide[] = [
     recordSteps: [
       "Under Record With Webcam, click Start Webcam.",
       "Allow camera and microphone when the browser asks.",
-      "Practice with the teleprompter, then record.",
+      "Step 1: click Follow My Voice, then read out loud so the script scrolls with you.",
+      "Step 2: click Start Recording for the real take, and keep reading the same way.",
     ],
     getIntoTool: [
       "Your recording loads into the studio when you finish.",
-      "Prefer a file you already have? Use Upload A Saved Video instead.",
+      "Only use Upload A Saved Video if you already recorded somewhere else.",
     ],
   },
   {
@@ -65,7 +66,7 @@ const DEVICES: DeviceGuide[] = [
     shortLabel: "Phone Camera",
     icon: <Smartphone className="h-6 w-6" aria-hidden />,
     summary:
-      "Hold the phone sideways (landscape), prop it steady, face the light, and record in a quiet room.",
+      "Optional path. Webcam + teleprompter in this studio is usually easier. If you use a phone: hold it sideways (landscape), prop it steady, face the light, and record in a quiet room.",
     camera: [
       "Turn the phone sideways (landscape).",
       "Prop it at eye level so it does not shake.",
@@ -160,15 +161,17 @@ export function RecordingGuide() {
         </div>
         <HelpTip title="Recording Tips" size="lg">
           <p>
-            Optional help if you are new to recording. You can skip this and go
-            straight to upload or webcam.
+            Optional setup help. The easiest path is{" "}
+            <strong>Record With Webcam</strong> with Follow My Voice on the
+            teleprompter.
           </p>
         </HelpTip>
       </div>
 
       <div className="how-banner mt-3">
-        If you are new to recording and need setup advice, click here.
-        Otherwise, continue to the next step.
+        Recommended: record with the <strong>webcam and teleprompter</strong>{" "}
+        in this studio. Open tips below only if you need camera, light, or sound
+        advice.
       </div>
 
       <button
@@ -189,10 +192,13 @@ export function RecordingGuide() {
         <div className="mt-4 space-y-4">
           <PanelSteps
             steps={[
-              <>Click a device below (computer, phone, or separate camera).</>,
+              <>
+                Prefer <strong>Computer Webcam</strong> — it works with the
+                teleprompter and Follow My Voice.
+              </>,
               <>Read the setup tips for camera, light, and sound.</>,
               <>
-                Then go to upload or <strong>Record With Webcam</strong>.
+                Then go to <strong>Record With Webcam</strong> below.
               </>,
             ]}
           />

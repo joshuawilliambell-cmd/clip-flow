@@ -52,9 +52,9 @@ export function TeleprompterControlBar({
           <ControlTip
             tip={
               voiceFollow.step
-                ? `Step ${voiceFollow.step}: click this first. Allow the microphone when asked, then read out loud. The script moves with you as you talk. After you are comfortable, go to Step 2 and start recording. Works best in Chrome or Edge.`
+                ? `Step ${voiceFollow.step}: turn this on first. Your computer listens while you read. The script scrolls as you talk — you do not chase moving text. Allow the mic, read out loud at a normal pace, then go to Step 2 (Start Recording) for the real take. Chrome or Edge works best.`
                 : voiceFollow.supported
-                  ? "Best way to practice. Click this, allow the microphone when asked, then read out loud. The script moves with you as you talk. Works best in Chrome or Edge on your computer."
+                  ? "Turns on voice listening. Allow the microphone, then read the script out loud. The words move down the screen as you speak — like a TV teleprompter that follows you. Chrome or Edge on your computer works best."
                   : "This needs Chrome or Edge on your computer so it can listen while you read."
             }
           >

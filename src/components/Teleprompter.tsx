@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileUp, ScrollText } from "lucide-react";
 import { ControlTip } from "@/components/ControlTip";
 import { HelpTip } from "@/components/HelpTip";
@@ -27,10 +27,6 @@ import {
   estimateWpm,
   punctuationEaseMultiplier,
 } from "@/lib/teleprompter-pace";
-import {
-  findScriptCues,
-  wordIndexToScrollFraction,
-} from "@/lib/teleprompter-script-view";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 import { formatClock } from "@/lib/timeline";
@@ -129,15 +125,6 @@ export function Teleprompter({
   const highlightThrough = voiceFollow.listening
     ? voiceFollow.matchedWords
     : scrollHighlight;
-
-  const cues = useMemo(
-    () =>
-      findScriptCues(
-        practiceScript,
-        photos.map((p) => p.name).filter((n) => n.trim().length >= 2),
-      ),
-    [practiceScript, photos],
-  );
 
   // Keep webcam overlay on the same script text (including edits).
   useEffect(() => {
@@ -277,18 +264,6 @@ export function Teleprompter({
     setCountdown(null);
     setElapsedSeconds(0);
     setScrollHighlight(0);
-    voiceFollow.stop();
-  };
-
-  const jumpToCue = (wordIndex: number) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollHeight - el.clientHeight;
-    const fraction = wordIndexToScrollFraction(wordIndex, totalPracticeWords);
-    el.scrollTop = fraction * Math.max(0, maxScroll);
-    setScrollHighlight(wordIndex);
-    setScrolling(false);
-    setCountdown(null);
     voiceFollow.stop();
   };
 
@@ -433,12 +408,13 @@ export function Teleprompter({
         </div>
         <HelpTip title="Script Teleprompter">
           <p>
-            Start with <strong>Follow My Voice</strong> — allow the mic, then
-            read out loud. The script moves with you as you speak.
+            <strong>Follow My Voice</strong> listens while you read. As you say
+            each line out loud, the script scrolls for you — you do not need to
+            chase moving text.
           </p>
           <p>
-            Hover any button for a short plain-language tip. Play / Scroll is a
-            backup if you are not using the mic.
+            Practice here first, then use the same button when you record with
+            the webcam (recommended).
           </p>
         </HelpTip>
       </div>
@@ -471,13 +447,38 @@ export function Teleprompter({
             <p className="text-[15px] font-bold tracking-tight text-[var(--yellow)]">
               Practice Here
             </p>
-            <p className="mt-1 text-[12px] font-medium leading-snug text-white/80">
-              Same width and controls as the webcam teleprompter. Best option:{" "}
-              <strong className="text-[var(--yellow)]">Follow My Voice</strong>{" "}
-              — click it, allow the microphone, then read out loud so the script
-              follows you. Hover any button for a tip. Play / Scroll is a backup
-              (3-2-1 countdown). Keyboard: Space play/pause · R / Home for top.
-            </p>
+            <div className="mt-2 space-y-1.5 rounded-md border border-[var(--yellow)]/45 bg-black/30 px-3 py-2.5 text-[12px] font-medium leading-snug text-white/90">
+              <p className="font-bold text-[var(--yellow)]">
+                What Follow My Voice does
+              </p>
+              <p>
+                Your computer listens to you. As you read the script out loud,
+                it moves the words down the screen for you — like a TV
+                teleprompter that keeps up with your voice. You talk; it
+                scrolls.
+              </p>
+              <p className="font-bold text-[var(--yellow)]">How to use it</p>
+              <ol className="list-decimal space-y-0.5 pl-4">
+                <li>
+                  Click <strong className="text-white">Follow My Voice</strong>{" "}
+                  below and choose <strong className="text-white">Allow</strong>{" "}
+                  for the microphone.
+                </li>
+                <li>
+                  Read the line at the yellow guide out loud, at a normal
+                  speaking pace.
+                </li>
+                <li>
+                  Watch the words highlight and the script move as it hears you.
+                  Keep reading until you finish.
+                </li>
+                <li>
+                  When you feel ready, go to{" "}
+                  <strong className="text-white">Record With Webcam</strong>{" "}
+                  and use Follow My Voice the same way for your real take.
+                </li>
+              </ol>
+            </div>
             <p className="mt-1 text-[12px] font-semibold text-[var(--yellow)]">
               ~{paceSeconds}s · {speedPercent}%
               {scrolling || elapsedSeconds > 0
@@ -534,24 +535,6 @@ export function Teleprompter({
               </div>
             </div>
           </div>
-
-          {cues.length > 1 ? (
-            <div className="flex flex-wrap gap-1.5 px-3 pt-2">
-              <span className="w-full text-[10px] font-semibold uppercase tracking-wide text-white/60">
-                Jump To Cue
-              </span>
-              {cues.map((cue) => (
-                <button
-                  key={`${cue.label}-${cue.wordIndex}`}
-                  type="button"
-                  onClick={() => jumpToCue(cue.wordIndex)}
-                  className="rounded-md border border-white/30 bg-black/30 px-2 py-1 text-[11px] font-semibold text-white hover:border-[var(--yellow)]"
-                >
-                  Click Here · {cue.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
 
           <TeleprompterControlBar
             enabled={enabled}
@@ -645,8 +628,8 @@ export function Teleprompter({
                   </p>
                 ) : (
                   <p className="text-center text-[11px] font-medium text-white/75">
-                    Tip: start with Follow My Voice. Hover any button to see what
-                    it does.
+                    Click Follow My Voice, allow the mic, then read out loud —
+                    the script will follow you.
                   </p>
                 )}
               </div>
@@ -668,17 +651,15 @@ export function Teleprompter({
                 className="rounded-md bg-black/25 px-3 py-2 [&_strong]:text-[var(--yellow)]"
                 steps={[
                   <>
-                    Click <strong>Follow My Voice</strong>, allow the microphone,
-                    then read out loud — the script follows you (Chrome or Edge).
+                    Practice with <strong>Follow My Voice</strong> until the
+                    script feels natural (Chrome or Edge works best).
                   </>,
                   <>
-                    Hover any button for a short tip. Use{" "}
-                    <strong>Play / Scroll</strong> only if you are not using the
-                    mic.
+                    Then record with the <strong>webcam + teleprompter</strong>{" "}
+                    below — same Follow My Voice button for your real take.
                   </>,
                   <>
-                    Practice a few full passes before you record. Edit the script
-                    below anytime.
+                    Edit the script below anytime if you want different wording.
                   </>,
                 ]}
               />

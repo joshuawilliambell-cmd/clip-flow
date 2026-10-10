@@ -315,45 +315,47 @@ export function WebcamRecorder({
         </div>
         <HelpTip title="Record With Webcam" size="lg">
           <p>
-            Put the preview and teleprompter text near the <strong>very top</strong>{" "}
-            of your monitor, closest to your webcam, so your eyes look at the
-            lens — not left to right across the screen.
+            <strong>Best way to record:</strong> use this webcam with the
+            on-screen teleprompter. The script stays near your camera so you can
+            look natural while you read.
           </p>
           <p>
-            After the webcam is on: <strong>Step 1</strong> is Follow My Voice,
-            then <strong>Step 2</strong> is Start Recording when you are ready
-            for the real take.
+            <strong>Follow My Voice</strong> listens as you speak and scrolls the
+            script for you. Step 1 turns that on; Step 2 starts the real
+            recording.
           </p>
           <p>
-            Script text is preview-only and is not saved into the video file.
+            Script text is only for you while you talk — it is not saved into
+            the video file.
           </p>
         </HelpTip>
+      </div>
+
+      <div className="how-banner mt-4">
+        <strong>Recommended:</strong> record here with the webcam and
+        teleprompter. It is the easiest way to read your script and look at the
+        camera at the same time.
       </div>
 
       <PanelSteps
         className="mt-4"
         steps={[
           <>
-            Place this browser window so the preview sits at the{" "}
-            <strong>top of your monitor</strong>, near the webcam. Scoot back —
-            frame from about your waist to the top of your head.
+            Place this window at the <strong>top of your monitor</strong>, near
+            the webcam. Scoot back — frame from about your waist to the top of
+            your head.
           </>,
           <>
             Click <strong>Start Webcam</strong> and allow camera and microphone
             when asked.
           </>,
           <>
-            On the teleprompter, do <strong>Step 1 — Follow My Voice</strong>,
-            then under the preview do <strong>Step 2 — Start Recording</strong>.
+            <strong>Step 1 — Follow My Voice:</strong> the computer listens and
+            scrolls the script as you read. Then{" "}
+            <strong>Step 2 — Start Recording</strong> for the real take.
           </>,
         ]}
       />
-
-      <div className="how-banner mt-4">
-        Keep the teleprompter near the top of the screen (closest to the
-        webcam). Scoot back so we see from about your waist to the top of your
-        head.
-      </div>
 
       {phase === "idle" ? (
         <div className="mt-4 flex flex-wrap gap-3">
@@ -374,31 +376,34 @@ export function WebcamRecorder({
           {phase === "preview" ? (
             <div className="how-banner space-y-2">
               <p>
-                <strong>Do these in order</strong> — do not start recording
-                before Follow My Voice:
+                <strong>How Follow My Voice works here:</strong> click it and
+                allow the mic. Read the script out loud — the words scroll as
+                you talk, so you can look near the camera instead of down at a
+                paper. Do these in order:
               </p>
               <PanelSteps
                 steps={[
                   <>
-                    On the teleprompter above, click{" "}
+                    On the teleprompter, click{" "}
                     <strong>Follow My Voice</strong> (circled{" "}
-                    <strong>1</strong>). Allow the mic, then read out loud so
-                    the script follows you.
+                    <strong>1</strong>). Allow the mic, then start reading out
+                    loud at a normal pace.
                   </>,
                   <>
                     When you are ready for the real take, click{" "}
                     <strong>Start Recording</strong> below (circled{" "}
-                    <strong>2</strong>). Keep reading. Script text is not saved
-                    into the video.
+                    <strong>2</strong>). Keep reading the same way. The script
+                    text is not saved into the video.
                   </>,
                 ]}
               />
             </div>
           ) : (
             <div className="how-banner">
-              <strong>You are recording.</strong> Keep reading with Follow My
-              Voice. Click <strong>Stop Recording</strong> when you finish.
-              Script text is not saved into the video.
+              <strong>You are recording.</strong> Keep reading out loud with
+              Follow My Voice so the script stays with you. Click{" "}
+              <strong>Stop Recording</strong> when you finish. Script text is
+              not saved into the video.
             </div>
           )}
 

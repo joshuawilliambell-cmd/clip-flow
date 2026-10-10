@@ -191,20 +191,19 @@ export function WebcamTeleprompterOverlay({
       <div className="relative z-20 mx-auto flex w-full max-w-[min(100%,36rem)] flex-col px-2 pt-2 md:pt-3">
         {!recording ? (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
-            <strong className="text-[var(--yellow)]">Step 1</strong> — click{" "}
-            <strong className="text-[var(--yellow)]">Follow My Voice</strong>,
-            allow the mic, and read out loud.{" "}
-            <strong className="text-[var(--yellow)]">Step 2</strong> is{" "}
-            <strong>Start Recording</strong> under the preview when you are
-            ready for the real take. Keep this text near the top of your
-            monitor, close to the webcam.
+            <strong className="text-[var(--yellow)]">Step 1 — Follow My Voice:</strong>{" "}
+            click it, allow the mic, then read out loud. The script scrolls as
+            you speak.{" "}
+            <strong className="text-[var(--yellow)]">Step 2</strong> —{" "}
+            <strong>Start Recording</strong> under the preview for the real
+            take. Keep this text near the top of your monitor, by the webcam.
           </p>
         ) : (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
-            Recording now — keep reading with{" "}
-            <strong className="text-[var(--yellow)]">Follow My Voice</strong>.
-            Click <strong>Stop Recording</strong> under the preview when you
-            finish.
+            Recording — keep reading out loud so{" "}
+            <strong className="text-[var(--yellow)]">Follow My Voice</strong>{" "}
+            can scroll with you. Click <strong>Stop Recording</strong> under
+            the preview when you finish.
           </p>
         )}
 
