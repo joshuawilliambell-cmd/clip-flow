@@ -11,6 +11,10 @@ import { Maximize2, Pause, Play, RotateCcw } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 import { getPipLayout, VIDEO_TEMPLATE } from "@/lib/template";
+import {
+  frameAspectClass,
+  orientationLabel,
+} from "@/lib/orientation-ui";
 import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { formatClock } from "@/lib/timeline";
 import { HelpTip } from "@/components/HelpTip";
@@ -258,12 +262,19 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
           Video Preview
         </h3>
+        <span className="rounded-full border-2 border-[var(--ink)] bg-[var(--yellow)] px-2.5 py-0.5 text-[12px] font-bold text-[var(--ink)]">
+          {orientationLabel(videoOrientation)}
+        </span>
         <HelpTip title="Video preview">
           <p>This window shows what your finished video will look like.</p>
+          <p>
+            Shape matches your Video Format (
+            {orientationLabel(videoOrientation)}). Change it above if needed.
+          </p>
           <p>Team photos and names appear when it is their turn.</p>
           <p>Tap the big Play button to watch and listen.</p>
           <p>
@@ -286,9 +297,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
       >
         <div
           className={clsx(
-            videoOrientation === "portrait"
-              ? "mx-auto aspect-[9/16] w-full max-w-md"
-              : "aspect-video",
+            frameAspectClass(videoOrientation, "preview"),
             compact && videoOrientation === "portrait" && "max-w-xs",
           )}
         >
@@ -301,7 +310,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
                 src={video.url}
                 playsInline
                 preload="auto"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain bg-black"
                 onLoadedData={() => {
                   setHasFrame(true);
                   const el = videoRef.current;
@@ -446,13 +455,18 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
                 );
               })}
 
-              {/* Optional 1s opener thumbnail */}
+              {/* Optional 1s opener thumbnail (letterbox on portrait canvas). */}
               {showIntro && introThumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={introThumbnailUrl}
                   alt="Team thumbnail opener"
-                  className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                  className={clsx(
+                    "pointer-events-none absolute inset-0 h-full w-full bg-[var(--yellow)]",
+                    videoOrientation === "portrait"
+                      ? "object-contain"
+                      : "object-cover",
+                  )}
                 />
               ) : null}
 

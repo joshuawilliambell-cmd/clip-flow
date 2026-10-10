@@ -62,7 +62,12 @@ export function IntroductionVideo(props: CompositionProps) {
           <Html5Video
             src={videoSrc}
             trimBefore={trimBefore}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              backgroundColor: "#000",
+            }}
             volume={videoVolume}
             acceptableTimeShiftInSeconds={1.5}
           />
@@ -137,7 +142,7 @@ export function IntroductionVideo(props: CompositionProps) {
 
       {showIntro && introThumbnailSrc ? (
         <Sequence from={0} durationInFrames={introFrames} layout="none">
-          <IntroThumbnail src={introThumbnailSrc} />
+          <IntroThumbnail src={introThumbnailSrc} orientation={orientation} />
         </Sequence>
       ) : null}
     </AbsoluteFill>

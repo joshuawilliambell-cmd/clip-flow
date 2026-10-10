@@ -7,6 +7,7 @@ import { PanelSteps } from "@/components/PanelStep";
 import { TeamPhotoSilhouette } from "@/components/TeamPhotoSilhouette";
 import { useStudio } from "@/lib/studio-context";
 import { getPipLayout, type PipSide } from "@/lib/template";
+import { frameAspectClass } from "@/lib/orientation-ui";
 
 const OPTIONS: Array<{ id: PipSide; label: string; hint: string }> = [
   {
@@ -118,9 +119,7 @@ export function PipSidePicker() {
               key={`preview-${option.id}`}
               className={clsx(
                 "relative overflow-hidden rounded-xl border-2",
-                videoOrientation === "portrait"
-                  ? "aspect-[9/16] w-full max-w-[11rem]"
-                  : "aspect-video w-full",
+                frameAspectClass(videoOrientation, "picker"),
                 pipSide === option.id
                   ? "border-[var(--primary)]"
                   : "border-[var(--border)]",

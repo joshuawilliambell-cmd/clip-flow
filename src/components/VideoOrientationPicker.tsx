@@ -30,7 +30,12 @@ const OPTIONS: Array<{
   },
 ];
 
-export function VideoOrientationPicker() {
+export function VideoOrientationPicker({
+  compact = false,
+}: {
+  /** Shorter copy for Step 2 (format still applies to preview, PIP, export). */
+  compact?: boolean;
+} = {}) {
   const { videoOrientation, setVideoOrientation, video } = useStudio();
 
   return (
@@ -41,7 +46,9 @@ export function VideoOrientationPicker() {
             Video Format
           </h3>
           <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-            Choose before you record — teammate corner photos resize to match
+            {compact
+              ? "Applies to preview, corner photos, and the exported MP4"
+              : "Choose before you record — preview, corner photos, and export all match"}
           </p>
         </div>
         <HelpTip title="Video Format" size="lg">
@@ -50,31 +57,33 @@ export function VideoOrientationPicker() {
             <strong>Portrait</strong> is the tall phone format.
           </p>
           <p>
-            The small teammate photo in the corner is sized for whichever format
-            you pick, so it stays clear of your face.
+            On desktop and phone, the webcam preview, Step 2 preview, teammate
+            corner photos, and exported MP4 all use this shape.
           </p>
         </HelpTip>
       </div>
 
-      <PanelSteps
-        className="mt-3"
-        steps={[
-          <>
-            Pick <strong>Landscape</strong> (wide) or <strong>Portrait</strong>{" "}
-            (tall) for the finished video.
-          </>,
-          <>
-            Hold your phone to match that shape when you record (or upload a
-            matching file).
-          </>,
-          <>
-            Corner photo placement (left/right) uses the layout built for this
-            format.
-          </>,
-        ]}
-      />
+      {!compact ? (
+        <PanelSteps
+          className="mt-3"
+          steps={[
+            <>
+              Pick <strong>Landscape</strong> (wide) or{" "}
+              <strong>Portrait</strong> (tall) for the finished video.
+            </>,
+            <>
+              Record or upload in that same shape (webcam preview matches it on
+              desktop and phone).
+            </>,
+            <>
+              Corner photo placement (left/right) uses the layout built for this
+              format.
+            </>,
+          ]}
+        />
+      ) : null}
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <div className={clsx("grid gap-3 md:grid-cols-2", compact ? "mt-3" : "mt-4")}>
         {OPTIONS.map((option) => {
           const selected = videoOrientation === option.id;
           return (
@@ -110,43 +119,47 @@ export function VideoOrientationPicker() {
         })}
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
-        {OPTIONS.map((option) => {
-          const pip = PIP_BY_ORIENTATION[option.id];
-          return (
-            <div
-              key={`preview-${option.id}`}
-              className={clsx(
-                "relative mx-auto w-full overflow-hidden rounded-xl border-2",
-                option.id === "landscape" ? "aspect-video" : "aspect-[9/16] max-w-[11rem]",
-                videoOrientation === option.id
-                  ? "border-[var(--primary)]"
-                  : "border-[var(--border)]",
-              )}
-              aria-hidden
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#334155] to-[#0f172a]" />
+      {!compact ? (
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {OPTIONS.map((option) => {
+            const pip = PIP_BY_ORIENTATION[option.id];
+            return (
               <div
-                className="absolute overflow-hidden rounded-md border-2 border-white bg-[#cbd5e1] shadow-md"
-                style={{
-                  top: `${pip.paddingTopPercent}%`,
-                  left: `${pip.paddingSidePercent}%`,
-                  width: `${pip.widthPercent}%`,
-                  height: `${pip.heightPercent}%`,
-                }}
-              />
-              <p className="absolute bottom-2 left-0 right-0 text-center text-sm font-semibold text-white">
-                {option.ratio} · example PIP
-              </p>
-            </div>
-          );
-        })}
-      </div>
+                key={`preview-${option.id}`}
+                className={clsx(
+                  "relative mx-auto w-full overflow-hidden rounded-xl border-2",
+                  option.id === "landscape"
+                    ? "aspect-video"
+                    : "aspect-[9/16] max-w-[11rem]",
+                  videoOrientation === option.id
+                    ? "border-[var(--primary)]"
+                    : "border-[var(--border)]",
+                )}
+                aria-hidden
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#334155] to-[#0f172a]" />
+                <div
+                  className="absolute overflow-hidden rounded-md border-2 border-white bg-[#cbd5e1] shadow-md"
+                  style={{
+                    top: `${pip.paddingTopPercent}%`,
+                    left: `${pip.paddingSidePercent}%`,
+                    width: `${pip.widthPercent}%`,
+                    height: `${pip.heightPercent}%`,
+                  }}
+                />
+                <p className="absolute bottom-2 left-0 right-0 text-center text-sm font-semibold text-white">
+                  {option.ratio} · example PIP
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
 
       {video ? (
         <p className="mt-3 text-[13px] font-medium text-[var(--muted)]">
           You already have a video loaded. If it was shot in a different shape,
-          the preview may crop edges — re-record or upload a matching{" "}
+          the preview may letterbox or crop — re-record or upload a matching{" "}
           {videoOrientation === "portrait" ? "portrait" : "landscape"} file for
           the cleanest result.
         </p>

@@ -20,9 +20,14 @@ import { exportIntroductionVideo } from "@/lib/export-video";
 import { VideoPreview } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { PipSidePicker } from "@/components/PipSidePicker";
+import { VideoOrientationPicker } from "@/components/VideoOrientationPicker";
 import { HelpTip } from "@/components/HelpTip";
 import { PanelSteps } from "@/components/PanelStep";
 import { filledTeamPhotos } from "@/lib/team-slots";
+import {
+  orientationFileSuffix,
+  orientationLabel,
+} from "@/lib/orientation-ui";
 
 const MUSIC_SAMPLE_SECONDS = 30;
 
@@ -49,6 +54,7 @@ export function PreviewExportStep({
     setStep,
     photos,
     teamMemberCount,
+    videoOrientation,
   } = useStudio();
 
   const [progress, setProgress] = useState<number | null>(null);
@@ -143,8 +149,8 @@ export function PreviewExportStep({
         <div className="max-w-3xl">
           <h2 className="step-title">Step 2: Finish And Download</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
-            Finish your video here — place teammate photos, trim, add quiet
-            music, then export an MP4.
+            Finish your video here — confirm landscape or portrait, place
+            teammate photos, trim, add quiet music, then export an MP4.
           </p>
         </div>
         <HelpTip title="What Do I Do On This Page?" size="lg">
@@ -159,7 +165,9 @@ export function PreviewExportStep({
         </HelpTip>
       </div>
 
-      {/* Preview + timeline first — editing sits under playback like an NLE. */}
+      <VideoOrientationPicker compact />
+
+      {/* Preview + timeline — frame shape follows Video Format (desktop + mobile). */}
       <section className="section-card space-y-2 bg-white p-3 md:p-4">
         <VideoPreview />
         <Timeline />
@@ -469,7 +477,9 @@ export function PreviewExportStep({
               Export your video to MP4
             </h3>
             <p className="mt-1 text-lg text-[var(--muted)]">
-              Creates one finished file you can upload to Allego.
+              Creates one finished{" "}
+              <strong>{orientationLabel(videoOrientation)}</strong> file you can
+              upload to Allego.
             </p>
           </div>
           <HelpTip title="Export to MP4" size="lg">
@@ -514,7 +524,11 @@ export function PreviewExportStep({
         ) : null}
 
         {downloadUrl ? (
-          <a href={downloadUrl} download="loves-team-introduction.mp4" className="btn-yellow mt-4 inline-flex">
+          <a
+            href={downloadUrl}
+            download={`loves-team-introduction-${orientationFileSuffix(videoOrientation)}.mp4`}
+            className="btn-yellow mt-4 inline-flex"
+          >
             <Download className="h-5 w-5" /> Click Here to Download MP4
           </a>
         ) : null}

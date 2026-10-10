@@ -136,9 +136,10 @@ export function VideoUploadStep() {
         {!video ? (
           <div className="how-banner">
             Prefer to skip the webcam? If you already have a video file from
-            your phone or another camera, upload it here. Otherwise, use{" "}
-            <strong>Record With Webcam</strong> above — that is the recommended
-            path with the teleprompter.
+            your phone or another camera, upload it here — match the{" "}
+            <strong>Video Format</strong> you picked (landscape or portrait).
+            Otherwise, use <strong>Record With Webcam</strong> above — that is
+            the recommended path with the teleprompter.
           </div>
         ) : null}
         {!video ? (
@@ -146,7 +147,7 @@ export function VideoUploadStep() {
             steps={[
               <>
                 Only use this if you already have a saved recording on this
-                computer.
+                computer in the same shape as Video Format.
               </>,
               <>
                 Otherwise go back up to <strong>Record With Webcam</strong> —

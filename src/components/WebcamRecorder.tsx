@@ -8,6 +8,10 @@ import { PanelSteps, StepCircle } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
 import { useIsLandscape, useIsMobile } from "@/hooks/useIsMobile";
 import { useStudio } from "@/lib/studio-context";
+import {
+  frameAspectClass,
+  orientationLabel,
+} from "@/lib/orientation-ui";
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
@@ -131,6 +135,21 @@ export function WebcamRecorder({
   }, [phase, attachLivePreview]);
 
   const live = phase === "preview" || phase === "recording";
+
+  // Desktop/web: when Video Format changes during live preview, retarget the camera.
+  useEffect(() => {
+    if (phase !== "preview") return;
+    const stream = streamRef.current;
+    const track = stream?.getVideoTracks()[0];
+    if (!track) return;
+    void track
+      .applyConstraints({
+        width: { ideal: wantLandscape ? 1280 : 720 },
+        height: { ideal: wantLandscape ? 720 : 1280 },
+        aspectRatio: { ideal: wantLandscape ? 16 / 9 : 9 / 16 },
+      })
+      .catch(() => undefined);
+  }, [wantLandscape, phase]);
 
   const mobileStudio = isMobile === true;
   /** Phone orientation does not match the chosen video format. */
@@ -369,7 +388,9 @@ export function WebcamRecorder({
           <>
             Place this window at the <strong>top of your monitor</strong>, near
             the webcam. Scoot back — frame from about your waist to the top of
-            your head.
+            your head. Preview shape is{" "}
+            <strong>{orientationLabel(videoOrientation)}</strong> (from Video
+            Format above).
           </>,
           <>
             Click <strong>Start Webcam</strong> and allow camera and microphone
@@ -476,12 +497,10 @@ export function WebcamRecorder({
                   "relative",
                   mobileStudio
                     ? "flex min-h-0 flex-1 items-center justify-center bg-black"
-                    : wantLandscape
-                      ? "aspect-video"
-                      : "mx-auto aspect-[9/16] max-h-[70vh] w-full max-w-md",
+                    : frameAspectClass(videoOrientation, "webcam"),
                 )}
               >
-                {/* Frame the camera to the chosen format (letterboxed on mobile). */}
+                {/* Frame the camera to the chosen format (desktop + mobile). */}
                 <div
                   className={clsx(
                     "relative overflow-hidden bg-black",
@@ -512,8 +531,7 @@ export function WebcamRecorder({
                     </div>
                   ) : (
                     <div className="absolute right-3 top-3 z-30 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
-                      Live preview ·{" "}
-                      {wantLandscape ? "landscape 16:9" : "portrait 9:16"}
+                      Live preview · {orientationLabel(videoOrientation)}
                     </div>
                   )}
                   {mobileOrientationMismatch ? (
@@ -647,11 +665,10 @@ export function WebcamRecorder({
               src={reviewUrl}
               controls
               playsInline
-              className={
-                wantLandscape
-                  ? "aspect-video w-full"
-                  : "mx-auto aspect-[9/16] max-h-[70vh] w-full max-w-md"
-              }
+              className={clsx(
+                frameAspectClass(videoOrientation, "review"),
+                "object-contain",
+              )}
             />
           </div>
           <div className="flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] border-2 border-[var(--ink)] bg-[var(--yellow)]/40 p-3 md:p-4">
