@@ -34,9 +34,9 @@ const DEVICES: DeviceGuide[] = [
     shortLabel: "Computer Camera",
     icon: <Laptop className="h-6 w-6" aria-hidden />,
     summary:
-      "Recommended. Record in this studio with the webcam and on-screen teleprompter — easiest way to read your script and look at the camera. No Teams or Zoom needed.",
+      "For a computer only. Record in this studio with your webcam and on-screen teleprompter — easiest way to read your script and look at the lens. No Teams or Zoom needed.",
     camera: [
-      "Sit so the camera is at eye level.",
+      "Sit so the webcam is at eye level.",
       "Scoot back so we see from about your waist up to the top of your head.",
       "Look toward the webcam lens when you speak.",
       "Leave a little empty space on one side for teammate photos later.",
@@ -50,13 +50,13 @@ const DEVICES: DeviceGuide[] = [
       "A headset mic often sounds clearer than a laptop mic.",
     ],
     recordSteps: [
-      "Under Record With Webcam, click Start Webcam.",
-      "Allow camera and microphone when the browser asks.",
+      "On a computer, under Record With Webcam, click Start Webcam.",
+      "Allow the computer camera and microphone when the browser asks.",
       "Step 1: click Follow My Voice, then read out loud so the script scrolls with you.",
-      "Step 2: click Start Recording for the real take, and keep reading the same way.",
+      "Step 2: click Start Recording for the real take; use Pause or Stop as needed.",
     ],
     getIntoTool: [
-      "Your recording loads into the studio when you finish.",
+      "Your webcam recording loads into the studio when you finish.",
       "Only use Upload A Saved Video if you already recorded somewhere else.",
     ],
   },
@@ -66,11 +66,12 @@ const DEVICES: DeviceGuide[] = [
     shortLabel: "Phone Camera",
     icon: <Smartphone className="h-6 w-6" aria-hidden />,
     summary:
-      "Optional path. Webcam + teleprompter in this studio is usually easier. If you use a phone: match the Video Format you picked (landscape or portrait), prop it steady, face the light, and record in a quiet room.",
+      "Two options: (1) open this studio on your phone and record with the on-screen teleprompter, or (2) use the phone Camera app, then upload the file. Match Video Format (landscape 16:9 or portrait 4:3).",
     camera: [
-      "Match Video Format: sideways for landscape, upright for portrait.",
-      "Prop it at eye level so it does not shake.",
+      "Match Video Format: sideways for landscape 16:9, upright for portrait 4:3.",
+      "Prop the phone at eye level so it does not shake.",
       "Frame from about waist up to the top of your head.",
+      "In this studio on your phone: selfie camera opens first — tap Flip for rear.",
     ],
     lighting: [
       "Face a window or bright indoor light.",
@@ -79,14 +80,15 @@ const DEVICES: DeviceGuide[] = [
     audio: [
       "Silence notifications.",
       "Stay close enough that your voice is clear.",
+      "If you use Follow My Voice in Safari/Chrome on the phone, allow the microphone.",
     ],
     recordSteps: [
-      "Open the Camera app and choose Video.",
-      "Record in the same shape as Video Format, then stop when finished.",
+      "Option A — this studio on your phone: Start Webcam → Follow My Voice → Start Recording (Pause/Stop at the bottom).",
+      "Option B — Camera app: choose Video, record in the matching shape, then stop.",
     ],
     getIntoTool: [
-      "Send the file to your computer (AirDrop, email, Drive, etc.).",
-      "In Step 1, click Choose Video From File and pick the clip.",
+      "Option A: the recording loads into the studio when you save it.",
+      "Option B: send the file to your computer (AirDrop, email, Drive), then Choose Video From File in Step 1.",
     ],
   },
   {
@@ -97,7 +99,7 @@ const DEVICES: DeviceGuide[] = [
     summary:
       "Use a camcorder or DSLR on a tripod at eye level in a quiet room.",
     camera: [
-      "Tripod at eye level; match Video Format (16:9 landscape or 9:16 portrait).",
+      "Tripod at eye level; match Video Format (16:9 landscape or 4:3 portrait).",
       "Frame mid-chest or waist up with a little space above your head.",
     ],
     lighting: ["Face soft light (window or lamp)."],
@@ -169,9 +171,9 @@ export function RecordingGuide() {
       </div>
 
       <div className="how-banner mt-3">
-        Recommended: record with the <strong>webcam and teleprompter</strong>{" "}
-        in this studio. Open tips below only if you need camera, light, or sound
-        advice.
+        On a computer, use <strong>Computer Webcam</strong> tips + Record With
+        Webcam below. On a phone, open <strong>Phone Camera</strong> tips (studio
+        on phone, or Camera app then upload).
       </div>
 
       <button
@@ -193,12 +195,16 @@ export function RecordingGuide() {
           <PanelSteps
             steps={[
               <>
-                Prefer <strong>Computer Webcam</strong> — it works with the
-                teleprompter and Follow My Voice.
+                On a computer, choose <strong>Computer Webcam</strong> — webcam +
+                teleprompter + Follow My Voice.
               </>,
-              <>Read the setup tips for camera, light, and sound.</>,
               <>
-                Then go to <strong>Record With Webcam</strong> below.
+                On a phone, choose <strong>Phone Camera</strong> for phone-specific
+                steps (studio on phone or Camera app).
+              </>,
+              <>
+                Then record with <strong>Record With Webcam</strong> below, or
+                upload a file from your phone Camera app.
               </>,
             ]}
           />

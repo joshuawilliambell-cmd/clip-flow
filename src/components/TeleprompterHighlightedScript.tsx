@@ -5,6 +5,7 @@ import {
   TELEPROMPTER_COLUMN_CLASS,
   TELEPROMPTER_TEXT_CLASS_COMPACT,
   TELEPROMPTER_TEXT_CLASS_LARGE,
+  TELEPROMPTER_TEXT_CLASS_MOBILE,
 } from "@/lib/teleprompter-layout";
 import { tokenizeScript } from "@/lib/teleprompter-script-view";
 
@@ -15,6 +16,8 @@ type TeleprompterHighlightedScriptProps = {
   fontLarge: boolean;
   /** Extra roomy line spacing (Teleprompter.com-style). */
   roomyLines: boolean;
+  /** Phone studio: keep type a bit smaller so 2+ lines stay visible. */
+  mobileStudio?: boolean;
   className?: string;
   emptyLabel?: string;
 };
@@ -28,19 +31,23 @@ export function TeleprompterHighlightedScript({
   highlightThrough,
   fontLarge,
   roomyLines,
+  mobileStudio = false,
   className,
   emptyLabel = "Add a script above, then click Follow My Voice to practice.",
 }: TeleprompterHighlightedScriptProps) {
   const text = script.trim();
+  const typeClass = mobileStudio
+    ? TELEPROMPTER_TEXT_CLASS_MOBILE
+    : fontLarge
+      ? TELEPROMPTER_TEXT_CLASS_LARGE
+      : TELEPROMPTER_TEXT_CLASS_COMPACT;
   if (!text) {
     return (
       <div
         className={clsx(
           "mx-auto text-white/70",
           TELEPROMPTER_COLUMN_CLASS,
-          fontLarge
-            ? TELEPROMPTER_TEXT_CLASS_LARGE
-            : TELEPROMPTER_TEXT_CLASS_COMPACT,
+          typeClass,
           roomyLines && "leading-relaxed",
           className,
         )}
@@ -58,9 +65,7 @@ export function TeleprompterHighlightedScript({
       className={clsx(
         "mx-auto whitespace-pre-wrap text-white",
         TELEPROMPTER_COLUMN_CLASS,
-        fontLarge
-          ? TELEPROMPTER_TEXT_CLASS_LARGE
-          : TELEPROMPTER_TEXT_CLASS_COMPACT,
+        typeClass,
         roomyLines && "!leading-relaxed",
         className,
       )}

@@ -19,6 +19,10 @@ export const TELEPROMPTER_TEXT_CLASS_LARGE =
 export const TELEPROMPTER_TEXT_CLASS_COMPACT =
   "text-[1.15rem] md:text-[1.25rem] font-semibold leading-snug tracking-wide";
 
+/** Phone studio: slightly smaller so at least two script lines stay in view. */
+export const TELEPROMPTER_TEXT_CLASS_MOBILE =
+  "text-[1.05rem] font-semibold leading-relaxed tracking-wide";
+
 /**
  * Insert a blank line after each sentence so readers get a natural breath
  * pause. Display-only — does not change the saved script text.

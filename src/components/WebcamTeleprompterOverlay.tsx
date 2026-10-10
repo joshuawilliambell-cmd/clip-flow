@@ -130,17 +130,18 @@ export function WebcamTeleprompterOverlay({
   if (isMobile === true) {
     return (
       <div className="flex h-full min-h-0 flex-col bg-black/92">
-        <p className="shrink-0 px-2 pb-1 pt-1 text-center text-[11px] font-semibold leading-snug text-white">
+        <p className="shrink-0 px-2 pb-0.5 pt-1 text-center text-[11px] font-semibold leading-snug text-white">
           {recording ? (
             <>
               Keep reading out loud —{" "}
               <span className="text-[var(--yellow)]">Follow My Voice</span>{" "}
-              scrolls with you.
+              scrolls with you. At least two lines stay visible.
             </>
           ) : (
             <>
-              <span className="text-[var(--yellow)]">Step 1</span> — Follow My
-              Voice, then read out loud. Script stays in this top area.
+              <span className="text-[var(--yellow)]">Phone camera</span> — Follow
+              My Voice, then read out loud. Two script lines stay in view so you
+              can see what comes next.
             </>
           )}
         </p>
@@ -150,29 +151,32 @@ export function WebcamTeleprompterOverlay({
             onReset={resetScroll}
             voiceFollow={voiceControls}
             extras={statusBlock}
+            device="phone"
           />
         </div>
 
-        <div className="relative min-h-0 flex-1 overflow-hidden border-y border-white/25 bg-black/75">
+        {/* Reading line near the top so the next line is always visible below. */}
+        <div className="relative min-h-[4.75rem] flex-1 overflow-hidden border-y border-white/25 bg-black/75">
           <div
-            className="pointer-events-none absolute inset-x-2 top-[28%] z-20 h-0.5 bg-[var(--yellow)]/90"
+            className="pointer-events-none absolute inset-x-2 top-[22%] z-20 h-0.5 bg-[var(--yellow)]/90"
             aria-hidden
           />
           <div
             ref={scrollerRef}
-            className="h-full overflow-y-auto px-3 pb-10 pt-2 text-center scrollbar-none"
+            className="h-full overflow-y-auto px-3 pb-12 pt-1 text-center scrollbar-none"
             style={{ scrollbarWidth: "none" }}
             aria-live="polite"
           >
             <TeleprompterHighlightedScript
               script={script}
               highlightThrough={highlightThrough}
-              fontLarge={fontLarge}
-              roomyLines={lineRoomy}
+              fontLarge={false}
+              roomyLines
+              mobileStudio
               className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]"
               emptyLabel="Your script will show here."
             />
-            <div className="h-16" aria-hidden />
+            <div className="h-20" aria-hidden />
           </div>
         </div>
       </div>
@@ -190,20 +194,20 @@ export function WebcamTeleprompterOverlay({
         {!recording ? (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
             <strong className="text-[var(--yellow)]">
-              Step 1 — Follow My Voice:
+              Webcam — Step 1 Follow My Voice:
             </strong>{" "}
-            click it, allow the mic, then read out loud. The script scrolls as
-            you speak.{" "}
+            click it, allow the computer mic, then read out loud. The script
+            scrolls as you speak.{" "}
             <strong className="text-[var(--yellow)]">Step 2</strong> —{" "}
-            <strong>Start Recording</strong> under the preview for the real
-            take. Keep this text near the top of your monitor, by the webcam.
+            <strong>Start Recording</strong> under the webcam preview. Keep this
+            window near the top of your monitor, by the webcam lens.
           </p>
         ) : (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
-            Recording — keep reading out loud so{" "}
+            Webcam recording — keep reading out loud so{" "}
             <strong className="text-[var(--yellow)]">Follow My Voice</strong>{" "}
-            can scroll with you. Click <strong>Stop Recording</strong> under the
-            preview when you finish.
+            can scroll with you. Use Pause or Stop under the webcam preview when
+            you finish.
           </p>
         )}
 
@@ -235,6 +239,7 @@ export function WebcamTeleprompterOverlay({
         <TeleprompterControlBar
           onReset={resetScroll}
           voiceFollow={voiceControls}
+          device="webcam"
           extras={
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-center gap-2">

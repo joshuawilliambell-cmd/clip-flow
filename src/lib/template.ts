@@ -17,13 +17,14 @@ export const TEAM_MEMBER_COUNT_OPTIONS: TeamMemberCount[] = [0, 1, 2, 3, 4];
 /** Canvas size for each orientation (export + Remotion metadata). */
 export const ORIENTATION_CANVAS = {
   landscape: { width: 1920, height: 1080 },
-  portrait: { width: 1080, height: 1920 },
+  /** 4:3 portrait (3:4 width:height) — classic upright frame. */
+  portrait: { width: 1080, height: 1440 },
 } as const;
 
 /**
  * Fixed PIP region per canvas.
  * Landscape: ~3:4 photo on 16:9 (~292×389 px on 1920×1080).
- * Portrait: same absolute photo size on 9:16 (~292×389 px on 1080×1920).
+ * Portrait: same absolute photo size on 4:3 (~292×389 px on 1080×1440).
  */
 export const PIP_BY_ORIENTATION = {
   landscape: {
@@ -36,7 +37,7 @@ export const PIP_BY_ORIENTATION = {
     paddingTopPercent: 5,
     paddingSidePercent: 5,
     widthPercent: 27,
-    heightPercent: 20.3,
+    heightPercent: 27,
   },
 } as const;
 

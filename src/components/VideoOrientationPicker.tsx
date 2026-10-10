@@ -25,8 +25,8 @@ const OPTIONS: Array<{
   {
     id: "portrait",
     label: "Portrait",
-    hint: "Tall 9:16 — best for phone-first viewing",
-    ratio: "9:16",
+    hint: "Upright 4:3 — classic portrait frame for phone and webcam",
+    ratio: "4:3",
   },
 ];
 
@@ -53,8 +53,8 @@ export function VideoOrientationPicker({
         </div>
         <HelpTip title="Video Format" size="lg">
           <p>
-            <strong>Landscape</strong> is the usual wide video.{" "}
-            <strong>Portrait</strong> is the tall phone format.
+            <strong>Landscape</strong> is wide 16:9.{" "}
+            <strong>Portrait</strong> is upright 4:3.
           </p>
           <p>
             On desktop and phone, the webcam preview, Step 2 preview, teammate
@@ -68,8 +68,8 @@ export function VideoOrientationPicker({
           className="mt-3"
           steps={[
             <>
-              Pick <strong>Landscape</strong> (wide) or{" "}
-              <strong>Portrait</strong> (tall) for the finished video.
+              Pick <strong>Landscape 16:9</strong> or{" "}
+              <strong>Portrait 4:3</strong> for the finished video.
             </>,
             <>
               Record or upload in that same shape (webcam preview matches it on
@@ -130,7 +130,7 @@ export function VideoOrientationPicker({
                   "relative mx-auto w-full overflow-hidden rounded-xl border-2",
                   option.id === "landscape"
                     ? "aspect-video"
-                    : "aspect-[9/16] max-w-[11rem]",
+                    : "aspect-[3/4] max-w-[12rem]",
                   videoOrientation === option.id
                     ? "border-[var(--primary)]"
                     : "border-[var(--border)]",

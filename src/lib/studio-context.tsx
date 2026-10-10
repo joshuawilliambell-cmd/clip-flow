@@ -101,7 +101,7 @@ type StudioContextValue = {
   videoVolume: number;
   musicTrackId: string;
   pipSide: PipSide;
-  /** Landscape 16:9 (default) or portrait 9:16 — PIP + export canvas follow this. */
+  /** Landscape 16:9 (default) or portrait 4:3 — PIP + export canvas follow this. */
   videoOrientation: VideoOrientation;
   introThumbnailUrl: string | null;
   introThumbnailEnabled: boolean;

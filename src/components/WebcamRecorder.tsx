@@ -60,9 +60,10 @@ function extensionForMime(mime: string): string {
 
 function sizeConstraints(wantLandscape: boolean): MediaTrackConstraints {
   return {
-    width: { ideal: wantLandscape ? 1280 : 720 },
-    height: { ideal: wantLandscape ? 720 : 1280 },
-    aspectRatio: { ideal: wantLandscape ? 16 / 9 : 9 / 16 },
+    width: { ideal: wantLandscape ? 1280 : 1080 },
+    height: { ideal: wantLandscape ? 720 : 1440 },
+    // Landscape 16:9 · Portrait 4:3 (3:4 width:height)
+    aspectRatio: { ideal: wantLandscape ? 16 / 9 : 3 / 4 },
   };
 }
 
@@ -611,34 +612,55 @@ export function WebcamRecorder({
       </div>
 
       <div className="how-banner mt-4">
-        <strong>Recommended:</strong> record here with the webcam and
-        teleprompter. It is the easiest way to read your script and look at the
-        camera at the same time. Uses the selfie camera first — tap Flip to
-        switch.
+        <strong>Computer webcam:</strong> record here with your webcam and
+        teleprompter — easiest on a laptop or desktop. Selfie camera opens
+        first; use Flip to switch. For a phone Camera app instead, see{" "}
+        <strong>Recording Tips → Phone Camera</strong> above.
       </div>
 
-      <PanelSteps
-        className="mt-4"
-        steps={[
-          <>
-            Place this window at the <strong>top of your monitor</strong>, near
-            the webcam. Scoot back — frame from about your waist to the top of
-            your head. Preview shape is{" "}
-            <strong>{orientationLabel(videoOrientation)}</strong> (from Video
-            Format above).
-          </>,
-          <>
-            Click <strong>Start Webcam</strong> and allow camera and microphone
-            when asked. Selfie camera opens by default — use <strong>Flip</strong>{" "}
-            to switch.
-          </>,
-          <>
-            <strong>Step 1 — Follow My Voice:</strong> the computer listens and
-            scrolls the script as you read. Then{" "}
-            <strong>Step 2 — Start Recording</strong>. Pause or Stop anytime.
-          </>,
-        ]}
-      />
+      {/* Desktop-only webcam setup steps (phone uses the fullscreen studio tips). */}
+      {isMobile !== true ? (
+        <PanelSteps
+          className="mt-4"
+          steps={[
+            <>
+              <strong>Webcam setup:</strong> place this window at the{" "}
+              <strong>top of your monitor</strong>, near the webcam lens. Scoot
+              back — frame from about your waist to the top of your head. Shape
+              is <strong>{orientationLabel(videoOrientation)}</strong>.
+            </>,
+            <>
+              Click <strong>Start Webcam</strong> and allow the computer camera
+              and microphone when asked. Selfie camera opens by default — use{" "}
+              <strong>Flip</strong> for the rear camera if needed.
+            </>,
+            <>
+              <strong>Step 1 — Follow My Voice</strong> (computer mic), then{" "}
+              <strong>Step 2 — Start Recording</strong>. Pause or Stop anytime.
+            </>,
+          ]}
+        />
+      ) : (
+        <PanelSteps
+          className="mt-4"
+          steps={[
+            <>
+              <strong>On your phone:</strong> video format is{" "}
+              <strong>{orientationLabel(videoOrientation)}</strong>. Hold the
+              phone to match (upright for portrait 4:3, sideways for landscape).
+            </>,
+            <>
+              Tap <strong>Start Webcam</strong>, allow camera and mic, then use{" "}
+              <strong>Flip</strong> if you need the rear camera.
+            </>,
+            <>
+              <strong>Follow My Voice</strong>, then{" "}
+              <strong>Start Recording</strong>. Pause or Stop from the bottom
+              controls.
+            </>,
+          ]}
+        />
+      )}
 
       {phase === "idle" ? (
         <div className="mt-4 flex flex-wrap gap-3">
@@ -715,7 +737,7 @@ export function WebcamRecorder({
                   role="dialog"
                   aria-modal="true"
                   aria-label="Webcam recorder"
-                  className="fixed z-[9999] grid grid-rows-[minmax(7.5rem,28%)_minmax(0,1fr)_auto] bg-black text-white"
+                  className="fixed z-[9999] grid grid-rows-[minmax(12rem,38%)_minmax(0,1fr)_auto] bg-black text-white"
                   style={{
                     top: viewport.top,
                     left: viewport.left,

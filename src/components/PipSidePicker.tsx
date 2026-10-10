@@ -25,7 +25,7 @@ const OPTIONS: Array<{ id: PipSide; label: string; hint: string }> = [
 export function PipSidePicker() {
   const { pipSide, setPipSide, videoOrientation } = useStudio();
   const formatLabel =
-    videoOrientation === "portrait" ? "portrait (9:16)" : "landscape (16:9)";
+    videoOrientation === "portrait" ? "portrait (4:3)" : "landscape (16:9)";
 
   return (
     <section className="section-card bg-white p-4 md:p-5">
