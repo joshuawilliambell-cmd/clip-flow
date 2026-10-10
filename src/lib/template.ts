@@ -88,7 +88,7 @@ export const VIDEO_TEMPLATE = {
   defaultVideoVolume: 0.5,
   branding: {
     brandName: "Love's",
-    productName: "Video Studio",
+    productName: "Enterprise Studio",
     primary: "#ED2024",
     primaryDark: "#C41418",
     accent: "#FFD400",
