@@ -17,7 +17,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "Love's Video Studio",
   description:
-    "Love's-branded introduction video creator for Allego. Upload, add team photos, export an MP4.",
+    "Love's-branded introduction video creator. Upload, add team photos, export an MP4.",
 };
 
 export default function RootLayout({

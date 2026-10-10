@@ -4,9 +4,7 @@
  * - Auth: corporate SSO before production deploy
  * - Storage: private object storage + expiring signed URLs for uploads
  * - Render worker: async Remotion/@remotion/renderer jobs with job status
- * - Allego: link-based access first; embedding / auto-publish only if approved
- *
- * Do not gate access solely on an Allego referring URL.
+ * - Sharing: optional publish / embed hooks only if approved later
  */
 
 export type RenderJobStatus =

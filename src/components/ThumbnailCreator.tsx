@@ -230,7 +230,7 @@ export function ThumbnailCreator({
           <p>
             <strong>Optional.</strong> This still image can play for one second
             at the start of your video (or you can download it as a PNG for
-            Allego or email). It shows you and your teammates as a team card.
+            email or chat). It shows you and your teammates as a team card.
           </p>
           <p>
             Your photo here is for this thumbnail only. It does not put a small

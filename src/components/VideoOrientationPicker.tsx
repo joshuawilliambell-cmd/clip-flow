@@ -19,7 +19,7 @@ const OPTIONS: Array<{
   {
     id: "landscape",
     label: "Landscape",
-    hint: "Wide 16:9 — best for desktop and Allego-style players",
+    hint: "Wide 16:9 — best for desktop and most video players",
     ratio: "16:9",
   },
   {

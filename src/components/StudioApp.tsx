@@ -52,7 +52,7 @@ function StudioShell() {
 
           <div className="flex max-w-md items-start gap-2">
             <p className="text-right text-[13px] font-semibold leading-snug tracking-tight text-[var(--ink)] md:text-[14px]">
-              Allego team intros &amp; thumbnails
+              Team intros &amp; thumbnails
             </p>
             <HelpTip title="What is this tool?" size="lg">
               <p>
@@ -79,7 +79,7 @@ function StudioShell() {
               <span className="hidden text-white/35 sm:inline">|</span>
               <span className="hidden sm:inline">Team intros</span>
               <span className="hidden text-white/35 md:inline">|</span>
-              <span className="hidden md:inline">Allego ready</span>
+              <span className="hidden md:inline">MP4 export</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-[var(--radius-sm)] border border-white/25 bg-[var(--primary)] px-2.5 py-1 text-[10px] font-semibold tracking-[0.12em] md:text-[11px]">
@@ -106,7 +106,7 @@ function StudioShell() {
       <footer className="mt-2 border-t border-[var(--ink)] bg-[var(--olive)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3.5 text-white md:px-6">
           <p className="text-[13px] font-semibold tracking-tight">
-            Love&apos;s Video Studio · Allego digital sales rooms
+            Love&apos;s Video Studio · Fleet team introductions
           </p>
           <p className="text-[12px] font-medium text-white/70">
             Short · Clear · On-brand

@@ -33,7 +33,7 @@ export function formatClock(seconds: number): string {
 /**
  * Estimate when each teammate’s name is spoken from their place in the
  * script text, then map that to the video timeline. Falls back to the
- * Allego defaults (23 / 35 / 47 / 56s) when a name is missing from the script.
+ * template defaults (23 / 35 / 47 / 56s) when a name is missing from the script.
  */
 export function cueStartsFromScript(
   photos: TeamPhoto[],
@@ -75,7 +75,7 @@ export function cueStartsFromScript(
 
 /**
  * Place filled photos when each name is cued in the script (preferred),
- * or at Allego defaults. Durations default to 10s; bars are clamped so they
+ * or at template defaults. Durations default to 10s; bars are clamped so they
  * fit without overlapping. Empty slots stay unused. Users can drag.
  */
 export function autoArrangePhotos(

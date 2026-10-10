@@ -55,7 +55,7 @@ export const VIDEO_TEMPLATE = {
   defaultOrientation: "landscape" as VideoOrientation,
   fps: 30,
   /**
-   * Preferred Allego intro length (guidance + teleprompter pacing default).
+   * Preferred intro length (guidance + teleprompter pacing default).
    * Not a hard maximum — uploads, webcam takes, and trims may be longer
    * (2+ minutes supported; keep under maxVideoBytes).
    */
