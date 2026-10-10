@@ -10,6 +10,7 @@ export const PRESET_JOB_TITLES = [
   "General Manager of Fuel Sales",
   "Inside Sales Account Manager",
   "Inside Sales Account Manager Fleet Sales",
+  "Manager of Fleet Maintenance & Service",
   "Manager of Inside Sales",
   "National Account Manager",
   "National Fuel Marketer",
@@ -62,6 +63,8 @@ export const PRESET_JOB_DUTIES: Record<PresetJobTitle, string> = {
     "remote fleet sales support, quotes and program setup, and growing your Love’s services by phone",
   "Manager of Inside Sales":
     "inside sales coverage, escalations, and keeping remote account support on track for you",
+  "Manager of Fleet Maintenance & Service":
+    "fleet maintenance planning, service coverage, and keeping your trucks running with Total Truck Care support",
 };
 
 /** Sentinel value for the custom / free-text title option. */
