@@ -6,7 +6,7 @@ import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
 import { PanelSteps, StepCircle } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import { useIsLandscape, useIsMobile } from "@/hooks/useIsMobile";
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
@@ -46,6 +46,7 @@ export function WebcamRecorder({
   disabled,
 }: WebcamRecorderProps) {
   const isMobile = useIsMobile();
+  const isLandscape = useIsLandscape();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -129,6 +130,7 @@ export function WebcamRecorder({
   const live = phase === "preview" || phase === "recording";
 
   const mobileStudio = isMobile === true;
+  const mobilePortrait = mobileStudio && isLandscape === false;
 
   // Mobile fullscreen selfie studio — lock page scroll while active.
   useEffect(() => {
@@ -164,12 +166,14 @@ export function WebcamRecorder({
     setMimeType(mime || "video/webm");
 
     try {
+      // Prefer a landscape 16:9 capture (matches the finished video).
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: {
           facingMode: "user",
           width: { ideal: 1280 },
           height: { ideal: 720 },
+          aspectRatio: { ideal: 16 / 9 },
         },
       });
       streamRef.current = stream;
@@ -442,9 +446,17 @@ export function WebcamRecorder({
                   : "relative overflow-hidden section-card",
               )}
             >
-              {/* Mobile: teleprompter + Follow My Voice in the top quarter. */}
+              {/* Mobile: teleprompter + Follow My Voice in the top strip. */}
               {mobileStudio ? (
-                <div className="h-[28%] min-h-[12rem] max-h-[34vh] shrink-0">
+                <div
+                  className={clsx(
+                    "shrink-0",
+                    // Landscape phone: shorter strip so the 16:9 camera stays large.
+                    isLandscape
+                      ? "h-[22%] min-h-[5.5rem] max-h-[28vh]"
+                      : "h-[26%] min-h-[10.5rem] max-h-[32vh]",
+                  )}
+                >
                   <WebcamTeleprompterOverlay
                     active={live}
                     recording={phase === "recording"}
@@ -455,37 +467,50 @@ export function WebcamRecorder({
               <div
                 className={clsx(
                   "relative",
-                  mobileStudio ? "min-h-0 flex-1" : "aspect-video",
+                  mobileStudio
+                    ? "flex min-h-0 flex-1 items-center justify-center bg-black"
+                    : "aspect-video",
                 )}
               >
-                <video
-                  ref={videoRef}
-                  muted
-                  playsInline
-                  autoPlay
+                {/* Mobile: always frame the camera as landscape 16:9 (letterboxed). */}
+                <div
                   className={clsx(
-                    "object-cover scale-x-[-1]",
+                    "relative overflow-hidden bg-black",
                     mobileStudio
-                      ? "absolute inset-0 h-full w-full"
-                      : "aspect-video h-full w-full",
+                      ? "aspect-video w-full max-h-full"
+                      : "h-full w-full",
                   )}
-                />
-                {!mobileStudio ? (
-                  <WebcamTeleprompterOverlay
-                    active={live}
-                    recording={phase === "recording"}
+                >
+                  <video
+                    ref={videoRef}
+                    muted
+                    playsInline
+                    autoPlay
+                    className="h-full w-full scale-x-[-1] object-cover"
                   />
-                ) : null}
-                {phase === "recording" ? (
-                  <div className="absolute right-3 top-3 z-30 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
-                    <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
-                    Live · Rec {formatClock(seconds)}
-                  </div>
-                ) : (
-                  <div className="absolute right-3 top-3 z-30 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
-                    Live preview — not recording yet
-                  </div>
-                )}
+                  {!mobileStudio ? (
+                    <WebcamTeleprompterOverlay
+                      active={live}
+                      recording={phase === "recording"}
+                    />
+                  ) : null}
+                  {phase === "recording" ? (
+                    <div className="absolute right-3 top-3 z-30 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
+                      <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
+                      Live · Rec {formatClock(seconds)}
+                    </div>
+                  ) : (
+                    <div className="absolute right-3 top-3 z-30 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
+                      Live preview · landscape 16:9
+                    </div>
+                  )}
+                  {mobilePortrait ? (
+                    <div className="absolute inset-x-2 bottom-2 z-30 rounded-md border border-[var(--yellow)]/70 bg-black/80 px-2 py-1.5 text-center text-[11px] font-semibold leading-snug text-white">
+                      Turn your phone <strong className="text-[var(--yellow)]">sideways</strong>{" "}
+                      (landscape) for the best recording — same as the finished video.
+                    </div>
+                  ) : null}
+                </div>
               </div>
 
               {/* Mobile: record controls docked under the selfie. */}

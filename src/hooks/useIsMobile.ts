@@ -19,3 +19,18 @@ export function useIsMobile(breakpointPx = 768): boolean | null {
 
   return mobile;
 }
+
+/** True when the device is held sideways (landscape). */
+export function useIsLandscape(): boolean | null {
+  const [landscape, setLandscape] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(orientation: landscape)");
+    const sync = () => setLandscape(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return landscape;
+}
