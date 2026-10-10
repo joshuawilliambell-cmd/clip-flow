@@ -1,8 +1,15 @@
 "use client";
 
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { Mic, Pause, Play, RotateCcw } from "lucide-react";
+import { ControlTip } from "@/components/ControlTip";
 import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import { clsx } from "clsx";
+
+export type VoiceFollowControls = {
+  listening: boolean;
+  supported: boolean;
+  onToggle: () => void;
+};
 
 type TeleprompterControlBarProps = {
   enabled: boolean;
@@ -13,6 +20,8 @@ type TeleprompterControlBarProps = {
   onReset: () => void;
   pixelsPerTick: number;
   onSpeedChange: (value: number) => void;
+  /** Primary practice path — shown first when provided. */
+  voiceFollow?: VoiceFollowControls;
   /** Practice-only extras under the shared bar. */
   extras?: React.ReactNode;
 };
@@ -30,65 +39,101 @@ export function TeleprompterControlBar({
   onReset,
   pixelsPerTick,
   onSpeedChange,
+  voiceFollow,
   extras,
 }: TeleprompterControlBarProps) {
   return (
     <div className="space-y-2 border-t border-white/20 bg-black/35 px-3 py-3">
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
-          onClick={onToggleEnabled}
-          className={clsx(
-            "rounded-full border px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide",
-            enabled
-              ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-              : "border-white/40 bg-black/50 text-white",
-          )}
-        >
-          {enabled ? "Click Here — Prompter On" : "Click Here — Prompter Off"}
-        </button>
+        {voiceFollow ? (
+          <ControlTip
+            tip={
+              voiceFollow.supported
+                ? "Best way to practice. Click this, allow the microphone when asked, then read out loud. The script moves with you as you talk. Works best in Chrome or Edge on your computer."
+                : "This needs Chrome or Edge on your computer so it can listen while you read."
+            }
+          >
+            <button
+              type="button"
+              disabled={!enabled || !voiceFollow.supported}
+              onClick={voiceFollow.onToggle}
+              className={clsx(
+                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[12px] font-bold shadow-sm disabled:opacity-40",
+                voiceFollow.listening
+                  ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                  : "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)] ring-2 ring-[var(--yellow)]/40",
+              )}
+            >
+              <Mic className="h-3.5 w-3.5" aria-hidden />
+              {voiceFollow.listening
+                ? "Click Here to Stop Voice Follow"
+                : "Click Here to Follow My Voice"}
+            </button>
+          </ControlTip>
+        ) : null}
 
-        <button
-          type="button"
-          disabled={!enabled}
-          onClick={onToggleScroll}
-          className="inline-flex items-center gap-1 rounded-full border border-[var(--yellow)] bg-[var(--yellow)] px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] disabled:opacity-40"
-        >
-          {scrolling || countdownActive ? (
-            <>
-              <Pause className="h-3.5 w-3.5" /> Click Here to Pause
-            </>
-          ) : (
-            <>
-              <Play className="h-3.5 w-3.5 fill-current" /> Click Here to Play /
-              Scroll
-            </>
-          )}
-        </button>
+        <ControlTip tip="Turns the on-screen script on or off. Leave this on while you practice or record.">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={enabled}
+            onClick={onToggleEnabled}
+            className={clsx(
+              "rounded-full border px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide",
+              enabled
+                ? "border-[var(--yellow)]/70 bg-black/50 text-white"
+                : "border-white/40 bg-black/50 text-white",
+            )}
+          >
+            {enabled ? "Click Here — Prompter On" : "Click Here — Prompter Off"}
+          </button>
+        </ControlTip>
 
-        <button
-          type="button"
-          disabled={!enabled}
-          onClick={onReset}
-          className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-40"
-        >
-          <RotateCcw className="h-3.5 w-3.5" /> Click Here for Top
-        </button>
+        <ControlTip tip="Backup option if you are not using Follow My Voice. Starts a 3-2-1 countdown, then moves the script at a steady speed. Click again to pause.">
+          <button
+            type="button"
+            disabled={!enabled || Boolean(voiceFollow?.listening)}
+            onClick={onToggleScroll}
+            className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-40"
+          >
+            {scrolling || countdownActive ? (
+              <>
+                <Pause className="h-3.5 w-3.5" /> Click Here to Pause
+              </>
+            ) : (
+              <>
+                <Play className="h-3.5 w-3.5 fill-current" /> Click Here to Play /
+                Scroll
+              </>
+            )}
+          </button>
+        </ControlTip>
 
-        <div className="flex min-w-[12rem] max-w-[18rem] flex-1 items-center gap-2 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-white">
-          <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-white/80">
-            Speed
-          </span>
-          <TeleprompterSpeedSlider
-            value={pixelsPerTick}
+        <ControlTip tip="Sends the script back to the very first line so you can start over.">
+          <button
+            type="button"
             disabled={!enabled}
-            variant="overlay"
-            aria-label="Teleprompter scroll speed"
-            onChange={onSpeedChange}
-          />
-        </div>
+            onClick={onReset}
+            className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-40"
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Click Here for Top
+          </button>
+        </ControlTip>
+
+        <ControlTip tip="How fast the script moves when you use Play / Scroll. This does not change Follow My Voice — that listens to you instead.">
+          <div className="flex min-w-[12rem] max-w-[18rem] flex-1 items-center gap-2 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-white">
+            <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-white/80">
+              Speed
+            </span>
+            <TeleprompterSpeedSlider
+              value={pixelsPerTick}
+              disabled={!enabled || Boolean(voiceFollow?.listening)}
+              variant="overlay"
+              aria-label="Teleprompter scroll speed"
+              onChange={onSpeedChange}
+            />
+          </div>
+        </ControlTip>
       </div>
       {extras}
     </div>

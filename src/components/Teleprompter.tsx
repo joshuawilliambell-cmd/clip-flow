@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FileUp, ScrollText } from "lucide-react";
+import { ControlTip } from "@/components/ControlTip";
 import { HelpTip } from "@/components/HelpTip";
 import { TeleprompterControlBar } from "@/components/TeleprompterControlBar";
 import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
@@ -432,9 +433,12 @@ export function Teleprompter({
         </div>
         <HelpTip title="Script Teleprompter">
           <p>
-            Practice Here uses the same Play / Scroll, Top, Speed, and On/Off
-            controls as when you record with the webcam — so your practice pace
-            matches the real take.
+            Start with <strong>Follow My Voice</strong> — allow the mic, then
+            read out loud. The script moves with you as you speak.
+          </p>
+          <p>
+            Hover any button for a short plain-language tip. Play / Scroll is a
+            backup if you are not using the mic.
           </p>
         </HelpTip>
       </div>
@@ -453,6 +457,11 @@ export function Teleprompter({
             onReset={() => undefined}
             pixelsPerTick={pixelsPerTick}
             onSpeedChange={onSpeedSlider}
+            voiceFollow={{
+              listening: false,
+              supported: voiceFollow.supported,
+              onToggle: () => undefined,
+            }}
           />
         </div>
       ) : (
@@ -463,10 +472,11 @@ export function Teleprompter({
               Practice Here
             </p>
             <p className="mt-1 text-[12px] font-medium leading-snug text-white/80">
-              Same width, speed, and controls as the webcam teleprompter. Click{" "}
-              <strong className="text-white">Play / Scroll</strong> (3-2-1
-              countdown), read out loud, then adjust Speed only after a full
-              pass. Keyboard: Space play/pause · R / Home for top.
+              Same width and controls as the webcam teleprompter. Best option:{" "}
+              <strong className="text-[var(--yellow)]">Follow My Voice</strong>{" "}
+              — click it, allow the microphone, then read out loud so the script
+              follows you. Hover any button for a tip. Play / Scroll is a backup
+              (3-2-1 countdown). Keyboard: Space play/pause · R / Home for top.
             </p>
             <p className="mt-1 text-[12px] font-semibold text-[var(--yellow)]">
               ~{paceSeconds}s · {speedPercent}%
@@ -556,63 +566,55 @@ export function Teleprompter({
             onReset={resetScroll}
             pixelsPerTick={pixelsPerTick}
             onSpeedChange={onSpeedSlider}
+            voiceFollow={{
+              listening: voiceFollow.listening,
+              supported: voiceFollow.supported,
+              onToggle: () => {
+                setScrolling(false);
+                voiceFollow.toggle();
+              },
+            }}
             extras={
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setScrolling(false);
-                      voiceFollow.toggle();
-                    }}
-                    className={clsx(
-                      "rounded-full border px-3 py-1.5 text-[12px] font-bold",
-                      voiceFollow.listening
-                        ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                        : "border-white/40 bg-black/50 text-white",
-                    )}
-                    title={
-                      voiceFollow.supported
-                        ? "Scroll as you speak (Chrome/Edge)"
-                        : "Needs Chrome or Edge speech recognition"
-                    }
-                  >
-                    {voiceFollow.listening
-                      ? "Click Here to Stop Voice Follow"
-                      : "Click Here to Follow My Voice"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLoopPractice((v) => !v)}
-                    className={clsx(
-                      "rounded-full border px-3 py-1.5 text-[12px] font-bold",
-                      loopPractice
-                        ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                        : "border-white/40 bg-black/50 text-white",
-                    )}
-                  >
-                    {loopPractice
-                      ? "Click Here — Loop On"
-                      : "Click Here — Loop Off"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLineRoomy(!lineRoomy)}
-                    className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
-                  >
-                    {lineRoomy
-                      ? "Click Here for Tighter Lines"
-                      : "Click Here for Roomy Lines"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFontLarge(!fontLarge)}
-                    className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
-                  >
-                    {fontLarge
-                      ? "Click Here for Smaller Text"
-                      : "Click Here for Bigger Text"}
-                  </button>
+                  <ControlTip tip="When the script finishes moving on Play / Scroll, it starts again from the top. Handy for extra practice runs.">
+                    <button
+                      type="button"
+                      onClick={() => setLoopPractice((v) => !v)}
+                      className={clsx(
+                        "rounded-full border px-3 py-1.5 text-[12px] font-bold",
+                        loopPractice
+                          ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                          : "border-white/40 bg-black/50 text-white",
+                      )}
+                    >
+                      {loopPractice
+                        ? "Click Here — Loop On"
+                        : "Click Here — Loop Off"}
+                    </button>
+                  </ControlTip>
+                  <ControlTip tip="Adds more space between lines so your eyes can move down the page more easily.">
+                    <button
+                      type="button"
+                      onClick={() => setLineRoomy(!lineRoomy)}
+                      className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
+                    >
+                      {lineRoomy
+                        ? "Click Here for Tighter Lines"
+                        : "Click Here for Roomy Lines"}
+                    </button>
+                  </ControlTip>
+                  <ControlTip tip="Makes the words larger or smaller. Pick what is easiest to read on your screen.">
+                    <button
+                      type="button"
+                      onClick={() => setFontLarge(!fontLarge)}
+                      className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
+                    >
+                      {fontLarge
+                        ? "Click Here for Smaller Text"
+                        : "Click Here for Bigger Text"}
+                    </button>
+                  </ControlTip>
                 </div>
                 {voiceFollow.listening ? (
                   <div className="flex items-center gap-2 px-1">
@@ -641,7 +643,12 @@ export function Teleprompter({
                       ? ` · ${voiceFollow.matchedWords}/${voiceFollow.totalWords} words`
                       : ""}
                   </p>
-                ) : null}
+                ) : (
+                  <p className="text-center text-[11px] font-medium text-white/75">
+                    Tip: start with Follow My Voice. Hover any button to see what
+                    it does.
+                  </p>
+                )}
               </div>
             }
           />
@@ -661,16 +668,17 @@ export function Teleprompter({
                 className="rounded-md bg-black/25 px-3 py-2 [&_strong]:text-[var(--yellow)]"
                 steps={[
                   <>
-                    Use the <strong>Play / Scroll</strong>, <strong>Top</strong>,
-                    and <strong>Speed</strong> controls above (same as webcam).
+                    Click <strong>Follow My Voice</strong>, allow the microphone,
+                    then read out loud — the script follows you (Chrome or Edge).
                   </>,
                   <>
-                    Optional: edit the script below, or click{" "}
-                    <strong>Follow My Voice</strong> (Chrome/Edge).
+                    Hover any button for a short tip. Use{" "}
+                    <strong>Play / Scroll</strong> only if you are not using the
+                    mic.
                   </>,
                   <>
-                    Practice a few full passes before you record. Do not change
-                    speed mid-script.
+                    Practice a few full passes before you record. Edit the script
+                    below anytime.
                   </>,
                 ]}
               />

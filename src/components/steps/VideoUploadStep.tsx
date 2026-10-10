@@ -91,8 +91,9 @@ export function VideoUploadStep() {
               it, replace it, or upload your own.
             </p>
             <p>
-              Practice here first. The speed you set also applies when you
-              record with the webcam.
+              Start with <strong>Follow My Voice</strong> — allow the mic, then
+              read out loud so the script follows you. Hover any button for a
+              plain-language tip.
             </p>
           </HelpTip>
         </div>
