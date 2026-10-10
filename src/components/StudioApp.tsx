@@ -91,8 +91,6 @@ function StudioShell() {
         <div className="border-t border-black/20 bg-[var(--olive)]">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/90 md:px-6 md:text-xs">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span>Fleet Sales</span>
-              <span className="hidden text-white/35 sm:inline">|</span>
               <span className="hidden sm:inline">Team intros</span>
               <span className="hidden text-white/35 md:inline">|</span>
               <span className="hidden md:inline">MP4 export</span>
