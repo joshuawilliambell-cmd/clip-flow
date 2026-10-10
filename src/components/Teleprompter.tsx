@@ -85,7 +85,6 @@ export function Teleprompter({
     people: rosterPeople,
   });
 
-  const [enabled, setEnabled] = useState(true);
   const [source, setSource] = useState<ScriptSource>("official");
   const [script, setScript] = useState(() => officialScript);
   const [customScript, setCustomScript] = useState("");
@@ -171,18 +170,14 @@ export function Teleprompter({
       setScrollDistancePx(Math.max(0, el.scrollHeight - el.clientHeight));
     });
     return () => window.cancelAnimationFrame(id);
-  }, [practiceScript, fontLarge, enabled]);
+  }, [practiceScript, fontLarge]);
 
   // Auto-start scroll when recording begins; allow manual scroll while preparing.
   useEffect(() => {
-    if (!enabled) {
-      setScrolling(false);
-      return;
-    }
     if (!recording) return;
     const delay = window.setTimeout(() => setScrolling(true), 800);
     return () => window.clearTimeout(delay);
-  }, [recording, enabled]);
+  }, [recording]);
 
   // Timer scroll pauses while Follow My Voice is driving the scroll.
   useEffect(() => {
@@ -219,7 +214,7 @@ export function Teleprompter({
   // which made slow slider speeds appear stuck until reset to a faster default.
   // Ease near punctuation so delivery can breathe (PromptSmart-style pacing).
   useEffect(() => {
-    if (!scrolling || !enabled || voiceFollow.listening) {
+    if (!scrolling || voiceFollow.listening) {
       scrollCarryRef.current = 0;
       return;
     }
@@ -256,7 +251,7 @@ export function Teleprompter({
       }
     }, TELEPROMPTER_TICK_MS);
     return () => window.clearInterval(id);
-  }, [scrolling, enabled, voiceFollow.listening]);
+  }, [scrolling, voiceFollow.listening]);
 
   const resetScroll = () => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
@@ -285,7 +280,7 @@ export function Teleprompter({
 
   // Space = play/pause with countdown; R / Home = back to top (common prompter shortcuts).
   useEffect(() => {
-    if (!enabled || recording) return;
+    if (recording) return;
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (
@@ -307,7 +302,7 @@ export function Teleprompter({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, recording, scrolling, countdown, voiceFollow.listening]);
+  }, [recording, scrolling, countdown, voiceFollow.listening]);
 
   const useOfficial = () => {
     setSource("official");
@@ -394,13 +389,11 @@ export function Teleprompter({
               Script Teleprompter
             </p>
             <p className="text-[12px] font-medium text-white/75">
-              {enabled
-                ? source === "official"
-                  ? `Official · ${INTRO_SCRIPTS[teamMemberCount].title}`
-                  : uploadName
-                    ? `Custom · ${uploadName}`
-                    : "Custom Script"
-                : "Off"}
+              {source === "official"
+                ? `Official · ${INTRO_SCRIPTS[teamMemberCount].title}`
+                : uploadName
+                  ? `Custom · ${uploadName}`
+                  : "Custom Script"}
               {" · "}
               Same controls as the webcam teleprompter
             </p>
@@ -419,29 +412,7 @@ export function Teleprompter({
         </HelpTip>
       </div>
 
-      {!enabled ? (
-        <div className="px-6 py-10 text-center">
-          <p className="mb-4 text-[15px] font-medium text-white/75">
-            Teleprompter is off. Turn it on with the control below to practice.
-          </p>
-          <TeleprompterControlBar
-            enabled={false}
-            onToggleEnabled={() => setEnabled(true)}
-            scrolling={false}
-            countdownActive={false}
-            onToggleScroll={() => undefined}
-            onReset={() => undefined}
-            pixelsPerTick={pixelsPerTick}
-            onSpeedChange={onSpeedSlider}
-            voiceFollow={{
-              listening: false,
-              supported: voiceFollow.supported,
-              onToggle: () => undefined,
-            }}
-          />
-        </div>
-      ) : (
-        <>
+      <>
           {/* Practice stage first — fixed reading window + always-visible controls */}
           <div className="border-b border-white/15 px-4 py-3">
             <p className="text-[15px] font-bold tracking-tight text-[var(--yellow)]">
@@ -537,12 +508,6 @@ export function Teleprompter({
           </div>
 
           <TeleprompterControlBar
-            enabled={enabled}
-            onToggleEnabled={() => {
-              setEnabled((v) => !v);
-              setScrolling(false);
-              voiceFollow.stop();
-            }}
             scrolling={scrolling}
             countdownActive={countdown !== null}
             onToggleScroll={toggleScrollWithCountdown}
@@ -758,8 +723,7 @@ export function Teleprompter({
               ) : null}
             </div>
           ) : null}
-        </>
-      )}
+      </>
     </div>
   );
 }

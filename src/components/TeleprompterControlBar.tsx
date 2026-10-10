@@ -15,8 +15,6 @@ export type VoiceFollowControls = {
 };
 
 type TeleprompterControlBarProps = {
-  enabled: boolean;
-  onToggleEnabled: () => void;
   scrolling: boolean;
   countdownActive: boolean;
   onToggleScroll: () => void;
@@ -34,8 +32,6 @@ type TeleprompterControlBarProps = {
  * practice feels identical to the recording teleprompter.
  */
 export function TeleprompterControlBar({
-  enabled,
-  onToggleEnabled,
   scrolling,
   countdownActive,
   onToggleScroll,
@@ -60,11 +56,15 @@ export function TeleprompterControlBar({
           >
             <span className="inline-flex items-center gap-1.5">
               {voiceFollow.step ? (
-                <StepCircle n={voiceFollow.step} tone="dark" label={`Step ${voiceFollow.step}`} />
+                <StepCircle
+                  n={voiceFollow.step}
+                  tone="dark"
+                  label={`Step ${voiceFollow.step}`}
+                />
               ) : null}
               <button
                 type="button"
-                disabled={!enabled || !voiceFollow.supported}
+                disabled={!voiceFollow.supported}
                 onClick={voiceFollow.onToggle}
                 className={clsx(
                   "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[12px] font-bold shadow-sm disabled:opacity-40",
@@ -84,27 +84,10 @@ export function TeleprompterControlBar({
           </ControlTip>
         ) : null}
 
-        <ControlTip tip="Turns the on-screen script on or off. Leave this on while you practice or record.">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={enabled}
-            onClick={onToggleEnabled}
-            className={clsx(
-              "rounded-full border px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide",
-              enabled
-                ? "border-[var(--yellow)]/70 bg-black/50 text-white"
-                : "border-white/40 bg-black/50 text-white",
-            )}
-          >
-            {enabled ? "Click Here — Prompter On" : "Click Here — Prompter Off"}
-          </button>
-        </ControlTip>
-
         <ControlTip tip="Backup option if you are not using Follow My Voice. Starts a 3-2-1 countdown, then moves the script at a steady speed. Click again to pause.">
           <button
             type="button"
-            disabled={!enabled || Boolean(voiceFollow?.listening)}
+            disabled={Boolean(voiceFollow?.listening)}
             onClick={onToggleScroll}
             className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-40"
           >
@@ -124,9 +107,8 @@ export function TeleprompterControlBar({
         <ControlTip tip="Sends the script back to the very first line so you can start over.">
           <button
             type="button"
-            disabled={!enabled}
             onClick={onReset}
-            className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
           >
             <RotateCcw className="h-3.5 w-3.5" /> Click Here for Top
           </button>
@@ -139,7 +121,7 @@ export function TeleprompterControlBar({
             </span>
             <TeleprompterSpeedSlider
               value={pixelsPerTick}
-              disabled={!enabled || Boolean(voiceFollow?.listening)}
+              disabled={Boolean(voiceFollow?.listening)}
               variant="overlay"
               aria-label="Teleprompter scroll speed"
               onChange={onSpeedChange}

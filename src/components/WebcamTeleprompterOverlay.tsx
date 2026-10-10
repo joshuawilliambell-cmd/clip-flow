@@ -71,7 +71,6 @@ export function WebcamTeleprompterOverlay({
   );
   scriptRef.current = script;
 
-  const [enabled, setEnabled] = useState(true);
   const [scrolling, setScrolling] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const voiceFollow = useTeleprompterVoiceFollow(script, scrollerRef);
@@ -90,7 +89,7 @@ export function WebcamTeleprompterOverlay({
 
   // Auto-scroll with countdown when recording begins.
   useEffect(() => {
-    if (!active || !enabled) {
+    if (!active) {
       setScrolling(false);
       setCountdown(null);
       return;
@@ -101,7 +100,7 @@ export function WebcamTeleprompterOverlay({
       return;
     }
     setCountdown(3);
-  }, [recording, active, enabled]);
+  }, [recording, active]);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -125,7 +124,7 @@ export function WebcamTeleprompterOverlay({
   }, [voiceFollow.listening, scrolling]);
 
   useEffect(() => {
-    if (!scrolling || !enabled || !active || voiceFollow.listening) {
+    if (!scrolling || !active || voiceFollow.listening) {
       scrollCarryRef.current = 0;
       return;
     }
@@ -153,7 +152,7 @@ export function WebcamTeleprompterOverlay({
       }
     }, TELEPROMPTER_TICK_MS);
     return () => window.clearInterval(id);
-  }, [scrolling, enabled, active, voiceFollow.listening]);
+  }, [scrolling, active, voiceFollow.listening]);
 
   if (!active) return null;
 
@@ -224,26 +223,18 @@ export function WebcamTeleprompterOverlay({
           ) : null}
           <div
             ref={scrollerRef}
-            className={`h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none ${
-              !enabled ? "opacity-40" : ""
-            }`}
+            className="h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none"
             style={{ scrollbarWidth: "none" }}
             aria-live="polite"
           >
-            {enabled ? (
-              <TeleprompterHighlightedScript
-                script={script}
-                highlightThrough={highlightThrough}
-                fontLarge={fontLarge}
-                roomyLines={lineRoomy}
-                className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]"
-                emptyLabel="Add your script above in the teleprompter."
-              />
-            ) : (
-              <p className="mx-auto max-w-[28ch] text-center text-[1.15rem] font-semibold text-white/70">
-                Teleprompter off — tap On below to show your script.
-              </p>
-            )}
+            <TeleprompterHighlightedScript
+              script={script}
+              highlightThrough={highlightThrough}
+              fontLarge={fontLarge}
+              roomyLines={lineRoomy}
+              className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]"
+              emptyLabel="Add your script above in the teleprompter."
+            />
             <div className="h-24" aria-hidden />
           </div>
         </div>
@@ -251,13 +242,6 @@ export function WebcamTeleprompterOverlay({
 
       <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-30">
         <TeleprompterControlBar
-          enabled={enabled}
-          onToggleEnabled={() => {
-            setEnabled((v) => !v);
-            setScrolling(false);
-            setCountdown(null);
-            voiceFollow.stop();
-          }}
           scrolling={scrolling}
           countdownActive={countdown !== null}
           onToggleScroll={toggleScrollWithCountdown}
