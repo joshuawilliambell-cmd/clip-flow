@@ -19,7 +19,12 @@ import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { HelpTip } from "@/components/HelpTip";
 import { VideoFilmstripBar } from "@/components/VideoFilmstripBar";
 import { filledTeamPhotos } from "@/lib/team-slots";
-import { createQuietAudio, type QuietAudio } from "@/lib/quiet-audio";
+import {
+  createQuietAudio,
+  createQuietVideoVoice,
+  type QuietAudio,
+  type QuietVideoVoice,
+} from "@/lib/quiet-audio";
 
 /**
  * Native HTML5 preview — Remotion Player often stays black on blob: uploads
@@ -50,6 +55,8 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
   const shellRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const musicRef = useRef<QuietAudio | null>(null);
+  const voiceRef = useRef<QuietVideoVoice | null>(null);
+  const [voiceDecoded, setVoiceDecoded] = useState(false);
   const [nativeError, setNativeError] = useState<string | null>(null);
   const [hasFrame, setHasFrame] = useState(false);
 
@@ -89,11 +96,50 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTime, isPlaying, video, trimStart]);
 
-  // Volume
+  // Talking-video voice via decoded Web Audio + GainNode. Required on iPhone —
+  // HTMLVideoElement.volume is ignored there (always full device level).
+  // Picture stays on <video> (muted when decode succeeds).
   useEffect(() => {
-    const el = videoRef.current;
-    if (el) el.volume = Math.min(1, Math.max(0, videoVolume));
-  }, [videoVolume, video]);
+    if (!video?.url) {
+      voiceRef.current?.dispose();
+      voiceRef.current = null;
+      setVoiceDecoded(false);
+      return;
+    }
+    const voice = createQuietVideoVoice(video.url, videoVolume);
+    voiceRef.current = voice;
+    setVoiceDecoded(false);
+    let cancelled = false;
+    void voice.ready.then((ok) => {
+      if (cancelled) return;
+      setVoiceDecoded(ok);
+      const el = videoRef.current;
+      if (!el) return;
+      if (ok) {
+        el.muted = true;
+        el.volume = 0;
+      } else {
+        el.muted = false;
+        el.volume = Math.min(1, Math.max(0, videoVolume));
+      }
+    });
+    return () => {
+      cancelled = true;
+      voice.dispose();
+      if (voiceRef.current === voice) voiceRef.current = null;
+      setVoiceDecoded(false);
+    };
+    // Recreate only when the source changes; volume synced below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video?.url]);
+
+  useEffect(() => {
+    voiceRef.current?.setVolume(videoVolume);
+    if (!voiceDecoded) {
+      const el = videoRef.current;
+      if (el) el.volume = Math.min(1, Math.max(0, videoVolume));
+    }
+  }, [videoVolume, voiceDecoded, video?.url]);
 
   // Looping music bed via Web Audio (GainNode). Required on iPhone — HTML
   // <audio>.volume is ignored there and can play at full device level.
@@ -128,6 +174,15 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
         el.currentTime = sourceTime(0);
         setCurrentTime(0);
       }
+      if (voiceDecoded) {
+        el.muted = true;
+        el.volume = 0;
+        voiceRef.current?.setVolume(videoVolume);
+        void voiceRef.current?.playFrom(el.currentTime);
+      } else {
+        el.muted = false;
+        el.volume = Math.min(1, Math.max(0, videoVolume));
+      }
       void el.play().catch(() => {
         setIsPlaying(false);
         setNativeError(
@@ -145,10 +200,20 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
       }
     } else {
       el.pause();
+      voiceRef.current?.pause();
       musicRef.current?.pause();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying, video, musicEnabled, musicVolume, musicSrc, outputDuration]);
+  }, [
+    isPlaying,
+    video,
+    musicEnabled,
+    musicVolume,
+    musicSrc,
+    outputDuration,
+    voiceDecoded,
+    videoVolume,
+  ]);
 
   // Reset frame flag when source changes
   useEffect(() => {
@@ -221,10 +286,14 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
       el.pause();
       setIsPlaying(false);
       setCurrentTime(outputDuration);
+      voiceRef.current?.pause();
       musicRef.current?.pause();
       return;
     }
-    if (isPlaying) setCurrentTime(t);
+    if (isPlaying) {
+      setCurrentTime(t);
+      if (voiceDecoded) voiceRef.current?.syncTo(el.currentTime);
+    }
   };
 
   const togglePlay = useCallback(() => {

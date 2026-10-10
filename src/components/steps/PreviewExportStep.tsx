@@ -428,7 +428,8 @@ export function PreviewExportStep({
                 <p>Drag left to make your voice quieter.</p>
                 <p>
                   Starts at 50% so playback is not too loud. Raise it if your
-                  voice is hard to hear.
+                  voice is hard to hear. Works on phone and computer — tap Play
+                  after you change it to hear the new level.
                 </p>
               </HelpTip>
             </span>
