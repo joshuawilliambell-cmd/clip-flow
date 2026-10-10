@@ -28,10 +28,14 @@ export function VideoUploadStep() {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const handleFiles = async (files: FileList | null) => {
+  const handleFiles = async (
+    files: FileList | null,
+    inputEl?: HTMLInputElement | null,
+  ) => {
     const file = files?.[0];
     // Allow picking the same iPhone album clip again after a failed attempt.
-    if (inputRef.current) inputRef.current.value = "";
+    if (inputEl) inputEl.value = "";
+    else if (inputRef.current) inputRef.current.value = "";
     if (!file) return;
     setError(null);
     setUploading(true);
@@ -197,20 +201,39 @@ export function VideoUploadStep() {
                 </p>
               </div>
               <p className="mb-4 max-w-md text-center text-[14px] font-medium text-[var(--muted)]">
-                Phone photo album or computer · MP4 / MOV / WebM
+                Phone photo album or computer · MP4 / MOV
               </p>
-              <button
-                type="button"
-                disabled={uploading}
-                onClick={() => inputRef.current?.click()}
-                className="btn-primary"
+              {/*
+                iOS Safari often drops onChange when the file input is
+                display:none and opened via .click(). Keep the input opacity-0
+                over the label instead.
+              */}
+              <label
+                className={`btn-primary relative inline-flex cursor-pointer overflow-hidden ${
+                  uploading ? "pointer-events-none opacity-45" : ""
+                }`}
                 data-testid="choose-video-folder"
               >
                 <Upload className="h-5 w-5" />
                 {uploading
                   ? "Adding your video…"
                   : "Click Here to Choose Video From File"}
-              </button>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="video/mp4,video/quicktime,.mp4,.mov,.m4v,video/*"
+                  disabled={uploading}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  onChange={(e) =>
+                    void handleFiles(e.target.files, e.currentTarget)
+                  }
+                />
+              </label>
+              <p className="mt-3 max-w-md text-center text-[13px] font-semibold leading-snug text-[var(--ink)]">
+                On iPhone: tap the video once, then tap the{" "}
+                <strong>blue ✓ at the top right</strong> to add it (not only the
+                checkmark on the thumbnail).
+              </p>
               {uploading ? (
                 <p className="mt-3 text-center text-[14px] font-semibold text-[var(--ink)]">
                   Loading from your album — this can take a few seconds on
@@ -236,13 +259,17 @@ export function VideoUploadStep() {
                   Length: {video.durationSeconds.toFixed(1)} seconds
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                className="btn-secondary"
-              >
+              <label className="btn-secondary relative inline-flex cursor-pointer overflow-hidden">
                 Click Here to Replace With Video From File
-              </button>
+                <input
+                  type="file"
+                  accept="video/mp4,video/quicktime,.mp4,.mov,.m4v,video/*"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  onChange={(e) =>
+                    void handleFiles(e.target.files, e.currentTarget)
+                  }
+                />
+              </label>
               <button
                 type="button"
                 onClick={clearVideo}
@@ -258,14 +285,6 @@ export function VideoUploadStep() {
           </div>
         )}
       </section>
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept="video/*,video/mp4,video/quicktime,video/x-m4v,.mp4,.mov,.m4v,.webm"
-        className="hidden"
-        onChange={(e) => void handleFiles(e.target.files)}
-      />
 
       {/* Errors while a video is already loaded (replace failed). Fresh-pick errors show in the upload box. */}
       {error && video ? (
