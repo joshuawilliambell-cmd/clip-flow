@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { HelpCircle, X } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -11,6 +11,8 @@ type HelpTipProps = {
   /** Larger touch target for primary controls */
   size?: "md" | "lg";
 };
+
+const EDGE_PAD = 12;
 
 /**
  * Click/tap tip bubble — works better than hover-only for touch screens
@@ -25,6 +27,46 @@ export function HelpTip({
   const [open, setOpen] = useState(false);
   const tipId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
+  const [caretLeft, setCaretLeft] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const root = rootRef.current;
+    const panel = panelRef.current;
+    if (!root || !panel) return;
+
+    const place = () => {
+      const btn = root.getBoundingClientRect();
+      const panelWidth = Math.min(352, window.innerWidth - EDGE_PAD * 2);
+      // Prefer centered under the button, then clamp into the viewport.
+      let left = btn.left + btn.width / 2 - panelWidth / 2;
+      left = Math.max(
+        EDGE_PAD,
+        Math.min(left, window.innerWidth - EDGE_PAD - panelWidth),
+      );
+      const top = btn.bottom + 8;
+      const caret = btn.left + btn.width / 2 - left;
+
+      setPanelStyle({
+        position: "fixed",
+        top,
+        left,
+        width: panelWidth,
+        zIndex: 80,
+      });
+      setCaretLeft(caret);
+    };
+
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -73,10 +115,12 @@ export function HelpTip({
 
       {open ? (
         <div
+          ref={panelRef}
           id={tipId}
           role="dialog"
           aria-label={title}
-          className="absolute left-1/2 top-[calc(100%+0.45rem)] z-50 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-white p-3.5 text-left shadow-[var(--elevate)]"
+          style={panelStyle}
+          className="rounded-[var(--radius-md)] border border-[var(--ink)] bg-white p-3.5 text-left shadow-[var(--elevate)]"
         >
           <div className="mb-2 flex items-start justify-between gap-3">
             <p className="text-[15px] font-semibold leading-snug tracking-tight text-[var(--ink)]">
@@ -94,7 +138,16 @@ export function HelpTip({
           <div className="space-y-2 text-[14px] leading-relaxed text-[var(--ink)]">
             {children}
           </div>
-          <div className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-[var(--ink)] bg-white" />
+          <div
+            className="absolute -top-1.5 h-3 w-3 rotate-45 border-l border-t border-[var(--ink)] bg-white"
+            style={{
+              left: caretLeft ?? "50%",
+              transform:
+                caretLeft === null
+                  ? "translateX(-50%) rotate(45deg)"
+                  : "translateX(-50%) rotate(45deg)",
+            }}
+          />
         </div>
       ) : null}
     </div>
