@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { resumeAudioContext } from "@/lib/mic-access";
 
 /**
  * Simple mic level meter (PromptSmart presentation mic meter).
  * Only runs while `active` — used during Follow My Voice practice.
+ * Resumes AudioContext (browsers often start suspended until a gesture).
  */
 export function useMicLevel(active: boolean): number {
   const [level, setLevel] = useState(0);
@@ -14,7 +16,7 @@ export function useMicLevel(active: boolean): number {
       setLevel(0);
       return;
     }
-    if (!navigator.mediaDevices?.getUserMedia) {
+    if (!navigator.mediaDevices?.getUserMedia || !window.isSecureContext) {
       setLevel(0);
       return;
     }
@@ -27,7 +29,11 @@ export function useMicLevel(active: boolean): number {
     const run = async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
           video: false,
         });
         if (cancelled) {
@@ -39,6 +45,12 @@ export function useMicLevel(active: boolean): number {
           (window as unknown as { webkitAudioContext: typeof AudioContext })
             .webkitAudioContext;
         ctx = new AudioCtx();
+        await resumeAudioContext(ctx);
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          void ctx.close();
+          return;
+        }
         const source = ctx.createMediaStreamSource(stream);
         const analyser = ctx.createAnalyser();
         analyser.fftSize = 256;

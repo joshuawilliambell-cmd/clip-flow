@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { scriptWords } from "@/lib/teleprompter-layout";
+import { probeMicrophone } from "@/lib/mic-access";
 
 type SpeechRecognitionLike = {
   continuous: boolean;
@@ -104,92 +105,112 @@ export function useTeleprompterVoiceFollow(
     wordIndexRef.current = 0;
     setMatchedWords(0);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
+    setStatus("Asking for microphone access…");
 
-    const rec = new Ctor();
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.lang = "en-US";
-    recognitionRef.current = rec;
-
-    rec.onresult = (event) => {
-      let chunk = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        chunk += ` ${event.results[i][0].transcript}`;
+    void (async () => {
+      // Unlock permission first — SpeechRecognition alone often fails silently
+      // in embedded previews and some browsers without a prior getUserMedia.
+      const probe = await probeMicrophone();
+      if (!wantListenRef.current) return;
+      if (!probe.ok) {
+        setStatus(probe.message);
+        wantListenRef.current = false;
+        setListening(false);
+        return;
       }
-      const heard = scriptWords(chunk);
-      if (heard.length === 0) return;
+      // Release the probe stream so SpeechRecognition can own the mic.
+      probe.stream.getTracks().forEach((t) => t.stop());
 
-      const words = wordsRef.current;
-      let idx = wordIndexRef.current;
-      for (const token of heard) {
-        // Look ahead a few words so filler (“um”, mishears) does not stall.
-        const windowEnd = Math.min(words.length, idx + 6);
-        let hit = -1;
-        for (let i = idx; i < windowEnd; i++) {
-          if (words[i] === token || words[i]?.startsWith(token) || token.startsWith(words[i] ?? "")) {
-            hit = i;
-            break;
+      const rec = new Ctor();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "en-US";
+      recognitionRef.current = rec;
+
+      rec.onresult = (event) => {
+        let chunk = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          chunk += ` ${event.results[i][0].transcript}`;
+        }
+        const heard = scriptWords(chunk);
+        if (heard.length === 0) return;
+
+        const words = wordsRef.current;
+        let idx = wordIndexRef.current;
+        for (const token of heard) {
+          // Look ahead a few words so filler (“um”, mishears) does not stall.
+          const windowEnd = Math.min(words.length, idx + 6);
+          let hit = -1;
+          for (let i = idx; i < windowEnd; i++) {
+            if (
+              words[i] === token ||
+              words[i]?.startsWith(token) ||
+              token.startsWith(words[i] ?? "")
+            ) {
+              hit = i;
+              break;
+            }
+          }
+          if (hit >= 0) {
+            idx = hit + 1;
           }
         }
-        if (hit >= 0) {
-          idx = hit + 1;
+        if (idx !== wordIndexRef.current) {
+          wordIndexRef.current = idx;
+          setMatchedWords(idx);
+          scrollToProgress(idx, words.length);
         }
-      }
-      if (idx !== wordIndexRef.current) {
-        wordIndexRef.current = idx;
-        setMatchedWords(idx);
-        scrollToProgress(idx, words.length);
-      }
-      if (idx >= words.length) {
-        setStatus("You reached the end of the script. Nice work.");
-        stop();
-      }
-    };
+        if (idx >= words.length) {
+          setStatus("You reached the end of the script. Nice work.");
+          stop();
+        }
+      };
 
-    rec.onerror = (event) => {
-      if (event.error === "not-allowed") {
-        setStatus(
-          "Microphone blocked or unavailable. Allow mic access in your browser (Chrome/Edge on your computer). Cursor’s preview often has no mic — open the site in a normal browser tab instead.",
-        );
-      } else if (event.error === "audio-capture") {
-        setStatus(
-          "No microphone found. Plug one in, or open this site in Chrome/Edge on your computer (not an embedded preview).",
-        );
-      } else if (event.error === "no-speech") {
-        setStatus("No speech heard yet — keep reading.");
-        return;
-      } else if (event.error !== "aborted") {
-        setStatus("Voice follow paused. Click again to retry.");
-      }
-      wantListenRef.current = false;
-      setListening(false);
-    };
-
-    rec.onend = () => {
-      if (wantListenRef.current) {
-        try {
-          rec.start();
+      rec.onerror = (event) => {
+        if (event.error === "not-allowed") {
+          setStatus(
+            "Microphone blocked or unavailable. Allow mic access in your browser (Chrome/Edge on your computer). Cursor’s preview often has no mic — open the site in a normal browser tab instead.",
+          );
+        } else if (event.error === "audio-capture") {
+          setStatus(
+            "No microphone found. Plug one in, or open this site in Chrome/Edge on your computer (not an embedded preview).",
+          );
+        } else if (event.error === "no-speech") {
+          setStatus("No speech heard yet — keep reading.");
           return;
-        } catch {
-          /* fall through */
+        } else if (event.error !== "aborted") {
+          setStatus("Voice follow paused. Click again to retry.");
         }
-      }
-      setListening(false);
-    };
+        wantListenRef.current = false;
+        setListening(false);
+      };
 
-    try {
-      rec.start();
-      setListening(true);
-      setStatus(
-        "Listening… read out loud. The script scrolls as it hears your words.",
-      );
-    } catch {
-      setStatus(
-        "Could not start the microphone. Use Chrome or Edge on your computer with mic permission allowed — Cursor’s in-app preview usually cannot access a mic.",
-      );
-      wantListenRef.current = false;
-      setListening(false);
-    }
+      rec.onend = () => {
+        if (wantListenRef.current) {
+          try {
+            rec.start();
+            return;
+          } catch {
+            /* fall through */
+          }
+        }
+        setListening(false);
+      };
+
+      try {
+        rec.start();
+        setListening(true);
+        setStatus(
+          `Listening on ${probe.deviceLabel}… read out loud. The script scrolls as it hears your words.`,
+        );
+      } catch {
+        setStatus(
+          "Could not start the microphone. Use Chrome or Edge on your computer with mic permission allowed — Cursor’s in-app preview usually cannot access a mic.",
+        );
+        wantListenRef.current = false;
+        setListening(false);
+      }
+    })();
   }, [scrollToProgress, scrollerRef, stop]);
 
   useEffect(() => () => stop(), [stop]);

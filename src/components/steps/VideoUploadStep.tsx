@@ -11,6 +11,7 @@ import { ThumbnailCreator } from "@/components/ThumbnailCreator";
 import { ScriptFillIns } from "@/components/ScriptFillIns";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
+import { MicrophoneTest } from "@/components/MicrophoneTest";
 import { PanelSteps } from "@/components/PanelStep";
 
 export function VideoUploadStep() {
@@ -74,6 +75,8 @@ export function VideoUploadStep() {
       )}
 
       <ThumbnailCreator />
+
+      <MicrophoneTest />
 
       <section className="section-card space-y-3 bg-white p-4 md:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
