@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { scriptForTeam } from "@/lib/intro-script";
 import { ControlTip } from "@/components/ControlTip";
 import { TeleprompterControlBar } from "@/components/TeleprompterControlBar";
 import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useMicLevel } from "@/hooks/useMicLevel";
 import { useTeleprompterVoiceFollow } from "@/hooks/useTeleprompterVoiceFollow";
 import { formatScriptForNaturalReading } from "@/lib/teleprompter-layout";
@@ -19,13 +20,15 @@ type WebcamTeleprompterOverlayProps = {
 };
 
 /**
- * Top-of-preview teleprompter for webcam capture.
- * Same controls as Practice Here: Follow My Voice only (no Play / Scroll).
+ * Webcam teleprompter.
+ * Desktop: overlays the preview (unchanged).
+ * Mobile: top-quarter sheet inside the fullscreen selfie studio.
  */
 export function WebcamTeleprompterOverlay({
   active,
   recording,
 }: WebcamTeleprompterOverlayProps) {
+  const isMobile = useIsMobile();
   const {
     teamMemberCount,
     photos,
@@ -69,7 +72,7 @@ export function WebcamTeleprompterOverlay({
 
   useEffect(() => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
-  }, [fillKey, script]);
+  }, [fillKey, script, isMobile]);
 
   if (!active) return null;
 
@@ -77,6 +80,100 @@ export function WebcamTeleprompterOverlay({
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     voiceFollow.stop();
   };
+
+  const voiceControls = {
+    listening: voiceFollow.listening,
+    supported: voiceFollow.supported,
+    step: recording ? undefined : 1,
+    onToggle: () => voiceFollow.toggle(),
+  };
+
+  const statusBlock =
+    voiceFollow.listening || voiceFollow.status ? (
+      <div className="space-y-1.5">
+        {voiceFollow.listening ? (
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
+              Mic
+            </span>
+            <div
+              className="h-2 flex-1 overflow-hidden rounded-full bg-white/15"
+              role="meter"
+              aria-label="Microphone level"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(micLevel * 100)}
+            >
+              <div
+                className="h-full rounded-full bg-[var(--yellow)] transition-[width] duration-75"
+                style={{ width: `${Math.round(micLevel * 100)}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
+        {voiceFollow.status ? (
+          <p className="text-center text-[11px] font-medium text-[var(--yellow)]">
+            {voiceFollow.status}
+            {voiceFollow.listening && voiceFollow.totalWords > 0
+              ? ` · ${voiceFollow.matchedWords}/${voiceFollow.totalWords} words`
+              : ""}
+          </p>
+        ) : null}
+      </div>
+    ) : null;
+
+  // Until the breakpoint is known, keep the desktop overlay (no flash of mobile sheet).
+  if (isMobile === true) {
+    return (
+      <div className="flex h-full min-h-0 flex-col bg-black/92">
+        <p className="shrink-0 px-2 pb-1 pt-1 text-center text-[11px] font-semibold leading-snug text-white">
+          {recording ? (
+            <>
+              Keep reading out loud —{" "}
+              <span className="text-[var(--yellow)]">Follow My Voice</span>{" "}
+              scrolls with you.
+            </>
+          ) : (
+            <>
+              <span className="text-[var(--yellow)]">Step 1</span> — Follow My
+              Voice, then read out loud. Script stays in this top area.
+            </>
+          )}
+        </p>
+
+        <div className="pointer-events-auto shrink-0 px-2 pb-1">
+          <TeleprompterControlBar
+            onReset={resetScroll}
+            voiceFollow={voiceControls}
+            extras={statusBlock}
+          />
+        </div>
+
+        <div className="relative min-h-0 flex-1 overflow-hidden border-y border-white/25 bg-black/75">
+          <div
+            className="pointer-events-none absolute inset-x-2 top-[28%] z-20 h-0.5 bg-[var(--yellow)]/90"
+            aria-hidden
+          />
+          <div
+            ref={scrollerRef}
+            className="h-full overflow-y-auto px-3 pb-10 pt-2 text-center scrollbar-none"
+            style={{ scrollbarWidth: "none" }}
+            aria-live="polite"
+          >
+            <TeleprompterHighlightedScript
+              script={script}
+              highlightThrough={highlightThrough}
+              fontLarge={fontLarge}
+              roomyLines={lineRoomy}
+              className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]"
+              emptyLabel="Your script will show here."
+            />
+            <div className="h-16" aria-hidden />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
@@ -133,12 +230,7 @@ export function WebcamTeleprompterOverlay({
       <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-30">
         <TeleprompterControlBar
           onReset={resetScroll}
-          voiceFollow={{
-            listening: voiceFollow.listening,
-            supported: voiceFollow.supported,
-            step: recording ? undefined : 1,
-            onToggle: () => voiceFollow.toggle(),
-          }}
+          voiceFollow={voiceControls}
           extras={
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -168,34 +260,7 @@ export function WebcamTeleprompterOverlay({
                   </button>
                 </ControlTip>
               </div>
-              {voiceFollow.listening ? (
-                <div className="flex items-center gap-2 px-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
-                    Mic
-                  </span>
-                  <div
-                    className="h-2 flex-1 overflow-hidden rounded-full bg-white/15"
-                    role="meter"
-                    aria-label="Microphone level"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.round(micLevel * 100)}
-                  >
-                    <div
-                      className="h-full rounded-full bg-[var(--yellow)] transition-[width] duration-75"
-                      style={{ width: `${Math.round(micLevel * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ) : null}
-              {voiceFollow.status ? (
-                <p className="text-center text-[11px] font-medium text-[var(--yellow)]">
-                  {voiceFollow.status}
-                  {voiceFollow.listening && voiceFollow.totalWords > 0
-                    ? ` · ${voiceFollow.matchedWords}/${voiceFollow.totalWords} words`
-                    : ""}
-                </p>
-              ) : null}
+              {statusBlock}
             </div>
           }
         />

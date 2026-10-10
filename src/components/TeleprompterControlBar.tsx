@@ -31,7 +31,7 @@ export function TeleprompterControlBar({
   extras,
 }: TeleprompterControlBarProps) {
   return (
-    <div className="space-y-2 border-t border-white/20 bg-black/35 px-3 py-3">
+    <div className="space-y-2 border-t border-white/20 bg-black/35 px-3 py-3 max-md:space-y-1 max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-1">
       <div className="flex flex-wrap items-center justify-center gap-2">
         <ControlTip
           tip={

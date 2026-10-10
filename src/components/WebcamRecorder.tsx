@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, Trash2, Check } from "lucide-react";
+import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
 import { PanelSteps, StepCircle } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { formatClock } from "@/lib/timeline";
 
 type WebcamRecorderProps = {
@@ -43,6 +45,7 @@ export function WebcamRecorder({
   onError,
   disabled,
 }: WebcamRecorderProps) {
+  const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -122,6 +125,20 @@ export function WebcamRecorder({
     if (!stream) return;
     void attachLivePreview(stream);
   }, [phase, attachLivePreview]);
+
+  const live = phase === "preview" || phase === "recording";
+
+  const mobileStudio = isMobile === true;
+
+  // Mobile fullscreen selfie studio — lock page scroll while active.
+  useEffect(() => {
+    if (!live || !mobileStudio) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [live, mobileStudio]);
 
   const reportError = (message: string) => {
     setLocalError(message);
@@ -300,8 +317,6 @@ export function WebcamRecorder({
     }
   };
 
-  const live = phase === "preview" || phase === "recording";
-
   return (
     <div className="section-card bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -373,107 +388,196 @@ export function WebcamRecorder({
 
       {live ? (
         <div className="mt-4 space-y-4">
-          {phase === "preview" ? (
-            <div className="how-banner space-y-2">
-              <p>
-                <strong>How Follow My Voice works here:</strong> click it and
-                allow the mic. Read the script out loud — the words scroll as
-                you talk, so you can look near the camera instead of down at a
-                paper. Do these in order:
-              </p>
-              <PanelSteps
-                steps={[
-                  <>
-                    On the teleprompter, click{" "}
-                    <strong>Follow My Voice</strong> (circled{" "}
-                    <strong>1</strong>). Allow the mic, then start reading out
-                    loud at a normal pace.
-                  </>,
-                  <>
-                    When you are ready for the real take, click{" "}
-                    <strong>Start Recording</strong> below (circled{" "}
-                    <strong>2</strong>). Keep reading the same way. The script
-                    text is not saved into the video.
-                  </>,
-                ]}
-              />
-            </div>
+          {/* Desktop-only coaching (mobile uses the fullscreen studio). */}
+          {!mobileStudio ? (
+            phase === "preview" ? (
+              <div className="how-banner space-y-2">
+                <p>
+                  <strong>How Follow My Voice works here:</strong> click it and
+                  allow the mic. Read the script out loud — the words scroll as
+                  you talk, so you can look near the camera instead of down at a
+                  paper. Do these in order:
+                </p>
+                <PanelSteps
+                  steps={[
+                    <>
+                      On the teleprompter, click{" "}
+                      <strong>Follow My Voice</strong> (circled{" "}
+                      <strong>1</strong>). Allow the mic, then start reading out
+                      loud at a normal pace.
+                    </>,
+                    <>
+                      When you are ready for the real take, click{" "}
+                      <strong>Start Recording</strong> below (circled{" "}
+                      <strong>2</strong>). Keep reading the same way. The script
+                      text is not saved into the video.
+                    </>,
+                  ]}
+                />
+              </div>
+            ) : (
+              <div className="how-banner">
+                <strong>You are recording.</strong> Keep reading out loud with
+                Follow My Voice so the script stays with you. Click{" "}
+                <strong>Stop Recording</strong> when you finish. Script text is
+                not saved into the video.
+              </div>
+            )
           ) : (
-            <div className="how-banner">
-              <strong>You are recording.</strong> Keep reading out loud with
-              Follow My Voice so the script stays with you. Click{" "}
-              <strong>Stop Recording</strong> when you finish. Script text is
-              not saved into the video.
-            </div>
+            <p className="text-[14px] font-medium text-[var(--muted)]">
+              Camera is open fullscreen on your phone. Use Follow My Voice at
+              the top, then Start Recording at the bottom.
+            </p>
           )}
 
+          {/* Spacer so the page does not collapse under the fixed mobile studio. */}
+          {mobileStudio ? <div className="h-[50vh]" aria-hidden /> : null}
+
           <div className="space-y-3">
-            <div className="relative overflow-hidden section-card bg-black">
-              <video
-                ref={videoRef}
-                muted
-                playsInline
-                autoPlay
-                className="aspect-video w-full object-cover scale-x-[-1]"
-              />
-              <WebcamTeleprompterOverlay
-                active={live}
-                recording={phase === "recording"}
-              />
-              {phase === "recording" ? (
-                <div className="absolute right-3 top-3 z-30 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
-                  <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
-                  Live · Rec {formatClock(seconds)}
-                </div>
-              ) : (
-                <div className="absolute right-3 top-3 z-30 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
-                  Live preview — not recording yet
-                </div>
+            <div
+              className={clsx(
+                "bg-black",
+                mobileStudio
+                  ? "fixed inset-0 z-[80] flex flex-col"
+                  : "relative overflow-hidden section-card",
               )}
+            >
+              {/* Mobile: teleprompter + Follow My Voice in the top quarter. */}
+              {mobileStudio ? (
+                <div className="h-[28%] min-h-[12rem] max-h-[34vh] shrink-0">
+                  <WebcamTeleprompterOverlay
+                    active={live}
+                    recording={phase === "recording"}
+                  />
+                </div>
+              ) : null}
+
+              <div
+                className={clsx(
+                  "relative",
+                  mobileStudio ? "min-h-0 flex-1" : "aspect-video",
+                )}
+              >
+                <video
+                  ref={videoRef}
+                  muted
+                  playsInline
+                  autoPlay
+                  className={clsx(
+                    "object-cover scale-x-[-1]",
+                    mobileStudio
+                      ? "absolute inset-0 h-full w-full"
+                      : "aspect-video h-full w-full",
+                  )}
+                />
+                {!mobileStudio ? (
+                  <WebcamTeleprompterOverlay
+                    active={live}
+                    recording={phase === "recording"}
+                  />
+                ) : null}
+                {phase === "recording" ? (
+                  <div className="absolute right-3 top-3 z-30 flex items-center gap-2 rounded-[var(--radius-sm)] bg-[var(--primary)] px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-white">
+                    <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
+                    Live · Rec {formatClock(seconds)}
+                  </div>
+                ) : (
+                  <div className="absolute right-3 top-3 z-30 rounded-full bg-black/70 px-3 py-1.5 text-sm font-bold text-white">
+                    Live preview — not recording yet
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile: record controls docked under the selfie. */}
+              {mobileStudio ? (
+                <div className="shrink-0 space-y-2 border-t border-white/20 bg-black px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+                  {phase === "preview" ? (
+                    <div className="flex flex-col gap-2">
+                      <span className="inline-flex w-full items-center gap-2">
+                        <StepCircle n={2} label="Step 2" tone="dark" />
+                        <button
+                          type="button"
+                          onClick={startRecording}
+                          className="btn-primary min-h-12 flex-1"
+                        >
+                          <Circle className="h-5 w-5 fill-current" />
+                          Step 2 — Start Recording
+                        </button>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={closeCamera}
+                        className="btn-secondary min-h-11 w-full border-white/40 bg-white/10 text-white"
+                      >
+                        Click Here to Cancel Webcam
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={stopRecording}
+                        className="btn-primary min-h-12 w-full"
+                      >
+                        <Square className="h-5 w-5 fill-current" />
+                        Click Here to Stop Recording
+                      </button>
+                      <p className="text-center text-[14px] font-bold text-white">
+                        Recording… {formatClock(seconds)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              {phase === "preview" ? (
-                <>
-                  <span className="inline-flex items-center gap-2">
-                    <StepCircle n={2} label="Step 2" />
-                    <button
-                      type="button"
-                      onClick={startRecording}
-                      className="btn-primary"
-                    >
-                      <Circle className="h-5 w-5 fill-current" />
-                      Step 2 — Click Here to Start Recording
-                    </button>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={closeCamera}
-                    className="btn-secondary"
-                  >
-                    Click Here to Cancel Webcam
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={stopRecording}
-                    className="btn-primary"
-                  >
-                    <Square className="h-5 w-5 fill-current" />
-                    Click Here to Stop Recording
-                  </button>
-                  <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
-                    Recording… {formatClock(seconds)}
-                  </span>
-                </>
-              )}
-            </div>
-            <p className="text-base text-[var(--muted)]">
-              About 60 seconds is preferred; 2+ minutes is fine. Trim on the
-              timeline after you save.
-            </p>
+            {/* Desktop controls under the preview. */}
+            {!mobileStudio ? (
+              <>
+                <div className="flex flex-wrap items-center gap-3">
+                  {phase === "preview" ? (
+                    <>
+                      <span className="inline-flex items-center gap-2">
+                        <StepCircle n={2} label="Step 2" />
+                        <button
+                          type="button"
+                          onClick={startRecording}
+                          className="btn-primary"
+                        >
+                          <Circle className="h-5 w-5 fill-current" />
+                          Step 2 — Click Here to Start Recording
+                        </button>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={closeCamera}
+                        className="btn-secondary"
+                      >
+                        Click Here to Cancel Webcam
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={stopRecording}
+                        className="btn-primary"
+                      >
+                        <Square className="h-5 w-5 fill-current" />
+                        Click Here to Stop Recording
+                      </button>
+                      <span className="rounded-xl border-2 border-[var(--ink)] bg-[var(--primary)] px-3 py-2 text-lg font-bold text-white">
+                        Recording… {formatClock(seconds)}
+                      </span>
+                    </>
+                  )}
+                </div>
+                <p className="text-base text-[var(--muted)]">
+                  About 60 seconds is preferred; 2+ minutes is fine. Trim on the
+                  timeline after you save.
+                </p>
+              </>
+            ) : null}
           </div>
         </div>
       ) : null}
