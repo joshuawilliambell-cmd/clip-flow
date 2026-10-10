@@ -85,8 +85,11 @@ export function PreviewExportStep({
       return;
     }
     stopMusicSample();
-    // QuietAudio uses a GainNode on iOS where element.volume is ignored.
-    const audio = createQuietAudio(src, musicVolume, { loop: false });
+    // Web Audio GainNode — HTMLAudio volume is ignored on iPhone.
+    const audio = createQuietAudio(src, musicVolume, {
+      loop: false,
+      onEnded: () => stopMusicSample(),
+    });
     sampleAudioRef.current = audio;
     setSamplingTrackId(trackId);
     void audio.play().catch(() => {
@@ -95,7 +98,6 @@ export function PreviewExportStep({
     sampleTimerRef.current = window.setTimeout(() => {
       stopMusicSample();
     }, MUSIC_SAMPLE_SECONDS * 1000);
-    audio.element.onended = () => stopMusicSample();
   };
 
   useEffect(() => {

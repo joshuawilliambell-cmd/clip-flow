@@ -95,7 +95,8 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     if (el) el.volume = Math.min(1, Math.max(0, videoVolume));
   }, [videoVolume, video]);
 
-  // Looping music bed — uses Web Audio gain on iOS where element.volume is ignored.
+  // Looping music bed via Web Audio (GainNode). Required on iPhone — HTML
+  // <audio>.volume is ignored there and can play at full device level.
   useEffect(() => {
     if (musicRef.current) {
       musicRef.current.dispose();
@@ -137,7 +138,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
       if (musicEnabled && musicRef.current) {
         musicRef.current.setVolume(musicVolume);
         void musicRef.current.play().catch(() => {
-          /* music is optional */
+          /* music is optional — never fall back to loud HTMLAudio on iOS */
         });
       } else {
         musicRef.current?.pause();

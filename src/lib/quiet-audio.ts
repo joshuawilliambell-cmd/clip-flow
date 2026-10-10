@@ -1,12 +1,12 @@
 /**
  * Bed-music helper that stays quiet on iOS/iPadOS.
  *
- * Safari (and iOS Chrome) ignore HTMLMediaElement.volume — it always plays at
- * full level. Route through a Web Audio GainNode when that happens.
+ * Safari ignores HTMLMediaElement.volume (always full level). MediaElementSource
+ * also fails silently on some iPhone paths and then falls back to that full
+ * blast. Decode into Web Audio and fader with a GainNode instead.
  */
 
 export type QuietAudio = {
-  element: HTMLAudioElement;
   setVolume: (volume: number) => void;
   play: () => Promise<void>;
   pause: () => void;
@@ -28,135 +28,163 @@ function getAudioContextCtor(): typeof AudioContext | null {
   );
 }
 
-/** True when the browser refuses to honor element.volume (typical on iOS). */
-export function mediaVolumeIsLocked(el: HTMLMediaElement): boolean {
-  const prev = el.volume;
-  try {
-    el.volume = 0.37;
-    const locked = Math.abs(el.volume - 0.37) > 0.02;
-    el.volume = prev;
-    return locked;
-  } catch {
-    el.volume = prev;
-    return true;
-  }
-}
-
 export function createQuietAudio(
   src: string,
   initialVolume: number,
-  options?: { loop?: boolean },
+  options?: { loop?: boolean; onEnded?: () => void },
 ): QuietAudio {
-  const element = new Audio(src);
-  element.preload = "auto";
-  element.loop = options?.loop ?? true;
-  // Same-origin music; helps MediaElementSource on stricter browsers.
-  try {
-    element.crossOrigin = "anonymous";
-  } catch {
-    /* ignore */
-  }
+  const loop = options?.loop ?? true;
+  const onEnded = options?.onEnded;
 
   let volume = clamp01(initialVolume);
-  element.volume = volume;
-
   let ctx: AudioContext | null = null;
   let gain: GainNode | null = null;
-  let graphReady = false;
-  let graphFailed = false;
+  let buffer: AudioBuffer | null = null;
+  let source: AudioBufferSourceNode | null = null;
+  let loadPromise: Promise<void> | null = null;
+  let disposed = false;
+  let playing = false;
+  /** Seconds into the buffer when the current source started. */
+  let offsetSeconds = 0;
+  /** AudioContext time when the current source started. */
+  let startedAtCtx = 0;
 
-  const applyVolume = () => {
+  const applyGain = () => {
     if (gain) {
-      // Gain is the real fader when the graph is connected.
-      gain.gain.value = volume;
-      // Keep element at unity so we do not double-attenuate on desktop.
-      try {
-        element.volume = 1;
-      } catch {
-        /* ignore */
-      }
-      return;
+      // setValueAtTime avoids glitches; keep extremely quiet beds audible only as ambience.
+      gain.gain.setValueAtTime(volume, ctx?.currentTime ?? 0);
+    }
+  };
+
+  const stopSource = () => {
+    if (!source) return;
+    try {
+      source.onended = null;
+      source.stop();
+    } catch {
+      /* already stopped */
     }
     try {
-      element.volume = volume;
+      source.disconnect();
     } catch {
       /* ignore */
     }
+    source = null;
   };
 
   const ensureGraph = async () => {
-    if (graphReady || graphFailed) {
-      if (ctx?.state === "suspended") {
-        await ctx.resume().catch(() => undefined);
-      }
-      return;
-    }
-
-    // Only build a graph when element.volume is ignored (iOS) or we already
-    // know we need reliable attenuation.
-    const needsGain = mediaVolumeIsLocked(element);
-    if (!needsGain) {
-      applyVolume();
-      return;
-    }
-
-    const Ctor = getAudioContextCtor();
-    if (!Ctor) {
-      graphFailed = true;
-      applyVolume();
-      return;
-    }
-
-    try {
-      ctx = new Ctor();
-      const source = ctx.createMediaElementSource(element);
-      gain = ctx.createGain();
-      gain.gain.value = volume;
-      source.connect(gain);
-      gain.connect(ctx.destination);
-      graphReady = true;
-      applyVolume();
+    if (disposed) return;
+    if (buffer && ctx && gain) {
       if (ctx.state === "suspended") {
         await ctx.resume().catch(() => undefined);
       }
-    } catch {
-      graphFailed = true;
-      gain = null;
-      ctx = null;
-      applyVolume();
+      return;
+    }
+    if (loadPromise) {
+      await loadPromise;
+      return;
+    }
+
+    loadPromise = (async () => {
+      const Ctor = getAudioContextCtor();
+      if (!Ctor) {
+        throw new Error("Web Audio is not available in this browser.");
+      }
+      ctx = new Ctor();
+      gain = ctx.createGain();
+      gain.gain.value = volume;
+      gain.connect(ctx.destination);
+
+      const res = await fetch(src, { credentials: "same-origin" });
+      if (!res.ok) {
+        throw new Error(`Could not load music (${res.status}).`);
+      }
+      const raw = await res.arrayBuffer();
+      // Safari requires a copy — decodeAudioData may detach the buffer.
+      const copy = raw.slice(0);
+      buffer = await ctx.decodeAudioData(copy);
+      if (ctx.state === "suspended") {
+        await ctx.resume().catch(() => undefined);
+      }
+    })();
+
+    try {
+      await loadPromise;
+    } catch (e) {
+      loadPromise = null;
+      throw e;
     }
   };
 
-  applyVolume();
-
   return {
-    element,
     setVolume(next) {
       volume = clamp01(next);
-      applyVolume();
+      applyGain();
     },
+
     async play() {
+      if (disposed) return;
       await ensureGraph();
-      applyVolume();
-      await element.play();
-    },
-    pause() {
-      element.pause();
-    },
-    dispose() {
-      element.pause();
-      try {
-        element.removeAttribute("src");
-        element.load();
-      } catch {
-        /* ignore */
+      if (!ctx || !gain || !buffer || disposed) return;
+
+      if (ctx.state === "suspended") {
+        await ctx.resume().catch(() => undefined);
       }
+      applyGain();
+
+      if (playing && source) return;
+
+      stopSource();
+      const node = ctx.createBufferSource();
+      node.buffer = buffer;
+      node.loop = loop;
+      node.connect(gain);
+      const startAt = Math.max(0, offsetSeconds % Math.max(buffer.duration, 0.001));
+      node.start(0, startAt);
+      startedAtCtx = ctx.currentTime;
+      source = node;
+      playing = true;
+
+      node.onended = () => {
+        if (source !== node) return;
+        playing = false;
+        source = null;
+        offsetSeconds = 0;
+        onEnded?.();
+      };
+    },
+
+    pause() {
+      if (!playing || !ctx || !buffer) {
+        stopSource();
+        playing = false;
+        return;
+      }
+      const elapsed = Math.max(0, ctx.currentTime - startedAtCtx);
+      offsetSeconds = (offsetSeconds + elapsed) % Math.max(buffer.duration, 0.001);
+      stopSource();
+      playing = false;
+    },
+
+    dispose() {
+      disposed = true;
+      playing = false;
+      stopSource();
+      offsetSeconds = 0;
+      buffer = null;
+      loadPromise = null;
+      if (gain) {
+        try {
+          gain.disconnect();
+        } catch {
+          /* ignore */
+        }
+      }
+      gain = null;
       if (ctx) {
         void ctx.close().catch(() => undefined);
       }
       ctx = null;
-      gain = null;
-      graphReady = false;
     },
   };
 }
