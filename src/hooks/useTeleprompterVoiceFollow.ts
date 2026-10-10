@@ -52,8 +52,8 @@ export function useTeleprompterVoiceFollow(
   const wordIndexRef = useRef(0);
   const wordsRef = useRef<string[]>([]);
   const wantListenRef = useRef(false);
-  /** Last heard token list we already applied (avoids re-advancing on interim growth). */
-  const appliedHeardRef = useRef("");
+  /** Script index when the current recognition phrase began (for interim re-align). */
+  const phraseStartIndexRef = useRef(0);
   const lastResultIndexRef = useRef(0);
 
   useEffect(() => {
@@ -72,8 +72,8 @@ export function useTeleprompterVoiceFollow(
       if (!el || total <= 0) return;
       const maxScroll = el.scrollHeight - el.clientHeight;
       if (maxScroll <= 0) return;
-      // Stay on the spoken word — no +N lead (felt like skipping ahead).
-      const progress = Math.min(1, Math.max(0, wordIndex / total));
+      // Slight lead so the reading line stays ahead of the voice.
+      const progress = Math.min(1, Math.max(0, (wordIndex + 1) / total));
       el.scrollTop = progress * maxScroll;
     },
     [scrollerRef],
@@ -107,7 +107,7 @@ export function useTeleprompterVoiceFollow(
     stop();
     wantListenRef.current = true;
     wordIndexRef.current = 0;
-    appliedHeardRef.current = "";
+    phraseStartIndexRef.current = 0;
     lastResultIndexRef.current = 0;
     setMatchedWords(0);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
@@ -134,13 +134,13 @@ export function useTeleprompterVoiceFollow(
       recognitionRef.current = rec;
 
       rec.onresult = (event) => {
-        // New recognition slot — start fresh interim-prefix tracking.
+        // New phrase slot — lock the script index so interim re-aligns cleanly.
         if (event.resultIndex > lastResultIndexRef.current) {
-          appliedHeardRef.current = "";
+          phraseStartIndexRef.current = wordIndexRef.current;
           lastResultIndexRef.current = event.resultIndex;
         }
 
-        // Build transcript from changed results (finals + current interim).
+        // Full transcript for this phrase (finals + growing interim).
         let chunk = "";
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
@@ -150,33 +150,22 @@ export function useTeleprompterVoiceFollow(
         const heard = scriptWords(chunk);
         if (heard.length === 0) return;
 
-        // Interim results grow ("hi" → "hi there"). Only feed tokens we
-        // have not already applied from this growing phrase.
-        const heardKey = heard.join(" ");
-        const prevKey = appliedHeardRef.current;
-        let tokensToApply = heard;
-        if (prevKey && heardKey.startsWith(prevKey)) {
-          const prevCount = prevKey.split(" ").filter(Boolean).length;
-          tokensToApply = heard.slice(prevCount);
-        } else if (prevKey && prevKey.startsWith(heardKey)) {
-          // ASR shortened/corrected — do not move backward; wait for more.
-          return;
-        }
-        appliedHeardRef.current = heardKey;
-        if (tokensToApply.length === 0) return;
-
         const words = wordsRef.current;
+        // Re-run from phrase start every time so ASR corrections keep pace
+        // instead of getting stuck on a stale partial match.
         const idx = advanceVoiceFollowIndex(
           words,
-          wordIndexRef.current,
-          tokensToApply,
+          phraseStartIndexRef.current,
+          heard,
         );
-        if (idx !== wordIndexRef.current) {
-          wordIndexRef.current = idx;
-          setMatchedWords(idx);
-          scrollToProgress(idx, words.length);
+        // Never move backward within a live phrase.
+        const next = Math.max(wordIndexRef.current, idx);
+        if (next !== wordIndexRef.current) {
+          wordIndexRef.current = next;
+          setMatchedWords(next);
+          scrollToProgress(next, words.length);
         }
-        if (idx >= words.length) {
+        if (next >= words.length) {
           setStatus("You reached the end of the script. Nice work.");
           stop();
         }
