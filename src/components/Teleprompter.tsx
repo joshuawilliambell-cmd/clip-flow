@@ -166,18 +166,18 @@ export function Teleprompter({
   return (
     <div
       className={clsx(
-        "flex flex-col rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--olive)] text-white",
+        "flex flex-col rounded-[var(--radius-md)] border border-[var(--ink)] bg-white text-[var(--ink)]",
         className,
       )}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/20 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--panel-soft)] px-4 py-3">
         <div className="flex items-center gap-2">
-          <ScrollText className="h-5 w-5 text-[var(--yellow)]" aria-hidden />
+          <ScrollText className="h-5 w-5 text-[var(--primary)]" aria-hidden />
           <div>
-            <p className="text-[15px] font-semibold tracking-tight">
+            <p className="text-[15px] font-semibold tracking-tight text-[var(--ink)]">
               Script Teleprompter
             </p>
-            <p className="text-[12px] font-medium text-white/75">
+            <p className="text-[12px] font-medium text-[var(--muted)]">
               {source === "official"
                 ? `Official · ${INTRO_SCRIPTS[teamMemberCount].title}`
                 : uploadName
@@ -201,24 +201,24 @@ export function Teleprompter({
         </HelpTip>
       </div>
 
-      <div className="border-b border-white/15 px-4 py-3">
-        <p className="text-[15px] font-bold tracking-tight text-[var(--yellow)]">
+      <div className="border-b border-[var(--border)] px-4 py-3">
+        <p className="text-[15px] font-bold tracking-tight text-[var(--ink)]">
           Practice Here
         </p>
-        <div className="mt-2 space-y-1.5 rounded-md border border-[var(--yellow)]/45 bg-black/30 px-3 py-2.5 text-[12px] font-medium leading-snug text-white/90">
-          <p className="font-bold text-[var(--yellow)]">
+        <div className="mt-2 space-y-1.5 rounded-md border border-[var(--ink)] bg-[var(--panel-soft)] px-3 py-2.5 text-[12px] font-medium leading-snug text-[var(--ink)]">
+          <p className="font-bold text-[var(--ink)]">
             What Follow My Voice does
           </p>
-          <p>
+          <p className="text-[var(--muted)]">
             Your computer listens to you. As you read the script out loud, it
             moves the words down the screen for you — like a TV teleprompter
             that keeps up with your voice. You talk; it scrolls.
           </p>
-          <p className="font-bold text-[var(--yellow)]">How to use it</p>
-          <ol className="list-decimal space-y-0.5 pl-4">
+          <p className="font-bold text-[var(--ink)]">How to use it</p>
+          <ol className="list-decimal space-y-0.5 pl-4 text-[var(--muted)]">
             <li>
-              Click <strong className="text-white">Follow My Voice</strong>{" "}
-              below and choose <strong className="text-white">Allow</strong> for
+              Click <strong className="text-[var(--ink)]">Follow My Voice</strong>{" "}
+              below and choose <strong className="text-[var(--ink)]">Allow</strong> for
               the microphone.
             </li>
             <li>
@@ -231,15 +231,16 @@ export function Teleprompter({
             </li>
             <li>
               When you feel ready, go to{" "}
-              <strong className="text-white">Record With Camera</strong> and use
+              <strong className="text-[var(--ink)]">Record With Camera</strong> and use
               Follow My Voice the same way for your real take.
             </li>
           </ol>
         </div>
       </div>
 
-      <div className="relative mx-auto w-full max-w-[min(100%,36rem)] px-3 pt-2">
-        <div className="relative h-52 overflow-hidden rounded-xl border border-white/30 bg-black/50 shadow-[0_8px_28px_rgba(0,0,0,0.4)] md:h-60">
+      <div className="relative mx-auto w-full max-w-[min(100%,36rem)] px-3 pt-3">
+        {/* Reading window stays dark so the script is easy to follow. */}
+        <div className="relative h-52 overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#141414] shadow-sm md:h-60">
           <div
             className="pointer-events-none absolute inset-x-2 top-[26%] z-20 h-0.5 bg-[var(--yellow)]/85"
             aria-hidden
@@ -262,6 +263,7 @@ export function Teleprompter({
       </div>
 
       <TeleprompterControlBar
+        tone="light"
         onReset={resetScroll}
         voiceFollow={{
           listening: voiceFollow.listening,
@@ -275,7 +277,7 @@ export function Teleprompter({
                 <button
                   type="button"
                   onClick={() => setLineRoomy(!lineRoomy)}
-                  className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
+                  className="rounded-full border border-[var(--ink)] bg-white px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]"
                 >
                   {lineRoomy
                     ? "Click Here for Tighter Lines"
@@ -286,7 +288,7 @@ export function Teleprompter({
                 <button
                   type="button"
                   onClick={() => setFontLarge(!fontLarge)}
-                  className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
+                  className="rounded-full border border-[var(--ink)] bg-white px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]"
                 >
                   {fontLarge
                     ? "Click Here for Smaller Text"
@@ -296,11 +298,11 @@ export function Teleprompter({
             </div>
             {voiceFollow.listening ? (
               <div className="flex items-center gap-2 px-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
                   Mic
                 </span>
                 <div
-                  className="h-2 flex-1 overflow-hidden rounded-full bg-white/15"
+                  className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--ink)]/10"
                   role="meter"
                   aria-label="Microphone level"
                   aria-valuemin={0}
@@ -308,21 +310,21 @@ export function Teleprompter({
                   aria-valuenow={Math.round(micLevel * 100)}
                 >
                   <div
-                    className="h-full rounded-full bg-[var(--yellow)] transition-[width] duration-75"
+                    className="h-full rounded-full bg-[var(--primary)] transition-[width] duration-75"
                     style={{ width: `${Math.round(micLevel * 100)}%` }}
                   />
                 </div>
               </div>
             ) : null}
             {voiceFollow.status ? (
-              <p className="text-center text-[11px] font-medium text-[var(--yellow)]">
+              <p className="text-center text-[11px] font-medium text-[var(--ink)]">
                 {voiceFollow.status}
                 {voiceFollow.listening && voiceFollow.totalWords > 0
                   ? ` · ${voiceFollow.matchedWords}/${voiceFollow.totalWords} words`
                   : ""}
               </p>
             ) : (
-              <p className="text-center text-[11px] font-medium text-white/75">
+              <p className="text-center text-[11px] font-medium text-[var(--muted)]">
                 Click Follow My Voice, allow the mic, then read out loud — the
                 script will follow you.
               </p>
@@ -332,16 +334,16 @@ export function Teleprompter({
       />
 
       {!recording ? (
-        <div className="space-y-3 border-t border-white/15 px-4 py-3">
-          <p className="rounded-md border border-[var(--yellow)]/50 bg-black/30 px-3 py-2 text-[12px] font-medium leading-snug text-white/90">
-            <strong className="text-[var(--yellow)]">Disclaimer:</strong> This
-            script was built automatically from the blanks you filled in. You
-            can edit it, remove parts, or replace it with your own script.
+        <div className="space-y-3 border-t border-[var(--border)] px-4 py-3">
+          <p className="rounded-md border border-[var(--ink)] bg-[var(--panel-soft)] px-3 py-2 text-[12px] font-medium leading-snug text-[var(--ink)]">
+            <strong>Disclaimer:</strong> This script was built automatically
+            from the blanks you filled in. You can edit it, remove parts, or
+            replace it with your own script.
           </p>
 
           <PanelSteps
-            tone="dark"
-            className="rounded-md bg-black/25 px-3 py-2 [&_strong]:text-[var(--yellow)]"
+            tone="light"
+            className="rounded-md border border-[var(--hairline)] bg-[var(--panel-soft)] px-3 py-2"
             steps={[
               <>
                 Practice with <strong>Follow My Voice</strong> until the script
@@ -364,8 +366,8 @@ export function Teleprompter({
               className={clsx(
                 "rounded-full border px-3 py-1.5 text-[12px] font-bold",
                 source === "official"
-                  ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                  : "border-white/35 text-white hover:border-[var(--yellow)]",
+                  ? "border-[var(--ink)] bg-[var(--yellow)] text-[var(--ink)]"
+                  : "border-[var(--ink)] bg-white text-[var(--ink)] hover:bg-[var(--panel-soft)]",
               )}
             >
               Click Here for Official Script
@@ -376,8 +378,8 @@ export function Teleprompter({
               className={clsx(
                 "rounded-full border px-3 py-1.5 text-[12px] font-bold",
                 source === "custom"
-                  ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                  : "border-white/35 text-white hover:border-[var(--yellow)]",
+                  ? "border-[var(--ink)] bg-[var(--yellow)] text-[var(--ink)]"
+                  : "border-[var(--ink)] bg-white text-[var(--ink)] hover:bg-[var(--panel-soft)]",
               )}
             >
               Click Here for My Script
@@ -385,7 +387,7 @@ export function Teleprompter({
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/35 px-3 py-1.5 text-[12px] font-bold text-white hover:border-[var(--yellow)]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--ink)] bg-white px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--panel-soft)]"
             >
               <FileUp className="h-3.5 w-3.5" />
               Click Here to Upload .txt
@@ -402,10 +404,10 @@ export function Teleprompter({
             />
           </div>
 
-          <p className="text-[12px] font-semibold text-[var(--yellow)]">
+          <p className="text-[12px] font-semibold text-[var(--ink)]">
             Edit Script Here
           </p>
-          <p className="text-[12px] font-medium text-white/70">
+          <p className="text-[12px] font-medium text-[var(--muted)]">
             You can change any wording in this box. Edits become your custom
             script and also show on the webcam teleprompter.
           </p>
@@ -426,7 +428,7 @@ export function Teleprompter({
                 }
               }}
               rows={4}
-              className="w-full resize-y rounded-[var(--radius-md)] border border-white/30 bg-white/10 px-3 py-2 text-[14px] font-medium leading-relaxed text-white placeholder:text-white/45 focus:border-[var(--yellow)] focus:outline-none"
+              className="field-input min-h-[6rem] resize-y"
               placeholder="Type or paste your script…"
             />
           </label>
@@ -434,7 +436,7 @@ export function Teleprompter({
           {source === "custom" ? (
             <button
               type="button"
-              className="text-[12px] font-semibold text-[var(--yellow)] underline"
+              className="text-[12px] font-semibold text-[var(--primary)] underline"
               onClick={useOfficial}
             >
               Click Here for Official {INTRO_SCRIPTS[teamMemberCount].title}{" "}
@@ -443,7 +445,7 @@ export function Teleprompter({
           ) : null}
 
           {uploadError ? (
-            <p className="text-[13px] font-semibold text-[var(--yellow)]">
+            <p className="text-[13px] font-semibold text-[var(--primary-dark)]">
               {uploadError}
             </p>
           ) : null}

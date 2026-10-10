@@ -27,6 +27,8 @@ type TeleprompterControlBarProps = {
    * - auto: pick from screen size
    */
   device?: "webcam" | "phone" | "auto";
+  /** light = cream page panels; dark = webcam overlay. */
+  tone?: "light" | "dark";
 };
 
 /**
@@ -38,10 +40,12 @@ export function TeleprompterControlBar({
   voiceFollow,
   extras,
   device = "auto",
+  tone = "dark",
 }: TeleprompterControlBarProps) {
   const isMobile = useIsMobile();
   const onPhone =
     device === "phone" || (device === "auto" && isMobile === true);
+  const light = tone === "light";
 
   const stepTip = onPhone
     ? `Step ${voiceFollow.step}: turn this on first. Your phone listens while you read. The script scrolls as you talk — you do not chase moving text. Allow the mic, read out loud at a normal pace, then tap Start Recording for the real take.`
@@ -56,14 +60,21 @@ export function TeleprompterControlBar({
       : "This needs Chrome or Edge on your computer so it can listen while you read.";
 
   return (
-    <div className="space-y-2 border-t border-white/20 bg-black/35 px-3 py-3 max-md:space-y-1 max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-1">
+    <div
+      className={clsx(
+        "space-y-2 px-3 py-3 max-md:space-y-1 max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:py-1",
+        light
+          ? "border-t border-[var(--border)] bg-[var(--panel-soft)]"
+          : "border-t border-white/20 bg-black/35",
+      )}
+    >
       <div className="flex flex-wrap items-center justify-center gap-2">
         <ControlTip tip={voiceFollow.step ? stepTip : defaultTip}>
           <span className="inline-flex items-center gap-1.5">
             {voiceFollow.step ? (
               <StepCircle
                 n={voiceFollow.step}
-                tone="dark"
+                tone={light ? "light" : "dark"}
                 label={`Step ${voiceFollow.step}`}
               />
             ) : null}
@@ -73,8 +84,8 @@ export function TeleprompterControlBar({
               onClick={voiceFollow.onToggle}
               className={clsx(
                 "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[12px] font-bold shadow-sm disabled:opacity-40",
-                "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]",
-                !voiceFollow.listening && "ring-2 ring-[var(--yellow)]/40",
+                "border-[var(--ink)] bg-[var(--yellow)] text-[var(--ink)]",
+                !voiceFollow.listening && "ring-2 ring-[var(--ink)]/15",
               )}
             >
               <Mic className="h-3.5 w-3.5" aria-hidden />
@@ -91,7 +102,12 @@ export function TeleprompterControlBar({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
+            className={clsx(
+              "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-[12px] font-bold",
+              light
+                ? "border-[var(--ink)] bg-white text-[var(--ink)] hover:bg-[var(--yellow)]"
+                : "border-white/40 bg-black/50 text-white",
+            )}
           >
             <RotateCcw className="h-3.5 w-3.5" /> Click Here for Top
           </button>
