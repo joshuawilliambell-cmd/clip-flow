@@ -252,9 +252,11 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
   }, []);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <h3 className="text-2xl font-bold text-[var(--ink)]">Video preview</h3>
+        <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
+          Video Preview
+        </h3>
         <HelpTip title="Video preview">
           <p>This window shows what your finished video will look like.</p>
           <p>Team photos and names appear when it is their turn.</p>

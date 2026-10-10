@@ -148,13 +148,22 @@ export function PreviewExportStep({
           </p>
         </div>
         <HelpTip title="What Do I Do On This Page?" size="lg">
-          <p>Work through each panel in order using the numbered steps.</p>
+          <p>
+            Start with the <strong>video preview and timeline</strong> right
+            under it — trim your talking video and move photo bars there.
+          </p>
           <p>
             Teammate photos are timed to when their name appears in your script.
-            You can still drag the bars on the timeline if you need to fine-tune.
+            You can still drag the bars if you need to fine-tune.
           </p>
         </HelpTip>
       </div>
+
+      {/* Preview + timeline first — editing sits under playback like an NLE. */}
+      <section className="section-card space-y-2 bg-white p-3 md:p-4">
+        <VideoPreview />
+        <Timeline />
+      </section>
 
       <section className="section-card bg-white p-4 md:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -269,7 +278,7 @@ export function PreviewExportStep({
                 Choose left or right for the small teammate photo in the corner.
               </>,
               <>
-                On the timeline below, colored bars show when each face appears.
+                On the timeline above, colored bars show when each face appears.
                 Drag a bar (hand cursor) to move it; drag the ends to change how
                 long it stays.
               </>,
@@ -282,13 +291,10 @@ export function PreviewExportStep({
         </section>
       ) : (
         <div className="how-banner">
-          No teammate corner photos for this project. Trim your video below, add
+          No teammate corner photos for this project. Trim your video above, add
           music if you like, then export.
         </div>
       )}
-
-      <VideoPreview />
-      <Timeline />
 
       <section className="section-card bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">

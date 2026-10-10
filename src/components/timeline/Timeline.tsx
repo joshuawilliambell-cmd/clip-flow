@@ -13,7 +13,6 @@ import {
 import { filledTeamPhotos } from "@/lib/team-slots";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
-import { PanelSteps } from "@/components/PanelStep";
 
 /** Extra pixels after the last second so the playhead / trim handle aren’t clipped. */
 const TIMELINE_END_PAD_PX = 56;
@@ -161,19 +160,14 @@ export function Timeline() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-start gap-2">
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
-              Timeline
-            </h3>
-            <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              Trim your talking video · move teammate photo bars to match when
-              you say each name
-            </p>
-          </div>
-          <HelpTip title="How To Use The Timeline" size="lg">
+    <div className="space-y-2">
+      {/* Compact bar — tracks sit directly under the video like an NLE. */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-2">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold tracking-tight text-[var(--ink)] md:text-lg">
+            Timeline
+          </h3>
+          <HelpTip title="How To Use The Timeline">
             <p>
               <strong>Track 1 — Your Video:</strong> the black bar is your
               recording. Drag the <strong>red handles</strong> on the ends (or
@@ -183,79 +177,51 @@ export function Timeline() {
             <p>
               <strong>Track 2 — Team Photos:</strong> each colored bar is one
               teammate&apos;s small corner photo. Bars start near when that
-              person&apos;s name is said in your script. Hover for a hand
-              cursor, then drag the middle of a bar to move when the photo
-              shows. Drag the left or right edge to make it shorter or longer.
-              Drag one bar onto another to swap order.
+              person&apos;s name is said in your script. Drag the middle of a
+              bar to move when the photo shows. Drag the edges to change how
+              long it stays.
             </p>
             <p>
-              Drag the <strong>red play line</strong> (ball on top) to jump to
-              any moment. Use Play / Pause to watch from there.
+              Drag the <strong>red play line</strong> to jump to any moment.
             </p>
           </HelpTip>
+          <span className="rounded-md border border-[var(--ink)] bg-[var(--yellow)] px-2 py-1 text-[12px] font-bold text-[var(--ink)]">
+            Finished {formatClock(outputDuration)}
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={togglePlay}
-            className="btn-primary min-w-[9.5rem]"
+            className="btn-primary !min-h-0 !px-3 !py-1.5 text-[13px]"
             aria-label={isPlaying ? "Pause preview" : "Play preview"}
           >
             {isPlaying ? (
               <>
-                <Pause className="h-5 w-5" /> Click Here to Pause
+                <Pause className="h-4 w-4" /> Click Here to Pause
               </>
             ) : (
               <>
-                <Play className="h-5 w-5 fill-current" /> Click Here to Play
+                <Play className="h-4 w-4 fill-current" /> Click Here to Play
               </>
             )}
           </button>
-          <div className="rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-2 text-base font-bold tabular-nums text-[var(--ink)]">
+          <div className="rounded-md border border-[var(--ink)] bg-white px-2.5 py-1 text-[13px] font-bold tabular-nums text-[var(--ink)]">
             {formatClock(currentTime)} / {formatClock(outputDuration)}
-          </div>
-          <div className="rounded-xl border-2 border-[var(--ink)] bg-[var(--yellow)] px-3 py-2 text-base font-bold text-[var(--ink)]">
-            Finished length: {formatClock(outputDuration)}
           </div>
         </div>
       </div>
 
-      <PanelSteps
-        steps={[
-          <>
-            <strong>Trim your video</strong> — use Cut Start / Cut End, or drag
-            the red handles on Track 1, to remove extra time at the beginning or
-            end.
-          </>,
-          <>
-            <strong>Match photos to names</strong> — each colored bar on Track 2
-            is a teammate&apos;s corner photo. It starts near when you say their
-            name. Drag the middle of a bar (hand cursor) to move when it shows;
-            drag the ends to change how long it stays.
-          </>,
-          <>
-            Click <strong>Play</strong> and watch. If a face pops up too early
-            or too late, pause and drag that bar until it matches when you say
-            the name.
-          </>,
-        ]}
-      />
-
-      <div className="how-banner">
-        Photos are placed automatically from your script. You only need to move
-        a bar if the timing feels off when you watch the preview.
-      </div>
-
-      {/* Cut controls stay outside the horizontal scroll so they are never clipped. */}
-      <div className="section-card space-y-2 bg-[var(--panel-soft)] p-3">
+      {/* Cut controls + tracks — immediately under the video playback. */}
+      <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-2.5 md:p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+          <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
             Track 1 · Your Video (Trim)
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
               onClick={() => nudgeTrim("start", 1)}
               disabled={outputDuration <= 3}
               title="Remove 1 second from the beginning"
@@ -264,7 +230,7 @@ export function Timeline() {
             </button>
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
               onClick={() => nudgeTrim("start", -1)}
               disabled={trimStart <= 0}
               title="Put 1 second back at the beginning"
@@ -273,7 +239,7 @@ export function Timeline() {
             </button>
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
               onClick={() => nudgeTrim("end", -1)}
               disabled={outputDuration <= 3}
               title="Remove 1 second from the end"
@@ -282,7 +248,7 @@ export function Timeline() {
             </button>
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[13px]"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
               onClick={() => nudgeTrim("end", 1)}
               disabled={trimEnd >= sourceDuration}
               title="Put 1 second back at the end"
@@ -390,17 +356,16 @@ export function Timeline() {
                 />
               </div>
             </div>
-            <p className="mt-2 text-base text-[var(--muted)]">
+            <p className="mt-1.5 text-[12px] font-medium text-[var(--muted)]">
               Original {formatClock(sourceDuration)}
               {cutStartSec > 0 || cutEndSec > 0
                 ? ` · keeping ${formatClock(outputDuration)} (cut ${formatClock(cutStartSec)} from start, ${formatClock(cutEndSec)} from end)`
                 : " · drag the red handles inward to shorten"}
-              . Photos below line up with the kept section.
             </p>
           </div>
 
           <div>
-            <div className="mb-1 text-sm font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+            <div className="mb-1 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
               Track 2 · Team Photos
             </div>
             <div
@@ -463,9 +428,8 @@ export function Timeline() {
               )}
             </div>
             {sorted.length > 1 ? (
-              <p className="mt-2 text-base text-[var(--muted)]">
-                Drag one photo bar onto another to change the order they appear
-                in the video.
+              <p className="mt-1.5 text-[12px] font-medium text-[var(--muted)]">
+                Drag one photo bar onto another to change the order they appear.
               </p>
             ) : null}
           </div>
@@ -491,6 +455,12 @@ export function Timeline() {
         </div>
       </div>
       </div>
+
+      <p className="text-[12px] font-medium leading-snug text-[var(--muted)]">
+        Photos are placed from your script. Move a bar only if the timing looks
+        off when you watch. Hover the{" "}
+        <strong className="text-[var(--ink)]">?</strong> above for more help.
+      </p>
     </div>
   );
 }
