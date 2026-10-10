@@ -15,7 +15,7 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "Love's Video Studio",
+  title: "Love's Enterprise Studio",
   description:
     "Love's-branded introduction video creator. Upload, add team photos, export an MP4.",
 };

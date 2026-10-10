@@ -30,7 +30,7 @@ function StudioShell() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/loves-video-mascot.jpg"
-              alt="Love's Video Studio mascot"
+              alt="Love's Enterprise Studio mascot"
               className="h-14 w-14 rounded-[var(--radius-md)] border border-[var(--ink)] bg-white object-cover md:h-16 md:w-16"
               width={1024}
               height={1024}
@@ -45,7 +45,7 @@ function StudioShell() {
                 height={50}
               />
               <p className="font-hero mt-0.5 text-[1.75rem] leading-none md:text-[2.1rem]">
-                Video Studio
+                Enterprise Studio
               </p>
             </div>
           </div>
@@ -98,9 +98,6 @@ function StudioShell() {
               <span className="hidden md:inline">MP4 export</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-[var(--radius-sm)] border border-white/25 bg-[var(--primary)] px-2.5 py-1 text-[10px] font-semibold tracking-[0.12em] md:text-[11px]">
-                Enterprise studio
-              </span>
               <StartOverButton />
             </div>
           </div>
@@ -122,7 +119,7 @@ function StudioShell() {
       <footer className="mt-2 border-t border-[var(--ink)] bg-[var(--olive)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3.5 text-white md:px-6">
           <p className="text-[13px] font-semibold tracking-tight">
-            Love&apos;s Video Studio · Fleet team introductions
+            Love&apos;s Enterprise Studio · Fleet team introductions
           </p>
           <p className="text-[12px] font-medium text-white/70">
             Short · Clear · On-brand
