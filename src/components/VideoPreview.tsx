@@ -19,6 +19,7 @@ import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { formatClock } from "@/lib/timeline";
 import { HelpTip } from "@/components/HelpTip";
 import { filledTeamPhotos } from "@/lib/team-slots";
+import { createQuietAudio, type QuietAudio } from "@/lib/quiet-audio";
 
 /**
  * Native HTML5 preview — Remotion Player often stays black on blob: uploads
@@ -48,7 +49,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
   const shellRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const musicRef = useRef<HTMLAudioElement | null>(null);
+  const musicRef = useRef<QuietAudio | null>(null);
   const [nativeError, setNativeError] = useState<string | null>(null);
   const [hasFrame, setHasFrame] = useState(false);
 
@@ -94,33 +95,25 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     if (el) el.volume = Math.min(1, Math.max(0, videoVolume));
   }, [videoVolume, video]);
 
-  // Keep a looping music bed element for the selected track.
-  // Always apply musicVolume immediately (default 2%) — never leave HTMLAudio
-  // at its built-in 100% volume.
+  // Looping music bed — uses Web Audio gain on iOS where element.volume is ignored.
   useEffect(() => {
     if (musicRef.current) {
-      musicRef.current.pause();
+      musicRef.current.dispose();
       musicRef.current = null;
     }
     if (!musicSrc) return;
-    const audio = new Audio(musicSrc);
-    audio.loop = true;
-    audio.preload = "auto";
-    audio.volume = Math.min(1, Math.max(0, musicVolume));
+    const audio = createQuietAudio(musicSrc, musicVolume, { loop: true });
     musicRef.current = audio;
     return () => {
-      audio.pause();
+      audio.dispose();
       if (musicRef.current === audio) musicRef.current = null;
     };
-    // musicVolume applied in a separate sync effect so track swaps stay quiet.
+    // musicVolume synced separately so track swaps do not recreate on every fader move.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [musicSrc, musicTrackId, video?.url]);
 
-  // Keep bed music at the studio level (2% default) whenever it changes.
   useEffect(() => {
-    if (musicRef.current) {
-      musicRef.current.volume = Math.min(1, Math.max(0, musicVolume));
-    }
+    musicRef.current?.setVolume(musicVolume);
   }, [musicVolume, musicSrc]);
 
   // Play / pause the native video + optional music bed.
@@ -142,7 +135,7 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
       });
 
       if (musicEnabled && musicRef.current) {
-        musicRef.current.volume = Math.min(1, Math.max(0, musicVolume));
+        musicRef.current.setVolume(musicVolume);
         void musicRef.current.play().catch(() => {
           /* music is optional */
         });

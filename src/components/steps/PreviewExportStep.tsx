@@ -28,6 +28,7 @@ import {
   orientationFileSuffix,
   orientationLabel,
 } from "@/lib/orientation-ui";
+import { createQuietAudio, type QuietAudio } from "@/lib/quiet-audio";
 
 const MUSIC_SAMPLE_SECONDS = 30;
 
@@ -61,7 +62,7 @@ export function PreviewExportStep({
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [samplingTrackId, setSamplingTrackId] = useState<string | null>(null);
-  const sampleAudioRef = useRef<HTMLAudioElement | null>(null);
+  const sampleAudioRef = useRef<QuietAudio | null>(null);
   const sampleTimerRef = useRef<number | null>(null);
 
   const filledCount = filledTeamPhotos(photos).length;
@@ -72,7 +73,7 @@ export function PreviewExportStep({
       sampleTimerRef.current = null;
     }
     if (sampleAudioRef.current) {
-      sampleAudioRef.current.pause();
+      sampleAudioRef.current.dispose();
       sampleAudioRef.current = null;
     }
     setSamplingTrackId(null);
@@ -84,18 +85,17 @@ export function PreviewExportStep({
       return;
     }
     stopMusicSample();
-    const audio = new Audio(src);
-    audio.volume = Math.min(1, Math.max(0, musicVolume));
+    // QuietAudio uses a GainNode on iOS where element.volume is ignored.
+    const audio = createQuietAudio(src, musicVolume, { loop: false });
     sampleAudioRef.current = audio;
     setSamplingTrackId(trackId);
     void audio.play().catch(() => {
-      setSamplingTrackId(null);
-      sampleAudioRef.current = null;
+      stopMusicSample();
     });
     sampleTimerRef.current = window.setTimeout(() => {
       stopMusicSample();
     }, MUSIC_SAMPLE_SECONDS * 1000);
-    audio.onended = () => stopMusicSample();
+    audio.element.onended = () => stopMusicSample();
   };
 
   useEffect(() => {
@@ -104,11 +104,17 @@ export function PreviewExportStep({
         window.clearTimeout(sampleTimerRef.current);
       }
       if (sampleAudioRef.current) {
-        sampleAudioRef.current.pause();
+        sampleAudioRef.current.dispose();
         sampleAudioRef.current = null;
       }
     };
   }, []);
+
+  // Keep an in-progress sample at the studio fader level (esp. on iPhone).
+  useEffect(() => {
+    sampleAudioRef.current?.setVolume(musicVolume);
+  }, [musicVolume]);
+
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   const generating = progress !== null && progress < 1;
@@ -315,7 +321,8 @@ export function PreviewExportStep({
               <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
                 Quiet under your voice · default{" "}
                 {Math.round(VIDEO_TEMPLATE.defaultMusicVolume * 100)}% · max{" "}
-                {Math.round(VIDEO_TEMPLATE.maxMusicVolume * 100)}%
+                {Math.round(VIDEO_TEMPLATE.maxMusicVolume * 100)}% · same on
+                phone and computer
               </p>
             </div>
             <HelpTip title="Background Music">
