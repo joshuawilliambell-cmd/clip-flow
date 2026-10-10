@@ -229,17 +229,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                     Click Here To Remove
                   </button>
                 </>
-              ) : (
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => fileRefs.current[index]?.click()}
-                  className="inline-flex items-center justify-center gap-1 rounded-md border-2 border-[var(--ink)] bg-[var(--yellow)] px-1.5 py-1.5 text-[11px] font-bold text-[var(--ink)] disabled:opacity-50"
-                >
-                  <ImagePlus className="h-3.5 w-3.5 shrink-0" />
-                  Click Here To Add Photo
-                </button>
-              )}
+              ) : null}
             </div>
 
             <div className="min-w-0 flex-1 space-y-2">

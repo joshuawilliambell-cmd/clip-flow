@@ -102,7 +102,7 @@ export function ScriptFillIns() {
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
             className="field-input"
-            placeholder="Example: Acme Logistics"
+            placeholder="Example: Tom"
             autoComplete="off"
           />
         </label>
