@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { PhotoFrameEditor } from "@/components/PhotoFrameEditor";
+import { ThumbnailSilhouetteMockup } from "@/components/ThumbnailSilhouetteMockup";
 import {
   exportTeamThumbnailPng,
   renderTeamThumbnail,
@@ -228,22 +229,34 @@ export function ThumbnailCreator({
         </div>
         <HelpTip title="Prepare Love's Team Thumbnail" size="lg">
           <p>
-            <strong>Optional.</strong> This still image can play for one second
-            at the start of your video (or you can download it as a PNG for
-            email or chat). It shows you and your teammates as a team card.
+            <strong>Optional.</strong> Think of the thumbnail as the cover of
+            your video — the professional team picture customers see first.
           </p>
           <p>
-            Your photo here is for this thumbnail only. It does not put a small
-            photo of you over the talking video. Only teammate photos can appear
-            in a corner while you speak.
+            It can play for one second at the start, or you can download it as a
+            PNG for email or chat.
+          </p>
+          <p>
+            Your featured photo here is for this cover only. It does not put a
+            small photo of you over the talking video. Only teammate photos can
+            appear in a corner while you speak.
           </p>
         </HelpTip>
       </div>
 
-      <div className="how-banner">
-        <strong>Optional.</strong> Use this if you want a Love&apos;s team card
-        at the very start of the video. Skip it if you only want your talking
-        clip.
+      <div className="how-banner flex flex-col gap-3 sm:flex-row sm:items-center">
+        <ThumbnailSilhouetteMockup />
+        <div className="min-w-0 space-y-1.5 text-[14px] font-medium leading-snug text-[var(--ink)] md:text-[15px]">
+          <p>
+            <strong>Optional · like a cover for your video.</strong> Customers
+            see this Love&apos;s Team picture first, so your video looks
+            polished and professional before you start talking.
+          </p>
+          <p className="text-[var(--muted)]">
+            Skip this if you only want your talking clip. The small example
+            shows a 4-person team card — yours will use the people you add.
+          </p>
+        </div>
       </div>
 
       {filledCount === 0 ? (
