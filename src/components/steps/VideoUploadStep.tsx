@@ -59,9 +59,8 @@ export function VideoUploadStep() {
           <h2 className="step-title">Step 1: Prepare Your Video</h2>
           <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
             Fill in a few blanks, add teammates if you want, then record or
-            upload. We handle the hard parts — like placing photos in the
-            corner and building a team thumbnail. About 60 seconds is preferred;
-            longer is fine.
+            upload. Have headshots ready if you want corner photos or a team
+            thumbnail. About 60 seconds is preferred; longer is fine.
           </p>
         </div>
         <HelpTip title="What Do I Do On This Page?" size="lg">
@@ -71,8 +70,13 @@ export function VideoUploadStep() {
             <strong>camera and teleprompter</strong> — that is the easiest path.
           </p>
           <p>
+            Want a team thumbnail or small photos in the corner of the video?
+            You&apos;ll need a clear headshot of each teammate, plus one of you
+            for the thumbnail cover.
+          </p>
+          <p>
             When your roster and talking video are ready, save and move to the
-            next step to trim, place photos, add music, and export.
+            next step to trim, add music, and export.
           </p>
         </HelpTip>
       </div>

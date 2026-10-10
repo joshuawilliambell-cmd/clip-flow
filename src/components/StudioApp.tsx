@@ -57,9 +57,10 @@ function StudioShell() {
                 customers — without needing to be techy.
               </p>
               <p>
-                You record yourself (or upload a clip). If you add teammates,
-                we can place their photos in the corner and help you build a
-                Love&apos;s Team thumbnail card.
+                You record yourself (or upload a clip). If you want teammate
+                photos in the corner or a team thumbnail cover, have a clear
+                headshot ready for each person — including yourself for the
+                thumbnail.
               </p>
               <p>
                 Then trim, add quiet music if you want, and download an MP4 to
@@ -72,11 +73,18 @@ function StudioShell() {
 
         {step === 1 ? (
           <div className="border-t border-black/15 px-4 py-3 md:px-6">
-            <p className="mx-auto max-w-6xl text-[15px] font-semibold leading-snug text-[var(--ink)] md:text-[16px]">
-              Make a short video for your customers the easy way. You talk on
-              camera — and if you want, we&apos;ll put teammate photos in the
-              corner and build a Love&apos;s Team thumbnail for you too.
-            </p>
+            <div className="mx-auto max-w-6xl space-y-1.5 text-[15px] font-semibold leading-snug text-[var(--ink)] md:text-[16px]">
+              <p>
+                Make a short video for your customers the easy way. You talk on
+                camera — and if you want, we&apos;ll put teammate photos in the
+                corner and build a Love&apos;s Team thumbnail for you too.
+              </p>
+              <p className="text-[14px] font-medium text-[var(--ink)]/80 md:text-[15px]">
+                Tip: If you want a thumbnail cover and/or corner photos, gather
+                a clear headshot of each teammate first — and one of yourself if
+                you&apos;ll appear on the thumbnail.
+              </p>
+            </div>
           </div>
         ) : null}
 
