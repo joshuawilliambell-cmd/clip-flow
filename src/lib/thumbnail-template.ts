@@ -35,22 +35,25 @@ export const THUMBNAIL_TEMPLATE = {
   header: {
     title: "Your Love's Enterprise Sales Team",
     /** Top gradient bar height */
-    barHeight: 118,
-    fontSize: 48,
+    barHeight: 168,
+    fontSize: 58,
     fontFamily: "Arial, Helvetica, sans-serif",
     fontWeight: "800",
   },
   card: {
     width: 360,
-    photoHeight: 420,
-    bodyHeight: 150,
+    photoHeight: 400,
+    /** Name + title + optional email */
+    bodyHeight: 188,
     radius: 18,
     gap: 36,
-    nameSize: 34,
-    titleSize: 24,
-    nameYOffset: 52,
-    dividerYOffset: 78,
-    titleYOffset: 112,
+    nameSize: 32,
+    titleSize: 22,
+    emailSize: 18,
+    nameYOffset: 40,
+    dividerYOffset: 64,
+    titleYOffset: 94,
+    emailYOffset: 132,
   },
   photoFit: {
     /** 1 = cover the portrait frame; higher zooms in. */
@@ -80,6 +83,8 @@ export type ThumbnailMember = {
   photoUrl: string | null;
   name: string;
   title: string;
+  /** Optional work email shown under the job title on the thumbnail. */
+  email: string;
   photoFit: ThumbnailPhotoFit;
 };
 

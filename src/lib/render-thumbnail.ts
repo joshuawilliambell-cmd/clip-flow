@@ -188,14 +188,14 @@ async function drawMemberCard(
 
   const bodyTop = y + card.photoHeight;
   const centerX = x + card.width / 2;
+  const textMax = card.width - 28;
 
-  // White name plate already filled by card background
   ctx.fillStyle = colors.text;
   ctx.font = `800 ${card.nameSize}px ${header.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const name = member.name.trim() || "Name";
-  ctx.fillText(name, centerX, bodyTop + card.nameYOffset, card.width - 28);
+  ctx.fillText(name, centerX, bodyTop + card.nameYOffset, textMax);
 
   ctx.strokeStyle = "rgba(26, 26, 26, 0.28)";
   ctx.lineWidth = 2;
@@ -207,7 +207,14 @@ async function drawMemberCard(
   ctx.fillStyle = colors.muted;
   ctx.font = `600 ${card.titleSize}px ${header.fontFamily}`;
   const title = member.title.trim() || "Job title";
-  ctx.fillText(title, centerX, bodyTop + card.titleYOffset, card.width - 28);
+  ctx.fillText(title, centerX, bodyTop + card.titleYOffset, textMax);
+
+  const email = member.email?.trim() ?? "";
+  if (email) {
+    ctx.fillStyle = colors.text;
+    ctx.font = `500 ${card.emailSize}px ${header.fontFamily}`;
+    ctx.fillText(email, centerX, bodyTop + card.emailYOffset, textMax);
+  }
 }
 
 export async function renderTeamThumbnail(
@@ -231,9 +238,13 @@ export async function renderTeamThumbnail(
   const active = members.slice(0, THUMBNAIL_TEMPLATE.maxMembers);
   const count = active.length;
   if (count > 0) {
+    const cardH = card.photoHeight + card.bodyHeight;
+    const creamTop = header.barHeight;
+    const creamHeight = height - creamTop;
     const totalWidth = count * card.width + (count - 1) * card.gap;
+    // Center the row in the cream area (horizontal + vertical).
     const startX = (width - totalWidth) / 2;
-    const cardY = header.barHeight + 72;
+    const cardY = creamTop + Math.max(24, (creamHeight - cardH) / 2);
 
     for (let i = 0; i < count; i += 1) {
       const member = active[i] ?? {
@@ -241,6 +252,7 @@ export async function renderTeamThumbnail(
         photoUrl: null,
         name: "",
         title: "",
+        email: "",
         photoFit: defaultPhotoFit(),
       };
       await drawMemberCard(

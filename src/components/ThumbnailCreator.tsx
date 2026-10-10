@@ -65,11 +65,13 @@ export function ThumbnailCreator({
   useEffect(() => {
     setMembers((prev) => {
       const fitById = new Map(prev.map((m) => [m.id, m.photoFit]));
+      const emailById = new Map(prev.map((m) => [m.id, m.email ?? ""]));
       const speaker: ThumbnailMember = {
         id: SPEAKER_THUMBNAIL_ID,
         photoUrl: speakerPhotoUrl,
         name: speakerName,
         title: speakerTitle,
+        email: emailById.get(SPEAKER_THUMBNAIL_ID) ?? "",
         photoFit: fitById.get(SPEAKER_THUMBNAIL_ID) ?? defaultPhotoFit(),
       };
       const teammates = rosterPhotos.map(
@@ -79,6 +81,7 @@ export function ThumbnailCreator({
             photoUrl: photo.url,
             name: photo.name,
             title: photo.title,
+            email: emailById.get(photo.id) ?? "",
             photoFit: fitById.get(photo.id) ?? defaultPhotoFit(),
           }) satisfies ThumbnailMember,
       );
@@ -104,7 +107,7 @@ export function ThumbnailCreator({
   const membersKey = members
     .map(
       (m) =>
-        `${m.id}\0${m.photoUrl ?? ""}\0${m.name}\0${m.title}\0${m.photoFit.scale}\0${m.photoFit.focusX}\0${m.photoFit.focusY}`,
+        `${m.id}\0${m.photoUrl ?? ""}\0${m.name}\0${m.title}\0${m.email}\0${m.photoFit.scale}\0${m.photoFit.focusX}\0${m.photoFit.focusY}`,
     )
     .join("|");
 
@@ -138,6 +141,12 @@ export function ThumbnailCreator({
   const updateFit = (id: string, photoFit: ThumbnailMember["photoFit"]) => {
     setMembers((prev) =>
       prev.map((m) => (m.id === id ? { ...m, photoFit } : m)),
+    );
+  };
+
+  const updateEmail = (id: string, email: string) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, email } : m)),
     );
   };
 
@@ -502,6 +511,22 @@ export function ThumbnailCreator({
                   />
                 </div>
               ) : null}
+
+              <label className="mt-3 block">
+                <span className="field-label">Email (optional)</span>
+                <input
+                  type="email"
+                  value={member.email}
+                  onChange={(e) => updateEmail(member.id, e.target.value)}
+                  className="field-input"
+                  placeholder="Example: josh.bell@loves.com"
+                  autoComplete="off"
+                />
+                <span className="mt-1 block text-[12px] font-medium text-[var(--muted)]">
+                  Shows under this person&apos;s name on the thumbnail. Leave
+                  blank to skip.
+                </span>
+              </label>
             </article>
           );
         })}

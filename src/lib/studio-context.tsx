@@ -940,6 +940,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
                 photoUrl: null,
                 name: "",
                 title: "",
+                email: "",
                 photoFit: defaultPhotoFit(),
               };
             const byId = new Map(thumbs.map((t) => [t.id, t]));
@@ -951,6 +952,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
                 photoUrl: photo.url,
                 name: photo.name,
                 title: photo.title,
+                email: existing?.email ?? "",
                 photoFit: existing?.photoFit ?? defaultPhotoFit(),
               };
             });

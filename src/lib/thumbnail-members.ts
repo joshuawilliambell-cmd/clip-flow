@@ -11,6 +11,7 @@ function emptySpeakerMember(): ThumbnailMember {
     photoUrl: null,
     name: "",
     title: "",
+    email: "",
     photoFit: defaultPhotoFit(),
   };
 }
@@ -21,6 +22,7 @@ function emptyTeammateMember(): ThumbnailMember {
     photoUrl: null,
     name: "",
     title: "",
+    email: "",
     photoFit: defaultPhotoFit(),
   };
 }
