@@ -246,7 +246,7 @@ export function VideoUploadStep() {
           onClick={() => setStep(2)}
           className="btn-primary min-w-[14rem]"
         >
-          Click Here to Finish & Download
+          Click Here to Save Your Video and Move to the Next Step
         </button>
       </div>
     </div>
