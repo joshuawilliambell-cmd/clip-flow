@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Replace, Trash2, Users } from "lucide-react";
+import { ImagePlus, Plus, Replace, Trash2, Users } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { JobTitleField } from "@/components/JobTitleField";
 import { PronounField } from "@/components/PronounField";
 import { PanelSteps } from "@/components/PanelStep";
+import { TeamPhotoSilhouette } from "@/components/TeamPhotoSilhouette";
 import { defaultDutiesForTitle } from "@/lib/job-titles";
 import { useStudio } from "@/lib/studio-context";
 
@@ -179,7 +180,7 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                     ? `Replace photo for teammate ${index + 1}`
                     : `Add photo for teammate ${index + 1}`
                 }
-                className="relative h-24 w-full overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-white disabled:opacity-60"
+                className="relative h-24 w-full overflow-hidden rounded-xl border-2 border-[var(--ink)] bg-[#94a3b8] disabled:opacity-60"
               >
                 {photo.url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -189,10 +190,20 @@ export function TeamRosterFields({ variant = "setup" }: TeamRosterFieldsProps) {
                     className="h-full w-full object-cover object-[center_28%]"
                   />
                 ) : (
-                  <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center text-[11px] font-semibold text-[var(--ink)]">
-                    <ImagePlus className="h-5 w-5 text-[var(--primary)]" />
-                    Click Here To Add Photo
-                  </span>
+                  <>
+                    <TeamPhotoSilhouette
+                      className="absolute inset-0 h-full w-full"
+                      title=""
+                    />
+                    <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-black/35 px-1 text-center">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-[var(--yellow)] text-[var(--ink)] shadow">
+                        <Plus className="h-4 w-4" strokeWidth={3} />
+                      </span>
+                      <span className="text-[10px] font-bold leading-tight text-white drop-shadow">
+                        Add Photo
+                      </span>
+                    </span>
+                  </>
                 )}
               </button>
               <input

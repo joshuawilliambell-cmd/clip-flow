@@ -2,7 +2,7 @@ import { clsx } from "clsx";
 
 type TeamPhotoSilhouetteProps = {
   className?: string;
-  /** Accessible label when not decorative. */
+  /** Accessible label when not decorative. Pass empty string for decorative. */
   title?: string;
 };
 
@@ -14,12 +14,14 @@ export function TeamPhotoSilhouette({
   className,
   title = "Team member photo",
 }: TeamPhotoSilhouetteProps) {
+  const decorative = !title;
   return (
     <svg
       viewBox="0 0 80 100"
       className={clsx("h-full w-full", className)}
-      role="img"
-      aria-label={title}
+      role={decorative ? "presentation" : "img"}
+      aria-hidden={decorative ? true : undefined}
+      aria-label={decorative ? undefined : title}
     >
       <rect width="80" height="100" fill="#94a3b8" />
       {/* Head */}
