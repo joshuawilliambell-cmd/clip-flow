@@ -1,17 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Pause, Play, RotateCcw } from "lucide-react";
 import { TELEPROMPTER_TICK_MS, scriptForTeam } from "@/lib/intro-script";
+import { TeleprompterControlBar } from "@/components/TeleprompterControlBar";
 import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
-import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import {
   formatScriptForNaturalReading,
   scriptWords,
 } from "@/lib/teleprompter-layout";
 import { punctuationEaseMultiplier } from "@/lib/teleprompter-pace";
 import { useStudio } from "@/lib/studio-context";
-import { clsx } from "clsx";
 
 type WebcamTeleprompterOverlayProps = {
   /** Live camera is showing (preview or recording). */
@@ -22,10 +20,7 @@ type WebcamTeleprompterOverlayProps = {
 
 /**
  * Top-of-preview teleprompter for webcam capture.
- * Script sits near the top of the frame so eyes stay toward the webcam
- * (usually above the monitor) instead of the screen center. Overlay is
- * DOM-only and is never burned into MediaRecorder.
- * Column width, type size, and script text match Script Teleprompter Practice.
+ * Uses the same control bar and reading window layout as Practice Here.
  */
 export function WebcamTeleprompterOverlay({
   active,
@@ -80,13 +75,13 @@ export function WebcamTeleprompterOverlay({
 
   pixelsPerTickRef.current = pixelsPerTick;
 
-  // Reset to top only when the script content changes — never on Pause.
   useEffect(() => {
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     scrollCarryRef.current = 0;
+    setScrollHighlight(0);
   }, [fillKey, script]);
 
-  // Auto-scroll shortly after recording begins (with a short countdown cue).
+  // Auto-scroll with countdown when recording begins.
   useEffect(() => {
     if (!active || !enabled) {
       setScrolling(false);
@@ -115,7 +110,6 @@ export function WebcamTeleprompterOverlay({
     return () => window.clearTimeout(t);
   }, [countdown]);
 
-  // Accumulate sub-pixel scroll; ease near punctuation for natural pauses.
   useEffect(() => {
     if (!scrolling || !enabled || !active) {
       scrollCarryRef.current = 0;
@@ -157,21 +151,34 @@ export function WebcamTeleprompterOverlay({
     setScrollHighlight(0);
   };
 
+  const toggleScrollWithCountdown = () => {
+    if (countdown !== null) {
+      setCountdown(null);
+      return;
+    }
+    if (scrolling) {
+      setScrolling(false);
+      return;
+    }
+    if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
+    scrollCarryRef.current = 0;
+    setScrollHighlight(0);
+    setCountdown(3);
+  };
+
   return (
     <div className="pointer-events-none absolute inset-0 z-10 flex flex-col">
-      {/* Soften lower half so the top reading band draws the eye upward */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/50 to-transparent"
         aria-hidden
       />
 
-      {/* Same ~5-word column as practice — container must not clip 28ch */}
       <div className="relative z-20 mx-auto flex w-full max-w-[min(100%,36rem)] flex-col px-2 pt-2 md:pt-3">
         {!recording ? (
           <p className="mb-1.5 rounded-md border border-[var(--yellow)]/60 bg-black/65 px-2 py-1.5 text-center text-[10px] font-semibold leading-snug text-white md:text-[11px]">
-            Same width and speed as Practice Here. Keep this text near the top
-            of your monitor, close to the webcam. Scoot back so we see from
-            about your waist to the top of your head.
+            Same controls as Practice Here. Keep this text near the top of your
+            monitor, close to the webcam. Scoot back so we see from about your
+            waist to the top of your head.
           </p>
         ) : null}
 
@@ -192,10 +199,9 @@ export function WebcamTeleprompterOverlay({
           ) : null}
           <div
             ref={scrollerRef}
-            className={clsx(
-              "h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none",
-              !enabled && "opacity-40",
-            )}
+            className={`h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none ${
+              !enabled ? "opacity-40" : ""
+            }`}
             style={{ scrollbarWidth: "none" }}
             aria-live="polite"
           >
@@ -218,69 +224,24 @@ export function WebcamTeleprompterOverlay({
         </div>
       </div>
 
-      {/* Controls stay at the bottom so they do not pull eyes from the lens */}
-      <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-3 pb-3 pt-10">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
-          onClick={() => {
+      <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-30">
+        <TeleprompterControlBar
+          enabled={enabled}
+          onToggleEnabled={() => {
             setEnabled((v) => !v);
             setScrolling(false);
+            setCountdown(null);
           }}
-          className={clsx(
-            "rounded-full border px-3 py-1.5 text-[12px] font-bold uppercase tracking-wide",
-            enabled
-              ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-              : "border-white/40 bg-black/50 text-white",
-          )}
-        >
-          {enabled
-            ? "Click Here — Prompter On"
-            : "Click Here — Prompter Off"}
-        </button>
-
-        <button
-          type="button"
-          disabled={!enabled}
-          onClick={() => setScrolling((v) => !v)}
-          className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-40"
-        >
-          {scrolling ? (
-            <>
-              <Pause className="h-3.5 w-3.5" /> Pause
-            </>
-          ) : (
-            <>
-              <Play className="h-3.5 w-3.5" /> Play / Scroll
-            </>
-          )}
-        </button>
-
-        <button
-          type="button"
-          disabled={!enabled}
-          onClick={resetScroll}
-          className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-40"
-        >
-          <RotateCcw className="h-3.5 w-3.5" /> Top
-        </button>
-
-        <div className="flex min-w-[12rem] max-w-[16rem] flex-1 items-center gap-2 rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-white">
-          <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-white/80">
-            Speed
-          </span>
-          <TeleprompterSpeedSlider
-            value={pixelsPerTick}
-            disabled={!enabled}
-            variant="overlay"
-            aria-label="Webcam teleprompter scroll speed"
-            onChange={(next) => {
-              setTeleprompterPixelsPerTick(next);
-              setTeleprompterSpeedOverridden(true);
-            }}
-          />
-        </div>
+          scrolling={scrolling}
+          countdownActive={countdown !== null}
+          onToggleScroll={toggleScrollWithCountdown}
+          onReset={resetScroll}
+          pixelsPerTick={pixelsPerTick}
+          onSpeedChange={(next) => {
+            setTeleprompterPixelsPerTick(next);
+            setTeleprompterSpeedOverridden(true);
+          }}
+        />
       </div>
     </div>
   );

@@ -1,14 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  FileUp,
-  Pause,
-  Play,
-  RotateCcw,
-  ScrollText,
-} from "lucide-react";
+import { FileUp, ScrollText } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
+import { TeleprompterControlBar } from "@/components/TeleprompterControlBar";
 import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
 import {
   INTRO_SCRIPTS,
@@ -23,7 +18,6 @@ import {
   scriptForTeam,
   suggestedPixelsPerTickForScript,
 } from "@/lib/intro-script";
-import { TeleprompterSpeedSlider } from "@/components/TeleprompterSpeedSlider";
 import { PanelSteps } from "@/components/PanelStep";
 import { useMicLevel } from "@/hooks/useMicLevel";
 import { useTeleprompterVoiceFollow } from "@/hooks/useTeleprompterVoiceFollow";
@@ -412,7 +406,7 @@ export function Teleprompter({
   return (
     <div
       className={clsx(
-        "flex h-full min-h-[22rem] max-h-[36rem] flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--olive)] text-white",
+        "flex flex-col rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--olive)] text-white",
         className,
       )}
     >
@@ -431,58 +425,230 @@ export function Teleprompter({
                     ? `Custom · ${uploadName}`
                     : "Custom Script"
                 : "Off"}
+              {" · "}
+              Same controls as the webcam teleprompter
             </p>
           </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <HelpTip title="Script Teleprompter">
-            <p>
-              Practice reading here before you record. The speed you set also
-              applies to the webcam teleprompter.
-            </p>
-          </HelpTip>
-
-          <button
-            type="button"
-            role="switch"
-            aria-checked={enabled}
-            aria-label={enabled ? "Turn teleprompter off" : "Turn teleprompter on"}
-            onClick={() => {
-              setEnabled((v) => !v);
-              setScrolling(false);
-            }}
-            className={clsx(
-              "relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border transition",
-              enabled
-                ? "border-[var(--yellow)] bg-[var(--yellow)]"
-                : "border-white/40 bg-white/15",
-            )}
-          >
-            <span
-              className={clsx(
-                "absolute top-0.5 h-6 w-6 rounded-full bg-[var(--ink)] shadow transition",
-                enabled ? "left-7" : "left-0.5",
-              )}
-            />
-            <span className="sr-only">{enabled ? "On" : "Off"}</span>
-          </button>
-          <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-white/90">
-            {enabled ? "On" : "Off"}
-          </span>
-        </div>
+        <HelpTip title="Script Teleprompter">
+          <p>
+            Practice Here uses the same Play / Scroll, Top, Speed, and On/Off
+            controls as when you record with the webcam — so your practice pace
+            matches the real take.
+          </p>
+        </HelpTip>
       </div>
 
       {!enabled ? (
-        <div className="flex flex-1 items-center justify-center px-6 py-10 text-center">
-          <p className="max-w-sm text-[15px] font-medium text-white/75">
-            Teleprompter is off. Flip the switch to show your script.
+        <div className="px-6 py-10 text-center">
+          <p className="mb-4 text-[15px] font-medium text-white/75">
+            Teleprompter is off. Turn it on with the control below to practice.
           </p>
+          <TeleprompterControlBar
+            enabled={false}
+            onToggleEnabled={() => setEnabled(true)}
+            scrolling={false}
+            countdownActive={false}
+            onToggleScroll={() => undefined}
+            onReset={() => undefined}
+            pixelsPerTick={pixelsPerTick}
+            onSpeedChange={onSpeedSlider}
+          />
         </div>
       ) : (
         <>
+          {/* Practice stage first — fixed reading window + always-visible controls */}
+          <div className="border-b border-white/15 px-4 py-3">
+            <p className="text-[15px] font-bold tracking-tight text-[var(--yellow)]">
+              Practice Here
+            </p>
+            <p className="mt-1 text-[12px] font-medium leading-snug text-white/80">
+              Same width, speed, and controls as the webcam teleprompter. Click{" "}
+              <strong className="text-white">Play / Scroll</strong> (3-2-1
+              countdown), read out loud, then adjust Speed only after a full
+              pass. Keyboard: Space play/pause · R / Home for top.
+            </p>
+            <p className="mt-1 text-[12px] font-semibold text-[var(--yellow)]">
+              ~{paceSeconds}s · {speedPercent}%
+              {scrolling || elapsedSeconds > 0
+                ? ` · ${formatClock(elapsedSeconds)} elapsed · ~${formatClock(remainingSeconds)} left`
+                : ""}
+              {liveWpm > 0 ? ` · ~${liveWpm} wpm` : ""}
+              {speedOverridden
+                ? " · custom speed"
+                : ` · auto-paced ~${TARGET_INTRO_SECONDS}s`}
+              {speedOverridden ? (
+                <>
+                  {" "}
+                  <button
+                    type="button"
+                    onClick={restorePacedSpeed}
+                    className="underline"
+                  >
+                    Reset Pace
+                  </button>
+                </>
+              ) : null}
+            </p>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-[min(100%,36rem)] px-3 pt-2">
+            <div className="relative h-52 overflow-hidden rounded-xl border border-white/30 bg-black/50 shadow-[0_8px_28px_rgba(0,0,0,0.4)] md:h-60">
+              <div
+                className="pointer-events-none absolute inset-x-2 top-[26%] z-20 h-0.5 bg-[var(--yellow)]/85"
+                aria-hidden
+              />
+              {countdown !== null && countdown > 0 ? (
+                <div
+                  className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/55"
+                  aria-live="assertive"
+                >
+                  <span className="font-display text-6xl font-bold text-[var(--yellow)] md:text-7xl">
+                    {countdown}
+                  </span>
+                </div>
+              ) : null}
+              <div
+                ref={scrollerRef}
+                className="h-full overflow-y-auto px-3 pb-16 pt-3 text-center scrollbar-none"
+                style={{ scrollbarWidth: "none" }}
+                aria-live="polite"
+              >
+                <TeleprompterHighlightedScript
+                  script={practiceScript}
+                  highlightThrough={highlightThrough}
+                  fontLarge={fontLarge}
+                  roomyLines={lineRoomy}
+                />
+                <div className="h-24" aria-hidden />
+              </div>
+            </div>
+          </div>
+
+          {cues.length > 1 ? (
+            <div className="flex flex-wrap gap-1.5 px-3 pt-2">
+              <span className="w-full text-[10px] font-semibold uppercase tracking-wide text-white/60">
+                Jump To Cue
+              </span>
+              {cues.map((cue) => (
+                <button
+                  key={`${cue.label}-${cue.wordIndex}`}
+                  type="button"
+                  onClick={() => jumpToCue(cue.wordIndex)}
+                  className="rounded-md border border-white/30 bg-black/30 px-2 py-1 text-[11px] font-semibold text-white hover:border-[var(--yellow)]"
+                >
+                  Click Here · {cue.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <TeleprompterControlBar
+            enabled={enabled}
+            onToggleEnabled={() => {
+              setEnabled((v) => !v);
+              setScrolling(false);
+              voiceFollow.stop();
+            }}
+            scrolling={scrolling}
+            countdownActive={countdown !== null}
+            onToggleScroll={toggleScrollWithCountdown}
+            onReset={resetScroll}
+            pixelsPerTick={pixelsPerTick}
+            onSpeedChange={onSpeedSlider}
+            extras={
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScrolling(false);
+                      voiceFollow.toggle();
+                    }}
+                    className={clsx(
+                      "rounded-full border px-3 py-1.5 text-[12px] font-bold",
+                      voiceFollow.listening
+                        ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                        : "border-white/40 bg-black/50 text-white",
+                    )}
+                    title={
+                      voiceFollow.supported
+                        ? "Scroll as you speak (Chrome/Edge)"
+                        : "Needs Chrome or Edge speech recognition"
+                    }
+                  >
+                    {voiceFollow.listening
+                      ? "Click Here to Stop Voice Follow"
+                      : "Click Here to Follow My Voice"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLoopPractice((v) => !v)}
+                    className={clsx(
+                      "rounded-full border px-3 py-1.5 text-[12px] font-bold",
+                      loopPractice
+                        ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
+                        : "border-white/40 bg-black/50 text-white",
+                    )}
+                  >
+                    {loopPractice
+                      ? "Click Here — Loop On"
+                      : "Click Here — Loop Off"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLineRoomy(!lineRoomy)}
+                    className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
+                  >
+                    {lineRoomy
+                      ? "Click Here for Tighter Lines"
+                      : "Click Here for Roomy Lines"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFontLarge(!fontLarge)}
+                    className="rounded-full border border-white/40 bg-black/50 px-3 py-1.5 text-[12px] font-bold text-white"
+                  >
+                    {fontLarge
+                      ? "Click Here for Smaller Text"
+                      : "Click Here for Bigger Text"}
+                  </button>
+                </div>
+                {voiceFollow.listening ? (
+                  <div className="flex items-center gap-2 px-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
+                      Mic
+                    </span>
+                    <div
+                      className="h-2 flex-1 overflow-hidden rounded-full bg-white/15"
+                      role="meter"
+                      aria-label="Microphone level"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(micLevel * 100)}
+                    >
+                      <div
+                        className="h-full rounded-full bg-[var(--yellow)] transition-[width] duration-75"
+                        style={{ width: `${Math.round(micLevel * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : null}
+                {voiceFollow.status ? (
+                  <p className="text-center text-[11px] font-medium text-[var(--yellow)]">
+                    {voiceFollow.status}
+                    {voiceFollow.listening && voiceFollow.totalWords > 0
+                      ? ` · ${voiceFollow.matchedWords}/${voiceFollow.totalWords} words`
+                      : ""}
+                  </p>
+                ) : null}
+              </div>
+            }
+          />
+
+          {/* Script editing below practice — does not hide the controls */}
           {!recording ? (
-            <div className="space-y-3 border-b border-white/15 px-4 py-3">
+            <div className="space-y-3 border-t border-white/15 px-4 py-3">
               <p className="rounded-md border border-[var(--yellow)]/50 bg-black/30 px-3 py-2 text-[12px] font-medium leading-snug text-white/90">
                 <strong className="text-[var(--yellow)]">Disclaimer:</strong>{" "}
                 This script was built automatically from the blanks you filled
@@ -495,18 +661,16 @@ export function Teleprompter({
                 className="rounded-md bg-black/25 px-3 py-2 [&_strong]:text-[var(--yellow)]"
                 steps={[
                   <>
-                    Review or edit the script in the box below (or click{" "}
-                    <strong>My Script</strong> / <strong>Upload .txt</strong>).
+                    Use the <strong>Play / Scroll</strong>, <strong>Top</strong>,
+                    and <strong>Speed</strong> controls above (same as webcam).
                   </>,
                   <>
-                    Under Practice Here, click <strong>Play / Scroll</strong>{" "}
-                    for a steady pace, or <strong>Follow My Voice</strong> so
-                    it scrolls as you speak (Chrome/Edge).
+                    Optional: edit the script below, or click{" "}
+                    <strong>Follow My Voice</strong> (Chrome/Edge).
                   </>,
                   <>
-                    If fixed scroll feels too fast, finish the pass first, then
-                    move the speed slider. Do not change speed mid-script.
-                    Practice a few times before you record.
+                    Practice a few full passes before you record. Do not change
+                    speed mid-script.
                   </>,
                 ]}
               />
@@ -516,7 +680,7 @@ export function Teleprompter({
                   type="button"
                   onClick={useOfficial}
                   className={clsx(
-                    "rounded-[var(--radius-sm)] border px-3 py-1.5 text-[13px] font-semibold",
+                    "rounded-full border px-3 py-1.5 text-[12px] font-bold",
                     source === "official"
                       ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
                       : "border-white/35 text-white hover:border-[var(--yellow)]",
@@ -528,7 +692,7 @@ export function Teleprompter({
                   type="button"
                   onClick={useCustom}
                   className={clsx(
-                    "rounded-[var(--radius-sm)] border px-3 py-1.5 text-[13px] font-semibold",
+                    "rounded-full border px-3 py-1.5 text-[12px] font-bold",
                     source === "custom"
                       ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
                       : "border-white/35 text-white hover:border-[var(--yellow)]",
@@ -539,7 +703,7 @@ export function Teleprompter({
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-white/35 px-3 py-1.5 text-[13px] font-semibold text-white hover:border-[var(--yellow)]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/35 px-3 py-1.5 text-[12px] font-bold text-white hover:border-[var(--yellow)]"
                 >
                   <FileUp className="h-3.5 w-3.5" />
                   Click Here to Upload .txt
@@ -561,7 +725,7 @@ export function Teleprompter({
               </p>
               <p className="text-[12px] font-medium text-white/70">
                 You can change any wording in this box. Edits become your custom
-                script.
+                script and also show on the webcam teleprompter.
               </p>
 
               <label className="block">
@@ -581,7 +745,7 @@ export function Teleprompter({
                       setTeleprompterSpeedOverridden(false);
                     }
                   }}
-                  rows={5}
+                  rows={4}
                   className="w-full resize-y rounded-[var(--radius-md)] border border-white/30 bg-white/10 px-3 py-2 text-[14px] font-medium leading-relaxed text-white placeholder:text-white/45 focus:border-[var(--yellow)] focus:outline-none"
                   placeholder="Type or paste your script…"
                 />
@@ -605,235 +769,6 @@ export function Teleprompter({
               ) : null}
             </div>
           ) : null}
-
-          <div className="border-b border-white/15 px-4 py-2">
-            <p className="text-[15px] font-bold tracking-tight text-[var(--yellow)]">
-              Practice Here
-            </p>
-            <p className="mt-1 text-[12px] font-medium leading-snug text-white/80">
-              This is the scrolling teleprompter practice area. The column width
-              and text size match the webcam teleprompter, so the speed you
-              practice is the same when you record. Click{" "}
-              <strong className="text-white">Play / Scroll</strong> and try to
-              read at that speed out loud. If it feels too fast, finish the
-              full pass, then slow the slider — do not adjust midway. Practice
-              several times before you record a real video.
-            </p>
-            <p className="mt-1.5 text-[12px] font-medium leading-snug text-white/70">
-              Scroll speed is set for about a {TARGET_INTRO_SECONDS}-second
-              video. If you slow it down, your finished video will usually be
-              longer than {TARGET_INTRO_SECONDS} seconds. Play starts with a
-              3-2-1 countdown. Keyboard:{" "}
-              <strong className="text-white">Space</strong> play/pause,{" "}
-              <strong className="text-white">R</strong> or Home back to top.
-              Optional: <strong className="text-white">Follow My Voice</strong>{" "}
-              uses your mic (Chrome/Edge), highlights words as you say them, and
-              scrolls with you (like PromptSmart VoiceTrack). Tip: spell out
-              numbers (&quot;sixty&quot; not &quot;60&quot;) for better matching.
-            </p>
-          </div>
-
-          <div className="relative min-h-0 flex-1">
-            <div
-              className="pointer-events-none absolute inset-x-0 top-[28%] z-10 h-0.5 bg-[var(--yellow)]/85"
-              aria-hidden
-            />
-            {countdown !== null && countdown > 0 ? (
-              <div
-                className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/55"
-                aria-live="assertive"
-              >
-                <span className="font-display text-7xl font-bold text-[var(--yellow)] drop-shadow-lg md:text-8xl">
-                  {countdown}
-                </span>
-              </div>
-            ) : null}
-            <div
-              ref={scrollerRef}
-              className="h-full min-h-[12rem] overflow-y-auto px-5 py-6 text-center"
-              aria-live="polite"
-            >
-              <TeleprompterHighlightedScript
-                script={practiceScript}
-                highlightThrough={highlightThrough}
-                fontLarge={fontLarge}
-                roomyLines={lineRoomy}
-              />
-              <div className="h-40" aria-hidden />
-            </div>
-          </div>
-
-          {cues.length > 1 ? (
-            <div className="flex flex-wrap gap-1.5 border-b border-white/15 px-3 py-2">
-              <span className="w-full text-[10px] font-semibold uppercase tracking-wide text-white/60">
-                Jump To Cue
-              </span>
-              {cues.map((cue) => (
-                <button
-                  key={`${cue.label}-${cue.wordIndex}`}
-                  type="button"
-                  onClick={() => jumpToCue(cue.wordIndex)}
-                  className="rounded-md border border-white/30 bg-black/30 px-2 py-1 text-[11px] font-semibold text-white hover:border-[var(--yellow)]"
-                >
-                  Click Here · {cue.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          <div className="space-y-2 border-t border-white/20 px-3 py-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white/70">
-                Scroll Speed
-              </span>
-              <span className="text-[12px] font-semibold text-[var(--yellow)]">
-                ~{paceSeconds}s · {speedPercent}%
-                {scrolling || elapsedSeconds > 0
-                  ? ` · ${formatClock(elapsedSeconds)} elapsed · ~${formatClock(remainingSeconds)} left`
-                  : ""}
-                {liveWpm > 0 ? ` · ~${liveWpm} wpm` : ""}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="shrink-0 text-[12px] font-semibold text-white/80">
-                Slower
-              </span>
-              <TeleprompterSpeedSlider
-                value={pixelsPerTick}
-                onChange={onSpeedSlider}
-                aria-label="Teleprompter scroll speed"
-              />
-              <span className="shrink-0 text-[12px] font-semibold text-white/80">
-                Faster
-              </span>
-            </div>
-            <p className="text-[11px] font-medium text-white/65">
-              {speedOverridden
-                ? "Custom speed — drag the slider after a full practice pass."
-                : `Auto-paced for about ${TARGET_INTRO_SECONDS} seconds.`}
-              {speedOverridden ? (
-                <>
-                  {" "}
-                  <button
-                    type="button"
-                    onClick={restorePacedSpeed}
-                    className="font-semibold text-[var(--yellow)] underline"
-                  >
-                    Click Here to Reset to ~{TARGET_INTRO_SECONDS}s Pace
-                  </button>
-                </>
-              ) : null}
-            </p>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleScrollWithCountdown}
-                className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-[var(--yellow)] bg-[var(--yellow)] px-3 py-1.5 text-[13px] font-semibold text-[var(--ink)]"
-              >
-                {scrolling || countdown !== null ? (
-                  <>
-                    <Pause className="h-3.5 w-3.5" /> Click Here to Pause
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-3.5 w-3.5 fill-current" /> Click Here to
-                    Play / Scroll
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setScrolling(false);
-                  voiceFollow.toggle();
-                }}
-                className={clsx(
-                  "inline-flex items-center gap-1 rounded-[var(--radius-sm)] border px-3 py-1.5 text-[13px] font-semibold",
-                  voiceFollow.listening
-                    ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                    : "border-white/40 text-white",
-                )}
-                title={
-                  voiceFollow.supported
-                    ? "Scroll as you speak (Chrome/Edge)"
-                    : "Needs Chrome or Edge speech recognition"
-                }
-              >
-                {voiceFollow.listening
-                  ? "Click Here to Stop Voice Follow"
-                  : "Click Here to Follow My Voice"}
-              </button>
-              <button
-                type="button"
-                onClick={resetScroll}
-                className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-white/40 px-3 py-1.5 text-[13px] font-semibold text-white"
-              >
-                <RotateCcw className="h-3.5 w-3.5" /> Click Here for Top
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoopPractice((v) => !v)}
-                className={clsx(
-                  "rounded-[var(--radius-sm)] border px-2.5 py-1.5 text-[12px] font-semibold",
-                  loopPractice
-                    ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]"
-                    : "border-white/35 text-white",
-                )}
-                title="Restart from the top when you reach the end"
-              >
-                {loopPractice
-                  ? "Click Here — Loop On"
-                  : "Click Here — Loop Off"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setLineRoomy(!lineRoomy)}
-                className="rounded-[var(--radius-sm)] border border-white/35 px-2.5 py-1.5 text-[12px] font-semibold text-white"
-              >
-                {lineRoomy
-                  ? "Click Here for Tighter Lines"
-                  : "Click Here for Roomy Lines"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFontLarge(!fontLarge)}
-                className="ml-auto rounded-[var(--radius-sm)] border border-white/35 px-2.5 py-1.5 text-[12px] font-semibold text-white"
-              >
-                {fontLarge
-                  ? "Click Here for Smaller Text"
-                  : "Click Here for Bigger Text"}
-              </button>
-            </div>
-            {voiceFollow.listening ? (
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-white/70">
-                  Mic
-                </span>
-                <div
-                  className="h-2 flex-1 overflow-hidden rounded-full bg-white/15"
-                  role="meter"
-                  aria-label="Microphone level"
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-valuenow={Math.round(micLevel * 100)}
-                >
-                  <div
-                    className="h-full rounded-full bg-[var(--yellow)] transition-[width] duration-75"
-                    style={{ width: `${Math.round(micLevel * 100)}%` }}
-                  />
-                </div>
-              </div>
-            ) : null}
-            {voiceFollow.status ? (
-              <p className="text-[11px] font-medium text-[var(--yellow)]">
-                {voiceFollow.status}
-                {voiceFollow.listening && voiceFollow.totalWords > 0
-                  ? ` · ${voiceFollow.matchedWords}/${voiceFollow.totalWords} words`
-                  : ""}
-              </p>
-            ) : null}
-          </div>
         </>
       )}
     </div>
