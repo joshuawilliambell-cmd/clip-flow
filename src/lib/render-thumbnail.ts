@@ -61,121 +61,82 @@ function drawCoverImage(
   ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
 
-/** Corner bands echoing the Love's heart stripes: red → yellow → orange. */
-function drawCornerAccents(ctx: CanvasRenderingContext2D) {
+/** Soft cream field — matches the in-app silhouette mockup. */
+function drawBackground(ctx: CanvasRenderingContext2D) {
   const { width, height, colors } = THUMBNAIL_TEMPLATE;
-
-  // Top-left: red base, yellow, orange (like heart motion stripes)
-  ctx.fillStyle = colors.red;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(540, 0);
-  ctx.lineTo(0, 360);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = colors.yellow;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(300, 0);
-  ctx.lineTo(0, 200);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = colors.orange;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(160, 0);
-  ctx.lineTo(0, 110);
-  ctx.closePath();
-  ctx.fill();
-
-  // Thin ink edges for logo-like definition
-  ctx.strokeStyle = colors.ink;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(540, 0);
-  ctx.lineTo(0, 360);
-  ctx.stroke();
-
-  // Bottom-right mirror
-  ctx.fillStyle = colors.red;
-  ctx.beginPath();
-  ctx.moveTo(width, height);
-  ctx.lineTo(width - 540, height);
-  ctx.lineTo(width, height - 360);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = colors.yellow;
-  ctx.beginPath();
-  ctx.moveTo(width, height);
-  ctx.lineTo(width - 300, height);
-  ctx.lineTo(width, height - 200);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = colors.orange;
-  ctx.beginPath();
-  ctx.moveTo(width, height);
-  ctx.lineTo(width - 160, height);
-  ctx.lineTo(width, height - 110);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(width - 540, height);
-  ctx.lineTo(width, height - 360);
-  ctx.stroke();
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, colors.background);
+  gradient.addColorStop(1, colors.backgroundDeep);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
 }
 
-function drawHeader(ctx: CanvasRenderingContext2D) {
+/** Gradient title bar with white title text (mockup style). */
+function drawHeaderBar(ctx: CanvasRenderingContext2D) {
   const { width, colors, header } = THUMBNAIL_TEMPLATE;
-  ctx.fillStyle = colors.ink;
+  const h = header.barHeight;
+  const gradient = ctx.createLinearGradient(0, 0, width, 0);
+  gradient.addColorStop(0, colors.red);
+  gradient.addColorStop(0.55, colors.orange);
+  gradient.addColorStop(1, colors.yellow);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, h);
+
+  ctx.fillStyle = "#FFFFFF";
   ctx.font = `${header.fontWeight} ${header.fontSize}px ${header.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(header.title, width / 2, header.y);
-
-  const textWidth = ctx.measureText(header.title).width;
-  const lineY = header.y;
-  const leftEnd = width / 2 - textWidth / 2 - header.lineGap;
-  const rightStart = width / 2 + textWidth / 2 + header.lineGap;
-
-  // Stripe lines: yellow then orange then red segments
-  drawStripeLine(ctx, leftEnd - header.lineWidth, leftEnd, lineY);
-  drawStripeLine(ctx, rightStart, rightStart + header.lineWidth, lineY);
+  ctx.fillText(header.title, width / 2, h / 2);
 }
 
-function drawStripeLine(
+/** Head-and-shoulders placeholder when a slot has no photo yet. */
+function drawSilhouettePlaceholder(
   ctx: CanvasRenderingContext2D,
-  x1: number,
-  x2: number,
+  x: number,
   y: number,
+  w: number,
+  h: number,
 ) {
   const { colors } = THUMBNAIL_TEMPLATE;
-  const mid1 = x1 + (x2 - x1) * 0.33;
-  const mid2 = x1 + (x2 - x1) * 0.66;
-  ctx.lineWidth = 6;
-  ctx.lineCap = "round";
+  ctx.fillStyle = colors.mutedPhoto;
+  ctx.fillRect(x, y, w, h);
 
-  ctx.strokeStyle = colors.yellow;
+  const cx = x + w / 2;
+  const headR = w * 0.18;
+  const headCy = y + h * 0.32;
+  ctx.fillStyle = colors.silhouette;
   ctx.beginPath();
-  ctx.moveTo(x1, y);
-  ctx.lineTo(mid1, y);
-  ctx.stroke();
+  ctx.arc(cx, headCy, headR, 0, Math.PI * 2);
+  ctx.fill();
 
-  ctx.strokeStyle = colors.orange;
   ctx.beginPath();
-  ctx.moveTo(mid1, y);
-  ctx.lineTo(mid2, y);
-  ctx.stroke();
+  ctx.moveTo(x + w * 0.1, y + h);
+  ctx.bezierCurveTo(
+    x + w * 0.1,
+    y + h * 0.58,
+    x + w * 0.28,
+    y + h * 0.52,
+    cx,
+    y + h * 0.52,
+  );
+  ctx.bezierCurveTo(
+    x + w * 0.72,
+    y + h * 0.52,
+    x + w * 0.9,
+    y + h * 0.58,
+    x + w * 0.9,
+    y + h,
+  );
+  ctx.closePath();
+  ctx.fill();
 
-  ctx.strokeStyle = colors.red;
+  ctx.fillStyle = colors.silhouetteMid;
   ctx.beginPath();
-  ctx.moveTo(mid2, y);
-  ctx.lineTo(x2, y);
-  ctx.stroke();
+  ctx.moveTo(cx - w * 0.08, y + h * 0.54);
+  ctx.lineTo(cx, y + h * 0.64);
+  ctx.lineTo(cx + w * 0.08, y + h * 0.54);
+  ctx.closePath();
+  ctx.fill();
 }
 
 async function drawMemberCard(
@@ -184,14 +145,14 @@ async function drawMemberCard(
   x: number,
   y: number,
 ) {
-  const { colors, card } = THUMBNAIL_TEMPLATE;
+  const { colors, card, header } = THUMBNAIL_TEMPLATE;
   const totalHeight = card.photoHeight + card.bodyHeight;
 
-  // Card shadow
+  // Soft shadow
   ctx.save();
-  ctx.shadowColor = "rgba(237, 32, 36, 0.18)";
-  ctx.shadowBlur = 24;
-  ctx.shadowOffsetY = 10;
+  ctx.shadowColor = "rgba(26, 26, 26, 0.14)";
+  ctx.shadowBlur = 22;
+  ctx.shadowOffsetY = 8;
   ctx.fillStyle = colors.card;
   drawRoundedRect(ctx, x, y, card.width, totalHeight, card.radius);
   ctx.fill();
@@ -210,53 +171,41 @@ async function drawMemberCard(
       const img = await loadImage(member.photoUrl);
       drawCoverImage(ctx, img, x, y, card.width, card.photoHeight, member.photoFit);
     } catch {
-      ctx.fillStyle = colors.mutedPhoto;
-      ctx.fillRect(x, y, card.width, card.photoHeight);
+      drawSilhouettePlaceholder(ctx, x, y, card.width, card.photoHeight);
     }
   } else {
-    ctx.fillStyle = colors.mutedPhoto;
-    ctx.fillRect(x, y, card.width, card.photoHeight);
-    ctx.fillStyle = colors.red;
-    ctx.font = `700 28px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Add photo", x + card.width / 2, y + card.photoHeight / 2);
+    drawSilhouettePlaceholder(ctx, x, y, card.width, card.photoHeight);
   }
   ctx.restore();
 
-  // Card border in Love's red
+  // Ink border (mockup style — not the old red frame)
   ctx.save();
   drawRoundedRect(ctx, x, y, card.width, totalHeight, card.radius);
-  ctx.strokeStyle = colors.red;
+  ctx.strokeStyle = colors.ink;
   ctx.lineWidth = 3;
   ctx.stroke();
   ctx.restore();
 
-  // Thin yellow/orange accent under photo
-  ctx.fillStyle = colors.yellow;
-  ctx.fillRect(x + 2, y + card.photoHeight - 6, card.width - 4, 3);
-  ctx.fillStyle = colors.orange;
-  ctx.fillRect(x + 2, y + card.photoHeight - 3, card.width - 4, 3);
-
   const bodyTop = y + card.photoHeight;
   const centerX = x + card.width / 2;
 
+  // White name plate already filled by card background
   ctx.fillStyle = colors.text;
-  ctx.font = `800 ${card.nameSize}px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
+  ctx.font = `800 ${card.nameSize}px ${header.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const name = member.name.trim() || "Name";
   ctx.fillText(name, centerX, bodyTop + card.nameYOffset, card.width - 28);
 
-  ctx.strokeStyle = colors.red;
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = "rgba(26, 26, 26, 0.28)";
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(centerX - 34, bodyTop + card.dividerYOffset);
   ctx.lineTo(centerX + 34, bodyTop + card.dividerYOffset);
   ctx.stroke();
 
-  ctx.fillStyle = colors.text;
-  ctx.font = `600 ${card.titleSize}px ${THUMBNAIL_TEMPLATE.header.fontFamily}`;
+  ctx.fillStyle = colors.muted;
+  ctx.font = `600 ${card.titleSize}px ${header.fontFamily}`;
   const title = member.title.trim() || "Job title";
   ctx.fillText(title, centerX, bodyTop + card.titleYOffset, card.width - 28);
 }
@@ -264,50 +213,27 @@ async function drawMemberCard(
 export async function renderTeamThumbnail(
   members: ThumbnailMember[],
 ): Promise<HTMLCanvasElement> {
-  const { width, height, colors, card } = THUMBNAIL_TEMPLATE;
+  const { width, height, colors, card, header } = THUMBNAIL_TEMPLATE;
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not create thumbnail canvas.");
 
-  // Warm Love's yellow field
-  const gradient = ctx.createRadialGradient(
-    width * 0.5,
-    height * 0.4,
-    80,
-    width * 0.5,
-    height * 0.5,
-    width * 0.75,
-  );
-  gradient.addColorStop(0, colors.yellowBright);
-  gradient.addColorStop(0.55, colors.background);
-  gradient.addColorStop(1, colors.backgroundDeep);
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, width, height);
+  drawBackground(ctx);
+  drawHeaderBar(ctx);
 
-  // Soft diagonal texture
-  ctx.save();
-  ctx.globalAlpha = 0.05;
-  ctx.strokeStyle = colors.red;
-  ctx.lineWidth = 2;
-  for (let i = -height; i < width + height; i += 48) {
-    ctx.beginPath();
-    ctx.moveTo(i, 0);
-    ctx.lineTo(i + height, height);
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  drawCornerAccents(ctx);
-  drawHeader(ctx);
+  // Outer frame like the mockup card
+  ctx.strokeStyle = colors.ink;
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, width - 6, height - 6);
 
   const active = members.slice(0, THUMBNAIL_TEMPLATE.maxMembers);
   const count = active.length;
   if (count > 0) {
     const totalWidth = count * card.width + (count - 1) * card.gap;
     const startX = (width - totalWidth) / 2;
-    const cardY = 250;
+    const cardY = header.barHeight + 72;
 
     for (let i = 0; i < count; i += 1) {
       const member = active[i] ?? {

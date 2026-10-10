@@ -1,10 +1,10 @@
 /**
- * Fixed Love's Enterprise Sales Team thumbnail template.
- * Colors follow the Love's heart logo: red, yellow, and orange.
+ * Love's Enterprise Sales Team thumbnail template.
+ * Clean cream field + gradient title bar (matches in-app silhouette mockup).
  */
 
 export const THUMBNAIL_TEMPLATE = {
-  id: "loves-team-thumbnail-v2",
+  id: "loves-team-thumbnail-v3",
   width: 1920,
   height: 1080,
   /** Speaker + up to four teammates. */
@@ -21,21 +21,24 @@ export const THUMBNAIL_TEMPLATE = {
     /** Heart stripe orange */
     orange: "#F15A22",
     orangeDeep: "#E87722",
+    /** Soft cream field (silhouette mockup) */
     background: "#FFF8E8",
-    backgroundDeep: "#FFE9A8",
+    backgroundDeep: "#FFF3D6",
     card: "#FFFFFF",
     text: "#1A1A1A",
-    mutedPhoto: "#F3E2B8",
+    muted: "#6B7280",
+    mutedPhoto: "#94A3B8",
+    silhouette: "#1E293B",
+    silhouetteMid: "#475569",
     ink: "#1A1A1A",
   },
   header: {
     title: "Your Love's Enterprise Sales Team",
-    y: 118,
-    fontSize: 56,
+    /** Top gradient bar height */
+    barHeight: 118,
+    fontSize: 48,
     fontFamily: "Arial, Helvetica, sans-serif",
     fontWeight: "800",
-    lineWidth: 100,
-    lineGap: 28,
   },
   card: {
     width: 360,
