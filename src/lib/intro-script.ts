@@ -5,7 +5,7 @@ import { defaultDutiesForTitle } from "@/lib/job-titles";
 
 /** Speaker self-intro first — you are not repeated later as a “team member.” */
 const OPENING =
-  "Hey, [Customer Name], [Your Name] with Love's here. Welcome to your Fleet Hub. I'm [Your A/An] [Your Job Title], and I can help you with things like [Your Job Duties]. This is a portal where you can learn all about what Love's can do for your fleet.";
+  "Hey, [Customer Name], [Your Name] with Love's here. Welcome to your Fleet Hub. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. This is a portal where you can learn all about what Love's can do for your fleet.";
 
 const TEAMMATE_LINE =
   "This is [Team Member Name], and [he/she] is [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";
@@ -110,11 +110,10 @@ export function personalizeScript(
   // Speaker self-intro placeholders (opening only — not teammate lines).
   const yourTitle = speakerTitle || "[Your Job Title]";
   const yourDuties = speakerDuties || "[Your Job Duties]";
-  const yourArticle =
-    yourTitle === "[Your Job Title]" ? "[Your A/An]" : indefiniteArticle(yourTitle);
-  text = text.replace(/\[Your A\/An\]/g, yourArticle);
   text = text.replace(/\[Your Job Title\]/g, yourTitle);
   text = text.replace(/\[Your Job Duties\]/g, yourDuties);
+  // Legacy templates that still used “I'm a/an …”
+  text = text.replace(/\[Your A\/An\]\s*/g, "");
 
   const teammateSlots = (text.match(/\[Team Member Name\]/g) ?? []).length;
   for (let i = 0; i < teammateSlots; i += 1) {
