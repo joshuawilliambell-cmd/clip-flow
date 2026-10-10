@@ -30,9 +30,9 @@ export type PresetJobTitle = (typeof PRESET_JOB_TITLES)[number];
  */
 export const PRESET_JOB_DUTIES: Record<PresetJobTitle, string> = {
   "Regional Account Manager":
-    "growing diesel volume across your region, Love’s Express Card programs, and group discount support",
+    "getting your fuel business moved over from your current provider, getting your direct bill credit account set up with Love's, and making sure the transition is a seamless process",
   "Area Account Manager":
-    "local diesel and fleet growth, Express Card setup, and day-to-day support for your area accounts",
+    "getting your fuel business switched over from your current provider, setting up your direct bill credit account with Love's, keeping that change smooth for you, and helping as your routes change and your fleet grows",
   "National Account Manager":
     "national fleet pricing and programs, multi-site fuel strategy, and enterprise account support",
   "TTC National Account Manager":
