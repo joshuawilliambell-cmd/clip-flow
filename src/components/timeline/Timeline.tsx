@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import { Maximize2, RotateCcw } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { VIDEO_TEMPLATE } from "@/lib/template";
 import {
@@ -12,6 +13,11 @@ import {
 import { filledTeamPhotos } from "@/lib/team-slots";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
+
+type TimelineProps = {
+  onRestart?: () => void;
+  onFullScreen?: () => void;
+};
 
 /** Extra pixels after the last second so the playhead / trim handle aren’t clipped. */
 const TIMELINE_END_PAD_PX = 56;
@@ -26,7 +32,7 @@ function useTimelineMetrics(duration: number, width: number) {
   return { pxPerSecond };
 }
 
-export function Timeline() {
+export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
   const {
     video,
     trimStart,
@@ -40,7 +46,11 @@ export function Timeline() {
     movePhoto,
     resizePhoto,
     reorderPhoto,
+    musicEnabled,
+    musicVolume,
+    compositionProps,
   } = useStudio();
+  const musicSrc = compositionProps?.musicSrc ?? null;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -144,43 +154,58 @@ export function Timeline() {
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-2">
-        <div className="flex items-center gap-2">
-          <h3 className="text-base font-semibold tracking-tight text-[var(--ink)] md:text-lg">
-            Photo Timeline
-          </h3>
-          <HelpTip title="How To Use The Timeline">
-            <p>
-              <strong>Trim your video</strong> with the dark filmstrip bar
-              directly under the preview — drag the white edges or use Cut Start
-              / Cut End below.
-            </p>
-            <p>
-              <strong>Team Photos:</strong> each colored bar is one
-              teammate&apos;s small corner photo. Bars start near when that
-              person&apos;s name is said in your script. Drag the middle of a
-              bar to move when the photo shows. Drag the edges to change how
-              long it stays.
-            </p>
-            <p>
-              Drag the <strong>red play line</strong> to jump to any moment.
-            </p>
-          </HelpTip>
-          <span className="rounded-md border border-[var(--ink)] bg-[var(--yellow)] px-2 py-1 text-[12px] font-bold text-[var(--ink)]">
-            Finished {formatClock(outputDuration)}
-          </span>
-        </div>
-        <div className="rounded-md border border-[var(--ink)] bg-white px-2.5 py-1 text-[13px] font-bold tabular-nums text-[var(--ink)]">
-          {formatClock(currentTime)} / {formatClock(outputDuration)}
-        </div>
-      </div>
-
       <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-2.5 md:p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-            Fine-tune trim (±1s)
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+              Fine-tune trim (±1s)
+            </div>
+            <HelpTip title="Scrub, trim, and full screen">
+              <p>
+                Use the dark bar under the video to play, scrub, and trim — drag
+                the white edges to shorten the start or end, and drag the
+                filmstrip to jump.
+              </p>
+              <p>
+                <strong>Team Photos:</strong> each colored bar is one
+                teammate&apos;s small corner photo. Drag the middle to move when
+                it shows, or the edges to change how long it stays.
+              </p>
+              <p>
+                <strong>Full screen</strong> expands the preview to fill your
+                phone or computer screen. On iPhone it uses the built-in video
+                full screen.
+              </p>
+            </HelpTip>
+            <span className="rounded-md border border-[var(--ink)] bg-[var(--yellow)] px-2 py-1 text-[12px] font-bold text-[var(--ink)]">
+              Finished {formatClock(outputDuration)}
+            </span>
+            <div className="rounded-md border border-[var(--ink)] bg-white px-2.5 py-1 text-[13px] font-bold tabular-nums text-[var(--ink)]">
+              {formatClock(currentTime)} / {formatClock(outputDuration)}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {musicEnabled && musicSrc ? (
+              <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
+                Music {Math.round(musicVolume * 100)}%
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={onRestart}
+              disabled={!onRestart}
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
+            >
+              <RotateCcw className="h-4 w-4" /> Restart from beginning
+            </button>
+            <button
+              type="button"
+              onClick={onFullScreen}
+              disabled={!onFullScreen}
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
+            >
+              <Maximize2 className="h-4 w-4" /> Full screen
+            </button>
             <button
               type="button"
               className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
@@ -265,8 +290,8 @@ export function Timeline() {
           </div>
 
           <div>
-            <div className="mb-1 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-              Team Photos
+            <div className="mb-1 flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+              <span>Photo Timeline · Team Photos</span>
             </div>
             <div
               className="relative h-16 touch-none rounded-lg bg-black/5"

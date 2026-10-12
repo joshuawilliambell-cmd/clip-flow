@@ -17,7 +17,10 @@ import { useStudio } from "@/lib/studio-context";
 import { MUSIC_TRACKS, VIDEO_TEMPLATE } from "@/lib/template";
 import { THUMBNAIL_TEMPLATE } from "@/lib/thumbnail-template";
 import { exportIntroductionVideo } from "@/lib/export-video";
-import { VideoPreview } from "@/components/VideoPreview";
+import {
+  VideoPreview,
+  type VideoPreviewHandle,
+} from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
 import { PipSidePicker } from "@/components/PipSidePicker";
 import { VideoOrientationPicker } from "@/components/VideoOrientationPicker";
@@ -64,6 +67,7 @@ export function PreviewExportStep({
   const [samplingTrackId, setSamplingTrackId] = useState<string | null>(null);
   const sampleAudioRef = useRef<QuietAudio | null>(null);
   const sampleTimerRef = useRef<number | null>(null);
+  const previewRef = useRef<VideoPreviewHandle>(null);
 
   const filledCount = filledTeamPhotos(photos).length;
 
@@ -176,10 +180,13 @@ export function PreviewExportStep({
 
       <VideoOrientationPicker compact />
 
-      {/* Preview (filmstrip flush under video) + photo timeline. */}
-      <section className="section-card space-y-4 bg-white p-3 md:p-4">
-        <VideoPreview />
-        <Timeline />
+      {/* Preview (filmstrip) with Fine-tune trim flush underneath. */}
+      <section className="section-card space-y-2 bg-white p-3 md:p-4">
+        <VideoPreview ref={previewRef} />
+        <Timeline
+          onRestart={() => previewRef.current?.restart()}
+          onFullScreen={() => void previewRef.current?.fullScreen()}
+        />
       </section>
 
       <section className="section-card bg-white p-4 md:p-5">

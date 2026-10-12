@@ -1,13 +1,14 @@
 "use client";
 
 import {
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { Maximize2, RotateCcw } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { clsx } from "clsx";
 import { getPipLayout, VIDEO_TEMPLATE } from "@/lib/template";
@@ -26,11 +27,19 @@ import {
   type QuietVideoVoice,
 } from "@/lib/quiet-audio";
 
+export type VideoPreviewHandle = {
+  restart: () => void;
+  fullScreen: () => void;
+};
+
 /**
  * Native HTML5 preview — Remotion Player often stays black on blob: uploads
  * (esp. phone MP4s). Export still uses Remotion separately.
  */
-export function VideoPreview({ compact = false }: { compact?: boolean }) {
+export const VideoPreview = forwardRef<
+  VideoPreviewHandle,
+  { compact?: boolean }
+>(function VideoPreview({ compact = false }, ref) {
   const {
     video,
     trimStart,
@@ -439,6 +448,15 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
     }
   }, []);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      restart,
+      fullScreen,
+    }),
+    [restart, fullScreen],
+  );
+
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -672,42 +690,6 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
         {video ? <VideoFilmstripBar /> : null}
       </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        {musicEnabled && musicSrc ? (
-          <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-3 py-2 text-[13px] font-bold text-[var(--ink)]">
-            Music {Math.round(musicVolume * 100)}%
-          </span>
-        ) : null}
-        <button
-          type="button"
-          onClick={restart}
-          disabled={!video}
-          className="btn-secondary"
-        >
-          <RotateCcw className="h-5 w-5" /> Restart from beginning
-        </button>
-        <button
-          type="button"
-          onClick={fullScreen}
-          disabled={!video}
-          className="btn-secondary"
-        >
-          <Maximize2 className="h-5 w-5" /> Full screen
-        </button>
-        <HelpTip title="Scrub, trim, and full screen">
-          <p>
-            Use the dark bar under the video to play, scrub, and trim — drag the
-            white edges to shorten the start or end, and drag the filmstrip to
-            jump.
-          </p>
-          <p>
-            <strong>Full screen</strong> expands the preview to fill your phone
-            or computer screen so it is easier to watch. On iPhone it uses the
-            built-in video full screen. Tap Done or swipe down to exit.
-          </p>
-        </HelpTip>
-      </div>
     </div>
   );
-}
+});
