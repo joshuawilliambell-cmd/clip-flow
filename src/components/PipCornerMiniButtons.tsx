@@ -11,7 +11,7 @@ const OPTIONS: Array<{ id: PipSide; label: string }> = [
 
 /**
  * Compact left/right PIP controls for the Fine-tune trim header —
- * miniature frame thumbnails with placement copy.
+ * miniature frame thumbnails stacked above the Cut End buttons.
  */
 export function PipCornerMiniButtons() {
   const { pipSide, setPipSide, videoOrientation, video } = useStudio();
@@ -22,7 +22,7 @@ export function PipCornerMiniButtons() {
 
   return (
     <div
-      className="flex shrink-0 items-stretch gap-1.5"
+      className="flex shrink-0 items-stretch justify-end gap-1"
       role="group"
       aria-label="Team photo corner placement"
     >
@@ -37,7 +37,7 @@ export function PipCornerMiniButtons() {
             aria-pressed={selected}
             title={option.label}
             className={clsx(
-              "flex w-[6.75rem] flex-col gap-1 rounded-md border-2 px-1.5 py-1.5 text-left transition",
+              "flex w-[5.75rem] flex-col gap-0.5 rounded-md border-2 px-1 py-1 text-left transition",
               selected
                 ? "border-[var(--ink)] bg-[var(--yellow)]"
                 : "border-[var(--border-strong)] bg-white hover:border-[var(--ink)]",
@@ -45,10 +45,10 @@ export function PipCornerMiniButtons() {
           >
             <div
               className={clsx(
-                "relative mx-auto w-full overflow-hidden rounded-sm border border-[var(--ink)]/30 bg-[#0f172a]",
+                "relative mx-auto overflow-hidden rounded-sm border border-[var(--ink)]/30 bg-[#0f172a]",
                 videoOrientation === "portrait"
-                  ? "aspect-[3/4] h-14 w-auto"
-                  : "aspect-video h-12 w-full",
+                  ? "aspect-[3/4] h-10 w-auto"
+                  : "aspect-video h-8 w-full",
               )}
               aria-hidden
             >
@@ -62,7 +62,7 @@ export function PipCornerMiniButtons() {
                 }}
               />
             </div>
-            <span className="text-[10px] font-bold leading-tight text-[var(--ink)]">
+            <span className="text-center text-[9px] font-bold leading-tight text-[var(--ink)]">
               {option.label}
               {selected ? " ✓" : ""}
             </span>
