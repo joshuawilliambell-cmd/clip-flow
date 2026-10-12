@@ -38,6 +38,46 @@ type WebcamRecorderProps = {
 
 type Phase = "idle" | "preview" | "recording" | "review";
 type FacingMode = "user" | "environment";
+type WebcamQuality = "standard" | "high" | "max";
+
+const WEBCAM_QUALITY: Record<
+  WebcamQuality,
+  {
+    id: WebcamQuality;
+    label: string;
+    hint: string;
+    landscape: { width: number; height: number };
+    portrait: { width: number; height: number };
+    videoBitsPerSecond: number;
+  }
+> = {
+  standard: {
+    id: "standard",
+    label: "Standard",
+    hint: "720p · smaller file",
+    landscape: { width: 1280, height: 720 },
+    portrait: { width: 960, height: 1280 },
+    videoBitsPerSecond: 2_500_000,
+  },
+  high: {
+    id: "high",
+    label: "High",
+    hint: "1080p · sharper (recommended)",
+    landscape: { width: 1920, height: 1080 },
+    portrait: { width: 1080, height: 1440 },
+    videoBitsPerSecond: 6_000_000,
+  },
+  max: {
+    id: "max",
+    label: "Highest",
+    hint: "Best your camera allows",
+    landscape: { width: 1920, height: 1080 },
+    portrait: { width: 1440, height: 1920 },
+    videoBitsPerSecond: 10_000_000,
+  },
+};
+
+const WEBCAM_QUALITY_OPTIONS = Object.values(WEBCAM_QUALITY);
 
 function pickRecorderMimeType(): string {
   const candidates = [
@@ -59,13 +99,29 @@ function extensionForMime(mime: string): string {
   return "webm";
 }
 
-function sizeConstraints(wantLandscape: boolean): MediaTrackConstraints {
+function sizeConstraints(
+  wantLandscape: boolean,
+  quality: WebcamQuality,
+): MediaTrackConstraints {
+  const preset = WEBCAM_QUALITY[quality];
+  const dim = wantLandscape ? preset.landscape : preset.portrait;
   return {
-    width: { ideal: wantLandscape ? 1280 : 1080 },
-    height: { ideal: wantLandscape ? 720 : 1440 },
+    width: { ideal: dim.width },
+    height: { ideal: dim.height },
     // Landscape 16:9 · Portrait 4:3 (3:4 width:height)
     aspectRatio: { ideal: wantLandscape ? 16 / 9 : 3 / 4 },
+    frameRate: { ideal: 30 },
   };
+}
+
+function trackResolutionLabel(stream: MediaStream | null): string | null {
+  const track = stream?.getVideoTracks()[0];
+  if (!track) return null;
+  const settings = track.getSettings();
+  const w = settings.width ?? 0;
+  const h = settings.height ?? 0;
+  if (!w || !h) return null;
+  return `${w}×${h}`;
 }
 
 /**
@@ -76,8 +132,9 @@ function sizeConstraints(wantLandscape: boolean): MediaTrackConstraints {
 async function openCameraStream(
   facing: FacingMode,
   wantLandscape: boolean,
+  quality: WebcamQuality,
 ): Promise<MediaStream> {
-  const size = sizeConstraints(wantLandscape);
+  const size = sizeConstraints(wantLandscape, quality);
 
   const tryGet = (video: MediaTrackConstraints) =>
     navigator.mediaDevices.getUserMedia({ audio: true, video });
@@ -135,6 +192,8 @@ export function WebcamRecorder({
   const [recordingPaused, setRecordingPaused] = useState(false);
   const [switchingCamera, setSwitchingCamera] = useState(false);
   const [portalReady, setPortalReady] = useState(false);
+  const [quality, setQuality] = useState<WebcamQuality>("high");
+  const [captureSizeLabel, setCaptureSizeLabel] = useState<string | null>(null);
 
   useEffect(() => {
     setPortalReady(true);
@@ -236,7 +295,7 @@ export function WebcamRecorder({
 
   const live = phase === "preview" || phase === "recording";
 
-  // When Video Format changes during live preview, retarget size (keep facing).
+  // When Video Format or quality changes during live preview, retarget size.
   useEffect(() => {
     if (phase !== "preview") return;
     const stream = streamRef.current;
@@ -244,11 +303,14 @@ export function WebcamRecorder({
     if (!track) return;
     void track
       .applyConstraints({
-        ...sizeConstraints(wantLandscape),
+        ...sizeConstraints(wantLandscape, quality),
         facingMode: { ideal: facingMode },
       })
+      .then(() => {
+        setCaptureSizeLabel(trackResolutionLabel(streamRef.current));
+      })
       .catch(() => undefined);
-  }, [wantLandscape, phase, facingMode]);
+  }, [wantLandscape, phase, facingMode, quality]);
 
   const mobileStudio = isMobile === true;
   const viewport = useVisualViewport(live && mobileStudio);
@@ -306,9 +368,10 @@ export function WebcamRecorder({
       // Release any format-picker live preview so this recorder can own the camera.
       claimStudioCamera();
       stopTracks();
-      const stream = await openCameraStream(facing, wantLandscape);
+      const stream = await openCameraStream(facing, wantLandscape, quality);
       streamRef.current = stream;
       setFacingMode(facing);
+      setCaptureSizeLabel(trackResolutionLabel(stream));
       resetReview();
       setPhase("preview");
       setSeconds(0);
@@ -370,17 +433,26 @@ export function WebcamRecorder({
     void attachLivePreview(stream);
 
     chunksRef.current = [];
-    const options = mimeType ? { mimeType } : undefined;
+    const preset = WEBCAM_QUALITY[quality];
+    const recorderOptions: MediaRecorderOptions = {
+      videoBitsPerSecond: preset.videoBitsPerSecond,
+      audioBitsPerSecond: 128_000,
+    };
+    if (mimeType) recorderOptions.mimeType = mimeType;
     let recorder: MediaRecorder;
     try {
-      recorder = options
-        ? new MediaRecorder(stream, options)
-        : new MediaRecorder(stream);
+      recorder = new MediaRecorder(stream, recorderOptions);
     } catch {
-      reportError(
-        "Could not start recording in this browser. Please upload a video file instead.",
-      );
-      return;
+      try {
+        recorder = mimeType
+          ? new MediaRecorder(stream, { mimeType })
+          : new MediaRecorder(stream);
+      } catch {
+        reportError(
+          "Could not start recording in this browser. Please upload a video file instead.",
+        );
+        return;
+      }
     }
 
     recorderRef.current = recorder;
@@ -599,6 +671,13 @@ export function WebcamRecorder({
             stays near the lens so you can look natural while you read.
           </p>
           <p>
+            <strong>Video quality:</strong> pick Standard, High, or Highest
+            before you record. High (1080p) is recommended. Teammate photos are
+            still pictures, so they often look sharper than moving video — good
+            lighting and Highest quality help close the gap. On a phone, the
+            rear camera is usually sharper than selfie.
+          </p>
+          <p>
             Starts on the <strong>selfie (front) camera</strong>. Tap{" "}
             <strong>Flip</strong> to switch to the rear camera.
           </p>
@@ -642,6 +721,64 @@ export function WebcamRecorder({
           </>,
         ]}
       />
+
+      {phase === "idle" || phase === "preview" ? (
+        <div className="mt-4 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[13px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
+              Video quality
+            </p>
+            <HelpTip title="Video quality">
+              <p>
+                This sets how sharp your webcam or phone recording is.{" "}
+                <strong>High</strong> is recommended for most people.
+              </p>
+              <p>
+                Your camera may not support every size — we use the closest it
+                allows. Teammate headshots are still photos, so they can look
+                clearer than video even on Highest.
+              </p>
+            </HelpTip>
+            {captureSizeLabel && phase === "preview" ? (
+              <span className="rounded-md border border-[var(--ink)] bg-white px-2 py-0.5 text-[12px] font-bold text-[var(--ink)]">
+                Camera: {captureSizeLabel}
+              </span>
+            ) : null}
+          </div>
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Webcam video quality"
+          >
+            {WEBCAM_QUALITY_OPTIONS.map((option) => {
+              const selected = quality === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  disabled={phase === "recording"}
+                  onClick={() => setQuality(option.id)}
+                  aria-pressed={selected}
+                  className={clsx(
+                    "min-w-[7.5rem] rounded-[var(--radius-md)] border-2 px-3 py-2 text-left transition",
+                    selected
+                      ? "border-[var(--ink)] bg-[var(--yellow)]"
+                      : "border-[var(--border-strong)] bg-white hover:border-[var(--ink)]",
+                  )}
+                >
+                  <span className="block text-[14px] font-bold text-[var(--ink)]">
+                    {option.label}
+                    {selected ? " ✓" : ""}
+                  </span>
+                  <span className="mt-0.5 block text-[12px] font-medium text-[var(--muted)]">
+                    {option.hint}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       {phase === "idle" ? (
         <div className="mt-4 flex flex-wrap gap-3">
