@@ -62,7 +62,7 @@ export function StartOverButton() {
             </h2>
             <p className="mt-2.5 text-[15px] font-medium text-[var(--muted)]">
               {hasWork
-                ? "This clears your video, team photos, timeline, music settings, and thumbnail from this project. You cannot undo this."
+                ? "This clears your video, team photos, timeline, music settings, and thumbnail from this project. You cannot undo this. Only want a new take? Cancel and use Record or upload a new video instead — that keeps your names and photos."
                 : "This resets the studio back to a blank project on Step 1."}
             </p>
             <div className="mt-5 flex flex-wrap justify-end gap-2">
