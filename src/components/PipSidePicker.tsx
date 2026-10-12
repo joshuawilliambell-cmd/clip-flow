@@ -23,9 +23,13 @@ const OPTIONS: Array<{ id: PipSide; label: string; hint: string }> = [
 ];
 
 export function PipSidePicker() {
-  const { pipSide, setPipSide, videoOrientation } = useStudio();
+  const { pipSide, setPipSide, videoOrientation, video } = useStudio();
   const formatLabel =
     videoOrientation === "portrait" ? "portrait (4:3)" : "landscape (16:9)";
+  const sourceSize =
+    video && video.width > 0 && video.height > 0
+      ? { width: video.width, height: video.height }
+      : null;
 
   return (
     <section className="section-card bg-white p-4 md:p-5">
@@ -113,7 +117,7 @@ export function PipSidePicker() {
         )}
       >
         {OPTIONS.map((option) => {
-          const layout = getPipLayout(option.id, videoOrientation);
+          const layout = getPipLayout(option.id, videoOrientation, sourceSize);
           return (
             <div
               key={`preview-${option.id}`}

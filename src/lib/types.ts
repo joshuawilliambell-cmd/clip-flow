@@ -50,6 +50,9 @@ export type CompositionProps = {
   pipSide: PipSide;
   /** Landscape 16:9 or portrait 4:3 — drives canvas size and PIP %. */
   orientation: VideoOrientation;
+  /** Source frame size — used to keep PIP on the contain-fitted picture. */
+  videoWidth: number;
+  videoHeight: number;
   /** Optional Love's Team thumbnail shown for the first second. */
   introThumbnailSrc: string | null;
   introThumbnailEnabled: boolean;

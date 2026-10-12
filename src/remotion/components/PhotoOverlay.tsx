@@ -15,6 +15,8 @@ type PhotoOverlayProps = {
   durationFrames: number;
   pipSide?: PipSide;
   orientation?: VideoOrientation;
+  sourceWidth?: number;
+  sourceHeight?: number;
 };
 
 export function PhotoOverlay({
@@ -26,10 +28,18 @@ export function PhotoOverlay({
   durationFrames,
   pipSide = VIDEO_TEMPLATE.pip.defaultSide,
   orientation = VIDEO_TEMPLATE.defaultOrientation,
+  sourceWidth,
+  sourceHeight,
 }: PhotoOverlayProps) {
   const frame = useCurrentFrame();
   const { fps, fadeInSeconds, fadeOutSeconds, pip } = VIDEO_TEMPLATE;
-  const layout = getPipLayout(pipSide, orientation);
+  const layout = getPipLayout(
+    pipSide,
+    orientation,
+    sourceWidth && sourceHeight
+      ? { width: sourceWidth, height: sourceHeight }
+      : null,
+  );
   const fadeIn = Math.max(1, Math.round(fadeInSeconds * fps));
   const fadeOut = Math.max(1, Math.round(fadeOutSeconds * fps));
   const local = frame - startFrame;

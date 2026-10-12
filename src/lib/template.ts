@@ -34,7 +34,8 @@ export const PIP_BY_ORIENTATION = {
     heightPercent: 36,
   },
   portrait: {
-    paddingTopPercent: 5,
+    /** Clear of typical contain letterbox on desktop previews. */
+    paddingTopPercent: 7,
     paddingSidePercent: 5,
     widthPercent: 27,
     heightPercent: 27,
@@ -151,26 +152,94 @@ export const VIDEO_TEMPLATE = {
   },
 };
 
+export type SourceSize = { width: number; height: number };
+
+/**
+ * Where object-fit:contain places the source inside the canvas
+ * (percent of the full canvas). Used so PIP sits on the picture, not
+ * in letterbox / pillarbox bars.
+ */
+export function getContainContentBox(
+  canvasW: number,
+  canvasH: number,
+  contentW: number,
+  contentH: number,
+): {
+  leftPercent: number;
+  topPercent: number;
+  widthPercent: number;
+  heightPercent: number;
+} {
+  if (canvasW <= 0 || canvasH <= 0 || contentW <= 0 || contentH <= 0) {
+    return {
+      leftPercent: 0,
+      topPercent: 0,
+      widthPercent: 100,
+      heightPercent: 100,
+    };
+  }
+  const canvasAspect = canvasW / canvasH;
+  const contentAspect = contentW / contentH;
+  if (contentAspect > canvasAspect) {
+    // Source wider than canvas → letterbox top/bottom.
+    const heightPercent = (canvasAspect / contentAspect) * 100;
+    return {
+      leftPercent: 0,
+      topPercent: (100 - heightPercent) / 2,
+      widthPercent: 100,
+      heightPercent,
+    };
+  }
+  // Source taller than canvas → pillarbox left/right.
+  const widthPercent = (contentAspect / canvasAspect) * 100;
+  return {
+    leftPercent: (100 - widthPercent) / 2,
+    topPercent: 0,
+    widthPercent,
+    heightPercent: 100,
+  };
+}
+
 /** Resolve absolute PIP box for a chosen side on the active canvas. */
 export function getPipLayout(
   side: PipSide = VIDEO_TEMPLATE.pip.defaultSide,
   orientation: VideoOrientation = VIDEO_TEMPLATE.defaultOrientation,
+  sourceSize?: SourceSize | null,
 ) {
-  const {
-    paddingTopPercent,
-    paddingSidePercent,
-    widthPercent,
-    heightPercent,
-  } = PIP_BY_ORIENTATION[orientation];
+  const base = PIP_BY_ORIENTATION[orientation];
+  const canvas = ORIENTATION_CANVAS[orientation];
+  const box =
+    sourceSize && sourceSize.width > 0 && sourceSize.height > 0
+      ? getContainContentBox(
+          canvas.width,
+          canvas.height,
+          sourceSize.width,
+          sourceSize.height,
+        )
+      : {
+          leftPercent: 0,
+          topPercent: 0,
+          widthPercent: 100,
+          heightPercent: 100,
+        };
+
+  // Size + padding are relative to the visible video area so a landscape
+  // clip inside a portrait frame does not park the PIP in the black bar.
+  const widthPercent = (base.widthPercent * box.widthPercent) / 100;
+  const heightPercent = (base.heightPercent * box.heightPercent) / 100;
+  const padTop = (base.paddingTopPercent * box.heightPercent) / 100;
+  const padSide = (base.paddingSidePercent * box.widthPercent) / 100;
+  const yPercent = box.topPercent + padTop;
   const xPercent =
     side === "left"
-      ? paddingSidePercent
-      : 100 - paddingSidePercent - widthPercent;
+      ? box.leftPercent + padSide
+      : box.leftPercent + box.widthPercent - padSide - widthPercent;
+
   return {
     side,
     orientation,
     xPercent,
-    yPercent: paddingTopPercent,
+    yPercent,
     widthPercent,
     heightPercent,
   };

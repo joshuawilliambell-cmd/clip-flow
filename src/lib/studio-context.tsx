@@ -1027,6 +1027,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       })),
       pipSide,
       orientation: videoOrientation,
+      videoWidth: video.width,
+      videoHeight: video.height,
       introThumbnailSrc: introThumbnailEnabled ? introThumbnailUrl : null,
       introThumbnailEnabled,
       videoVolume,

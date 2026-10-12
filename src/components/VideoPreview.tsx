@@ -62,8 +62,13 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
   const musicSrc = compositionProps?.musicSrc ?? null;
   const layout = useMemo(
-    () => getPipLayout(pipSide, videoOrientation),
-    [pipSide, videoOrientation],
+    () =>
+      getPipLayout(
+        pipSide,
+        videoOrientation,
+        video ? { width: video.width, height: video.height } : null,
+      ),
+    [pipSide, videoOrientation, video],
   );
   const activePhotos = useMemo(() => {
     return filledTeamPhotos(photos).filter(
@@ -470,11 +475,11 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
       {/* Video + filmstrip transport as one flush unit (iOS Photos–style). */}
       <div className="overflow-hidden rounded-[var(--radius-md)] border-2 border-[var(--ink)] bg-black">
-        <div className="flex justify-center bg-black">
+        <div className="flex items-center justify-center bg-black">
           <div
             ref={shellRef}
             className={clsx(
-              "relative",
+              "relative shrink-0",
               frameAspectClass(videoOrientation, "preview"),
               compact && videoOrientation === "portrait" && "max-w-xs",
             )}

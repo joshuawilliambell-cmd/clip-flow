@@ -18,6 +18,8 @@ export const defaultCompositionProps: CompositionProps = {
   photos: [],
   pipSide: VIDEO_TEMPLATE.pip.defaultSide,
   orientation: VIDEO_TEMPLATE.defaultOrientation,
+  videoWidth: VIDEO_TEMPLATE.width,
+  videoHeight: VIDEO_TEMPLATE.height,
   introThumbnailSrc: null,
   introThumbnailEnabled: false,
   videoVolume: VIDEO_TEMPLATE.defaultVideoVolume,
@@ -35,6 +37,8 @@ export function IntroductionVideo(props: CompositionProps) {
     photos,
     pipSide,
     orientation,
+    videoWidth,
+    videoHeight,
     introThumbnailSrc,
     introThumbnailEnabled,
     videoVolume,
@@ -108,6 +112,8 @@ export function IntroductionVideo(props: CompositionProps) {
               durationFrames={durationFramesPhoto}
               pipSide={pipSide}
               orientation={orientation}
+              sourceWidth={videoWidth}
+              sourceHeight={videoHeight}
             />
           </Sequence>
         );
