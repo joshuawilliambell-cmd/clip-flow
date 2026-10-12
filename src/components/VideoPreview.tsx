@@ -303,15 +303,44 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
   const restart = useCallback(() => {
     const el = videoRef.current;
+    const start = sourceTime(0);
     if (el) {
-      el.pause();
-      el.currentTime = sourceTime(0);
+      try {
+        el.currentTime = start;
+      } catch {
+        /* ignore seek races while metadata loads */
+      }
     }
-    musicRef.current?.pause();
     setCurrentTime(0);
-    setIsPlaying(false);
+    if (!isPlaying) {
+      setIsPlaying(true);
+      return;
+    }
+    // Already playing — effect won't re-fire; kick playback from t=0.
+    if (voiceDecoded) {
+      if (el) {
+        el.muted = true;
+        el.volume = 0;
+      }
+      voiceRef.current?.setVolume(videoVolume);
+      void voiceRef.current?.playFrom(start);
+    }
+    void el?.play().catch(() => undefined);
+    if (musicEnabled && musicRef.current) {
+      musicRef.current.setVolume(musicVolume);
+      void musicRef.current.play().catch(() => undefined);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setCurrentTime, setIsPlaying, trimStart]);
+  }, [
+    isPlaying,
+    musicEnabled,
+    musicVolume,
+    setCurrentTime,
+    setIsPlaying,
+    trimStart,
+    videoVolume,
+    voiceDecoded,
+  ]);
 
   // iOS native fullscreen plays element audio (GainNode voice is paused).
   useEffect(() => {
