@@ -10,8 +10,8 @@ const OPTIONS: Array<{ id: PipSide; label: string }> = [
 ];
 
 /**
- * Compact left/right PIP controls for the Fine-tune trim header —
- * miniature frame thumbnails stacked above the Cut End buttons.
+ * Compact left/right PIP controls — short enough to sit in-line with
+ * Fine-tune trim action buttons (Cut End, etc.).
  */
 export function PipCornerMiniButtons() {
   const { pipSide, setPipSide, videoOrientation, video } = useStudio();
@@ -22,7 +22,7 @@ export function PipCornerMiniButtons() {
 
   return (
     <div
-      className="flex shrink-0 items-stretch justify-end gap-1"
+      className="flex shrink-0 items-center gap-1"
       role="group"
       aria-label="Team photo corner placement"
     >
@@ -37,32 +37,30 @@ export function PipCornerMiniButtons() {
             aria-pressed={selected}
             title={option.label}
             className={clsx(
-              "flex w-[5.75rem] flex-col gap-0.5 rounded-md border-2 px-1 py-1 text-left transition",
+              "inline-flex h-9 items-center gap-1.5 rounded-md border-2 px-1.5 py-1 text-left transition",
               selected
                 ? "border-[var(--ink)] bg-[var(--yellow)]"
                 : "border-[var(--border-strong)] bg-white hover:border-[var(--ink)]",
             )}
           >
-            <div
+            <span
               className={clsx(
-                "relative mx-auto overflow-hidden rounded-sm border border-[var(--ink)]/30 bg-[#0f172a]",
-                videoOrientation === "portrait"
-                  ? "aspect-[3/4] h-10 w-auto"
-                  : "aspect-video h-8 w-full",
+                "relative shrink-0 overflow-hidden rounded-[2px] border border-[var(--ink)]/30 bg-[#0f172a]",
+                videoOrientation === "portrait" ? "h-7 w-5" : "h-6 w-10",
               )}
               aria-hidden
             >
-              <div
-                className="absolute overflow-hidden rounded-[2px] border border-white bg-[#cbd5e1]"
+              <span
+                className="absolute rounded-[1px] border border-white bg-[#cbd5e1]"
                 style={{
                   top: `${Math.max(4, layout.yPercent)}%`,
                   left: `${layout.xPercent}%`,
-                  width: `${Math.max(layout.widthPercent, 24)}%`,
-                  height: `${Math.max(layout.heightPercent, 30)}%`,
+                  width: `${Math.max(layout.widthPercent, 26)}%`,
+                  height: `${Math.max(layout.heightPercent, 32)}%`,
                 }}
               />
-            </div>
-            <span className="text-center text-[9px] font-bold leading-tight text-[var(--ink)]">
+            </span>
+            <span className="max-w-[5.5rem] text-[9px] font-bold leading-tight text-[var(--ink)]">
               {option.label}
               {selected ? " ✓" : ""}
             </span>

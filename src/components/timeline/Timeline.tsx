@@ -156,8 +156,8 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
   return (
     <div className="space-y-2">
       <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-2.5 md:p-3">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
               Fine-tune trim (±1s)
             </div>
@@ -173,9 +173,8 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
                 it shows, or the edges to change how long it stays.
               </p>
               <p>
-                Use the two small frames in the top-right to move team member
-                photos to the <strong>left</strong> or <strong>right</strong>{" "}
-                corner.
+                Use the two small frames on the right to move team member photos
+                to the <strong>left</strong> or <strong>right</strong> corner.
               </p>
               <p>
                 <strong>Full screen</strong> expands the preview to fill your
@@ -190,67 +189,65 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
               {formatClock(currentTime)} / {formatClock(outputDuration)}
             </div>
           </div>
-          <div className="ml-auto flex flex-col items-end gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {musicEnabled && musicSrc ? (
+              <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
+                Music {Math.round(musicVolume * 100)}%
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={onRestart}
+              disabled={!onRestart}
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
+            >
+              <RotateCcw className="h-4 w-4" /> Restart from beginning
+            </button>
+            <button
+              type="button"
+              onClick={onFullScreen}
+              disabled={!onFullScreen}
+              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
+            >
+              <Maximize2 className="h-4 w-4" /> Full screen
+            </button>
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              onClick={() => nudgeTrim("start", 1)}
+              disabled={outputDuration <= 3}
+              title="Remove 1 second from the beginning"
+            >
+              Cut Start +1s
+            </button>
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              onClick={() => nudgeTrim("start", -1)}
+              disabled={trimStart <= 0}
+              title="Put 1 second back at the beginning"
+            >
+              Undo Start −1s
+            </button>
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              onClick={() => nudgeTrim("end", -1)}
+              disabled={outputDuration <= 3}
+              title="Remove 1 second from the end"
+            >
+              Cut End +1s
+            </button>
+            <button
+              type="button"
+              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              onClick={() => nudgeTrim("end", 1)}
+              disabled={trimEnd >= sourceDuration}
+              title="Put 1 second back at the end"
+            >
+              Undo End −1s
+            </button>
             <PipCornerMiniButtons />
-            <div className="flex flex-wrap items-center justify-end gap-1.5">
-              {musicEnabled && musicSrc ? (
-                <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
-                  Music {Math.round(musicVolume * 100)}%
-                </span>
-              ) : null}
-              <button
-                type="button"
-                onClick={onRestart}
-                disabled={!onRestart}
-                className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
-              >
-                <RotateCcw className="h-4 w-4" /> Restart from beginning
-              </button>
-              <button
-                type="button"
-                onClick={onFullScreen}
-                disabled={!onFullScreen}
-                className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
-              >
-                <Maximize2 className="h-4 w-4" /> Full screen
-              </button>
-              <button
-                type="button"
-                className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
-                onClick={() => nudgeTrim("start", 1)}
-                disabled={outputDuration <= 3}
-                title="Remove 1 second from the beginning"
-              >
-                Cut Start +1s
-              </button>
-              <button
-                type="button"
-                className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
-                onClick={() => nudgeTrim("start", -1)}
-                disabled={trimStart <= 0}
-                title="Put 1 second back at the beginning"
-              >
-                Undo Start −1s
-              </button>
-              <button
-                type="button"
-                className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
-                onClick={() => nudgeTrim("end", -1)}
-                disabled={outputDuration <= 3}
-                title="Remove 1 second from the end"
-              >
-                Cut End +1s
-              </button>
-              <button
-                type="button"
-                className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
-                onClick={() => nudgeTrim("end", 1)}
-                disabled={trimEnd >= sourceDuration}
-                title="Put 1 second back at the end"
-              >
-                Undo End −1s
-              </button>
-            </div>
           </div>
         </div>
         {(cutStartSec > 0 || cutEndSec > 0) && (
