@@ -756,7 +756,6 @@ export function WebcamRecorder({
                 <button
                   key={option.id}
                   type="button"
-                  disabled={phase === "recording"}
                   onClick={() => setQuality(option.id)}
                   aria-pressed={selected}
                   className={clsx(
