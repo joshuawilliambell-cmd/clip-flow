@@ -82,11 +82,39 @@ function drawHeaderBar(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, h);
 
-  ctx.fillStyle = "#FFFFFF";
+  // Whole-pixel positions + slight stroke keep banner type sharp when scaled.
+  const titleX = Math.round(width / 2);
+  const titleY = Math.round(h / 2);
   ctx.font = `${header.fontWeight} ${header.fontSize}px ${header.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(header.title, width / 2, h / 2);
+  ctx.lineJoin = "round";
+  ctx.miterLimit = 2;
+  ctx.strokeStyle = "#FFFFFF";
+  ctx.lineWidth = 1.25;
+  ctx.strokeText(header.title, titleX, titleY);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText(header.title, titleX, titleY);
+}
+
+/** Crisp card type: integer coords + thin same-color stroke against soft scaling. */
+function drawSharpText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  color: string,
+) {
+  const px = Math.round(x);
+  const py = Math.round(y);
+  ctx.lineJoin = "round";
+  ctx.miterLimit = 2;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.1;
+  ctx.strokeText(text, px, py, maxWidth);
+  ctx.fillStyle = color;
+  ctx.fillText(text, px, py, maxWidth);
 }
 
 /** Head-and-shoulders placeholder when a slot has no photo yet. */
@@ -188,32 +216,53 @@ async function drawMemberCard(
 
   const bodyTop = y + card.photoHeight;
   const centerX = x + card.width / 2;
-  const textMax = card.width - 28;
+  const textMax = card.width - 24;
 
-  ctx.fillStyle = colors.text;
-  ctx.font = `800 ${card.nameSize}px ${header.fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+
   const name = member.name.trim() || "Name";
-  ctx.fillText(name, centerX, bodyTop + card.nameYOffset, textMax);
+  ctx.font = `800 ${card.nameSize}px ${header.fontFamily}`;
+  drawSharpText(
+    ctx,
+    name,
+    centerX,
+    bodyTop + card.nameYOffset,
+    textMax,
+    colors.text,
+  );
 
-  ctx.strokeStyle = "rgba(26, 26, 26, 0.28)";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = colors.ink;
+  ctx.globalAlpha = 0.55;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.moveTo(centerX - 34, bodyTop + card.dividerYOffset);
-  ctx.lineTo(centerX + 34, bodyTop + card.dividerYOffset);
+  ctx.moveTo(Math.round(centerX - 40), Math.round(bodyTop + card.dividerYOffset));
+  ctx.lineTo(Math.round(centerX + 40), Math.round(bodyTop + card.dividerYOffset));
   ctx.stroke();
+  ctx.globalAlpha = 1;
 
-  ctx.fillStyle = colors.muted;
-  ctx.font = `600 ${card.titleSize}px ${header.fontFamily}`;
   const title = member.title.trim() || "Job title";
-  ctx.fillText(title, centerX, bodyTop + card.titleYOffset, textMax);
+  ctx.font = `700 ${card.titleSize}px ${header.fontFamily}`;
+  drawSharpText(
+    ctx,
+    title,
+    centerX,
+    bodyTop + card.titleYOffset,
+    textMax,
+    colors.muted,
+  );
 
   const email = member.email?.trim() ?? "";
   if (email) {
-    ctx.fillStyle = colors.text;
-    ctx.font = `500 ${card.emailSize}px ${header.fontFamily}`;
-    ctx.fillText(email, centerX, bodyTop + card.emailYOffset, textMax);
+    ctx.font = `700 ${card.emailSize}px ${header.fontFamily}`;
+    drawSharpText(
+      ctx,
+      email,
+      centerX,
+      bodyTop + card.emailYOffset,
+      textMax,
+      colors.text,
+    );
   }
 }
 
@@ -224,8 +273,10 @@ export async function renderTeamThumbnail(
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) throw new Error("Could not create thumbnail canvas.");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
   drawBackground(ctx);
   drawHeaderBar(ctx);
