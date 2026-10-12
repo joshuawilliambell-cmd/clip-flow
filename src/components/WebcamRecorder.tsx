@@ -582,7 +582,7 @@ export function WebcamRecorder({
   );
 
   return (
-    <div className="section-card bg-white p-4 md:p-5">
+    <div id="record-with-camera" className="section-card bg-white p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">

@@ -10,6 +10,7 @@ import {
   Music2,
   Pause,
   Play,
+  RefreshCw,
   Volume2,
   VolumeX,
 } from "lucide-react";
@@ -56,6 +57,7 @@ export function PreviewExportStep({
     setVideoVolume,
     setMusicTrackId,
     setStep,
+    beginReplaceVideo,
     photos,
     teamMemberCount,
     videoOrientation,
@@ -175,8 +177,31 @@ export function PreviewExportStep({
             Teammate photos are timed to when their name appears in your script.
             You can still drag the bars if you need to fine-tune.
           </p>
+          <p>
+            Don&apos;t like this take? Use{" "}
+            <strong>Record or upload a new video</strong> — your names, photos,
+            and thumbnail stay saved.
+          </p>
         </HelpTip>
       </div>
+
+      {video ? (
+        <div className="how-banner flex flex-wrap items-center justify-between gap-3">
+          <p className="min-w-0 flex-1">
+            <strong>Don&apos;t like this take?</strong> Record or upload a new
+            talking video. Your names, teammate photos, thumbnail, and music
+            settings stay — only the video is replaced.
+          </p>
+          <button
+            type="button"
+            onClick={beginReplaceVideo}
+            className="btn-secondary shrink-0"
+          >
+            <RefreshCw className="h-5 w-5" />
+            Click Here to Record or Upload a New Video
+          </button>
+        </div>
+      ) : null}
 
       <VideoOrientationPicker compact />
 
@@ -566,10 +591,20 @@ export function PreviewExportStep({
         </div>
       </div>
 
-      <div className="flex justify-start border-t-2 border-[var(--border)] pt-4">
+      <div className="flex flex-wrap justify-start gap-3 border-t-2 border-[var(--border)] pt-4">
         <button type="button" onClick={() => setStep(1)} className="btn-secondary">
           Click Here to Go Back
         </button>
+        {video ? (
+          <button
+            type="button"
+            onClick={beginReplaceVideo}
+            className="btn-secondary"
+          >
+            <RefreshCw className="h-5 w-5" />
+            Click Here to Record or Upload a New Video
+          </button>
+        ) : null}
       </div>
     </div>
   );

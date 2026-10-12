@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Film, FolderOpen, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Film, FolderOpen, RefreshCw, Upload } from "lucide-react";
 import { useStudio } from "@/lib/studio-context";
 import { HelpTip } from "@/components/HelpTip";
 import { RecordingGuide } from "@/components/RecordingGuide";
@@ -20,6 +20,8 @@ export function VideoUploadStep() {
     video,
     setVideoFromFile,
     clearVideo,
+    beginReplaceVideo,
+    replacingVideo,
     setStep,
     teamMemberCount,
   } = useStudio();
@@ -27,6 +29,16 @@ export function VideoUploadStep() {
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (!replacingVideo || video) return;
+    const timer = window.setTimeout(() => {
+      document
+        .getElementById("record-with-camera")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [replacingVideo, video]);
 
   const handleFiles = async (
     files: FileList | null,
@@ -129,6 +141,14 @@ export function VideoUploadStep() {
       <RecordingGuide />
 
       <VideoOrientationPicker />
+
+      {replacingVideo && !video ? (
+        <div className="how-banner" role="status">
+          <strong>Ready for a new take.</strong> Your names, teammate photos,
+          thumbnail, and music settings were kept. Record with the camera below,
+          or upload a different file — then continue to Step 2 again.
+        </div>
+      ) : null}
 
       {!video ? (
         <WebcamRecorder
@@ -264,6 +284,14 @@ export function VideoUploadStep() {
                   Length: {video.durationSeconds.toFixed(1)} seconds
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={beginReplaceVideo}
+                className="btn-secondary"
+              >
+                <RefreshCw className="h-5 w-5" />
+                Click Here to Record a New Take
+              </button>
               <label className="btn-secondary relative inline-flex cursor-pointer overflow-hidden">
                 Click Here to Replace With Video From File
                 <input

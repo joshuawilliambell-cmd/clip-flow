@@ -118,6 +118,13 @@ type StudioContextValue = {
   /** Grow trim/source length if the browser later reports a longer duration. */
   reconcileVideoDuration: (durationSeconds: number) => void;
   clearVideo: () => void;
+  /**
+   * Drop only the talking video and return to Step 1 to record/upload again.
+   * Keeps names, photos, thumbnail, music, and format settings.
+   */
+  beginReplaceVideo: () => void;
+  /** True after beginReplaceVideo until a new talking video is added. */
+  replacingVideo: boolean;
   setTrim: (edge: "start" | "end", value: number) => void;
   setTeamMemberCount: (count: TeamMemberCount) => void;
   addPhotosFromFiles: (files: FileList | File[]) => Promise<TeamPhoto[]>;
@@ -347,6 +354,7 @@ function loadImageUrl(file: File): Promise<string> {
 
 export function StudioProvider({ children }: { children: ReactNode }) {
   const [step, setStep] = useState<StudioStep>(1);
+  const [replacingVideo, setReplacingVideo] = useState(false);
   const [video, setVideo] = useState<SourceVideo | null>(null);
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState<number>(
@@ -516,6 +524,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         if (prev) URL.revokeObjectURL(prev.url);
         return meta;
       });
+      setReplacingVideo(false);
       setTrimStart(0);
       setTrimEnd(end);
       setCurrentTime(0);
@@ -584,6 +593,19 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setIsPlaying(false);
   }, []);
 
+  const beginReplaceVideo = useCallback(() => {
+    setVideo((prev) => {
+      if (prev) URL.revokeObjectURL(prev.url);
+      return null;
+    });
+    setTrimStart(0);
+    setTrimEnd(VIDEO_TEMPLATE.targetDurationSeconds);
+    setCurrentTime(0);
+    setIsPlaying(false);
+    setReplacingVideo(true);
+    setStep(1);
+  }, []);
+
   const resetProject = useCallback(() => {
     setVideo((prev) => {
       if (prev) URL.revokeObjectURL(prev.url);
@@ -636,6 +658,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       return emptyThumbnailMembers(VIDEO_TEMPLATE.defaultTeamMemberCount);
     });
     setStep(1);
+    setReplacingVideo(false);
     setProjectEpoch((n) => n + 1);
   }, []);
 
@@ -1098,6 +1121,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setVideoFromFile,
       reconcileVideoDuration,
       clearVideo,
+      beginReplaceVideo,
+      replacingVideo,
       setTrim,
       setTeamMemberCount,
       addPhotosFromFiles,
@@ -1130,6 +1155,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [
       step,
       video,
+      replacingVideo,
       trimStart,
       trimEnd,
       photos,
@@ -1170,6 +1196,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setVideoFromFile,
       reconcileVideoDuration,
       clearVideo,
+      beginReplaceVideo,
       setTrim,
       addPhotosFromFiles,
       assignPhotosFromIndex,
