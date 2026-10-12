@@ -18,6 +18,7 @@ import { HelpTip } from "@/components/HelpTip";
 import { PanelSteps, StepCircle } from "@/components/PanelStep";
 import { WebcamTeleprompterOverlay } from "@/components/WebcamTeleprompterOverlay";
 import { useIsLandscape, useIsMobile } from "@/hooks/useIsMobile";
+import { claimStudioCamera } from "@/lib/camera-events";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { useStudio } from "@/lib/studio-context";
 import {
@@ -302,6 +303,8 @@ export function WebcamRecorder({
     setMimeType(mime || "video/webm");
 
     try {
+      // Release any format-picker live preview so this recorder can own the camera.
+      claimStudioCamera();
       stopTracks();
       const stream = await openCameraStream(facing, wantLandscape);
       streamRef.current = stream;
