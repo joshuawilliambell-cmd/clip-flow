@@ -23,10 +23,8 @@ import {
   type VideoPreviewHandle,
 } from "@/components/VideoPreview";
 import { Timeline } from "@/components/timeline/Timeline";
-import { PipSidePicker } from "@/components/PipSidePicker";
 import { VideoOrientationPicker } from "@/components/VideoOrientationPicker";
 import { HelpTip } from "@/components/HelpTip";
-import { PanelSteps } from "@/components/PanelStep";
 import { filledTeamPhotos } from "@/lib/team-slots";
 import {
   orientationFileSuffix,
@@ -311,34 +309,14 @@ export function PreviewExportStep({
       </section>
 
       {teamMemberCount > 0 ? (
-        <section className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              Place Teammate Photos
-            </h3>
-            <p className="mt-0.5 text-[13px] font-medium text-[var(--muted)]">
-              {filledCount} of {teamMemberCount} teammate photos ready · photos
-              line up with when each name is said in your script
-            </p>
-          </div>
-          <PanelSteps
-            steps={[
-              <>
-                Choose left or right for the small teammate photo — size follows
-                your landscape or portrait Video Format.
-              </>,
-              <>
-                On the timeline above, colored bars show when each face appears.
-                Drag a bar (hand cursor) to move it; drag the ends to change how
-                long it stays.
-              </>,
-              <>
-                Preview your video, then continue to music and export.
-              </>,
-            ]}
-          />
-          <PipSidePicker />
-        </section>
+        <div className="how-banner">
+          <strong>
+            {filledCount} of {teamMemberCount} teammate photos ready.
+          </strong>{" "}
+          Use the two small frames in <strong>Fine-tune trim</strong> to move
+          team member photos to the left or right corner. Drag the colored bars
+          on the photo timeline to change when each face appears.
+        </div>
       ) : (
         <div className="how-banner">
           No teammate corner photos for this project. Trim your video above, add

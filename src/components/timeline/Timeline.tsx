@@ -13,6 +13,7 @@ import {
 import { filledTeamPhotos } from "@/lib/team-slots";
 import { clsx } from "clsx";
 import { HelpTip } from "@/components/HelpTip";
+import { PipCornerMiniButtons } from "@/components/PipCornerMiniButtons";
 
 type TimelineProps = {
   onRestart?: () => void;
@@ -160,7 +161,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
             <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
               Fine-tune trim (±1s)
             </div>
-            <HelpTip title="Scrub, trim, and full screen">
+            <HelpTip title="Scrub, trim, and photo corner">
               <p>
                 Use the dark bar under the video to play, scrub, and trim — drag
                 the white edges to shorten the start or end, and drag the
@@ -170,6 +171,10 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
                 <strong>Team Photos:</strong> each colored bar is one
                 teammate&apos;s small corner photo. Drag the middle to move when
                 it shows, or the edges to change how long it stays.
+              </p>
+              <p>
+                Use the two small frames on the right to move team member photos
+                to the <strong>left</strong> or <strong>right</strong> corner.
               </p>
               <p>
                 <strong>Full screen</strong> expands the preview to fill your
@@ -184,7 +189,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
               {formatClock(currentTime)} / {formatClock(outputDuration)}
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
             {musicEnabled && musicSrc ? (
               <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
                 Music {Math.round(musicVolume * 100)}%
@@ -242,6 +247,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
             >
               Undo End −1s
             </button>
+            <PipCornerMiniButtons />
           </div>
         </div>
         {(cutStartSec > 0 || cutEndSec > 0) && (
