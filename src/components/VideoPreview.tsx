@@ -441,9 +441,11 @@ export function VideoPreview({ compact = false }: { compact?: boolean }) {
 
       {/* Video + filmstrip transport as one flush unit (iOS Photos–style). */}
       <div className="overflow-hidden rounded-[var(--radius-md)] border-2 border-[var(--ink)] bg-black">
-        <div ref={shellRef} className="relative bg-black">
+        <div className="flex justify-center bg-black">
           <div
+            ref={shellRef}
             className={clsx(
+              "relative",
               frameAspectClass(videoOrientation, "preview"),
               compact && videoOrientation === "portrait" && "max-w-xs",
             )}
