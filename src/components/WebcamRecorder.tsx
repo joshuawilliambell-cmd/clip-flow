@@ -129,6 +129,31 @@ function trackResolutionLabel(stream: MediaStream | null): string | null {
  * Request facingMode first (exact → ideal), then apply size — combining
  * strict resolution with facingMode often makes phones pick the main camera.
  */
+async function waitForVideoTrackLive(stream: MediaStream): Promise<void> {
+  const track = stream.getVideoTracks()[0];
+  if (!track) return;
+  track.enabled = true;
+  if (!track.muted && track.readyState === "live") return;
+  await new Promise<void>((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      track.removeEventListener("unmute", done);
+      track.removeEventListener("started", done as EventListener);
+      resolve();
+    };
+    track.addEventListener("unmute", done);
+    // Some engines fire "started"; ignore if unsupported.
+    try {
+      track.addEventListener("started", done as EventListener);
+    } catch {
+      /* ignore */
+    }
+    window.setTimeout(done, 800);
+  });
+}
+
 async function openCameraStream(
   facing: FacingMode,
   wantLandscape: boolean,
@@ -136,30 +161,42 @@ async function openCameraStream(
 ): Promise<MediaStream> {
   const size = sizeConstraints(wantLandscape, quality);
 
-  const tryGet = (video: MediaTrackConstraints) =>
+  const tryGet = (video: boolean | MediaTrackConstraints) =>
     navigator.mediaDevices.getUserMedia({ audio: true, video });
 
-  try {
-    const stream = await tryGet({ facingMode: { exact: facing }, ...size });
-    return stream;
-  } catch {
-    /* fall through */
-  }
+  // Prefer ideal (not exact) facing + size first. Exact facingMode often fails
+  // on desktop webcams and can leave a black preview until Flip reopens.
+  const attempts: Array<boolean | MediaTrackConstraints> = [
+    { facingMode: { ideal: facing }, ...size },
+    { facingMode: { exact: facing }, ...size },
+    { facingMode: { ideal: facing } },
+    // Last resort: any camera, then nudge size (desktop USB cams).
+    true,
+    size,
+  ];
 
-  try {
-    const stream = await tryGet({ facingMode: { ideal: facing }, ...size });
-    return stream;
-  } catch {
-    /* fall through */
+  let lastError: unknown;
+  for (const video of attempts) {
+    try {
+      const stream = await tryGet(video);
+      const track = stream.getVideoTracks()[0];
+      const needsSizeNudge =
+        video === true ||
+        (typeof video === "object" &&
+          video !== null &&
+          !("width" in video));
+      if (track && needsSizeNudge) {
+        await track.applyConstraints(size).catch(() => undefined);
+      }
+      await waitForVideoTrackLive(stream);
+      return stream;
+    } catch (e) {
+      lastError = e;
+    }
   }
-
-  // Facing only, then nudge size — most reliable selfie path on iOS/Android.
-  const stream = await tryGet({ facingMode: { ideal: facing } });
-  const track = stream.getVideoTracks()[0];
-  if (track) {
-    await track.applyConstraints(size).catch(() => undefined);
-  }
-  return stream;
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Could not open the camera.");
 }
 
 export function WebcamRecorder({
@@ -235,23 +272,59 @@ export function WebcamRecorder({
   }, [reviewUrl]);
 
   const attachLivePreview = useCallback(async (stream: MediaStream) => {
-    const el = videoRef.current;
-    if (!el) return;
-    el.setAttribute("playsinline", "true");
-    el.setAttribute("webkit-playsinline", "true");
-    el.muted = true;
-    el.defaultMuted = true;
-    el.playsInline = true;
-    if (el.srcObject !== stream) {
-      el.srcObject = stream;
-    }
-    // iOS often needs play() after metadata is ready.
-    const tryPlay = () => el.play().catch(() => undefined);
-    await tryPlay();
-    el.onloadedmetadata = () => {
-      void tryPlay();
+    const bind = async (el: HTMLVideoElement) => {
+      el.setAttribute("playsinline", "true");
+      el.setAttribute("webkit-playsinline", "true");
+      el.muted = true;
+      el.defaultMuted = true;
+      el.playsInline = true;
+      el.autoplay = true;
+      if (el.srcObject !== stream) {
+        el.srcObject = stream;
+      }
+      stream.getVideoTracks().forEach((t) => {
+        t.enabled = true;
+      });
+      const tryPlay = () => el.play().catch(() => undefined);
+      await tryPlay();
+      if (el.readyState < 2) {
+        await new Promise<void>((resolve) => {
+          const done = () => {
+            el.removeEventListener("loadedmetadata", done);
+            el.removeEventListener("canplay", done);
+            resolve();
+          };
+          el.addEventListener("loadedmetadata", done);
+          el.addEventListener("canplay", done);
+          window.setTimeout(done, 1200);
+        });
+        await tryPlay();
+      }
     };
+
+    // Video may not be mounted yet (phase just flipped to preview) — retry briefly.
+    for (let i = 0; i < 12; i += 1) {
+      const el = videoRef.current;
+      if (el) {
+        await bind(el);
+        if (el.videoWidth > 0 || el.readyState >= 2) return;
+      }
+      await new Promise((r) => window.setTimeout(r, 50));
+    }
+    const el = videoRef.current;
+    if (el) await bind(el);
   }, []);
+
+  /** Attach as soon as the visible <video> mounts (fixes blank preview until Flip). */
+  const setVideoNode = useCallback(
+    (el: HTMLVideoElement | null) => {
+      videoRef.current = el;
+      const stream = streamRef.current;
+      if (!el || !stream) return;
+      void attachLivePreview(stream);
+    },
+    [attachLivePreview],
+  );
 
   const closeCamera = useCallback(() => {
     clearTimer();
@@ -295,22 +368,21 @@ export function WebcamRecorder({
 
   const live = phase === "preview" || phase === "recording";
 
-  // When Video Format or quality changes during live preview, retarget size.
+  // When Video Format or quality changes during live preview, retarget size only.
+  // Do not re-apply facingMode here — that blacks out many desktop webcams until Flip.
   useEffect(() => {
     if (phase !== "preview") return;
     const stream = streamRef.current;
     const track = stream?.getVideoTracks()[0];
     if (!track) return;
     void track
-      .applyConstraints({
-        ...sizeConstraints(wantLandscape, quality),
-        facingMode: { ideal: facingMode },
-      })
+      .applyConstraints(sizeConstraints(wantLandscape, quality))
       .then(() => {
         setCaptureSizeLabel(trackResolutionLabel(streamRef.current));
+        void attachLivePreview(stream);
       })
       .catch(() => undefined);
-  }, [wantLandscape, phase, facingMode, quality]);
+  }, [wantLandscape, phase, quality, attachLivePreview]);
 
   const mobileStudio = isMobile === true;
   const viewport = useVisualViewport(live && mobileStudio);
@@ -368,6 +440,8 @@ export function WebcamRecorder({
       // Release any format-picker live preview so this recorder can own the camera.
       claimStudioCamera();
       stopTracks();
+      // Give Windows/macOS a beat to free the previous camera device.
+      await new Promise((r) => window.setTimeout(r, 120));
       const stream = await openCameraStream(facing, wantLandscape, quality);
       streamRef.current = stream;
       setFacingMode(facing);
@@ -376,9 +450,11 @@ export function WebcamRecorder({
       setPhase("preview");
       setSeconds(0);
       setRecordingPaused(false);
-      // Attach after phase change so the video element is mounted.
+      // Attach after paint; callback ref also binds when <video> mounts.
       requestAnimationFrame(() => {
-        void attachLivePreview(stream);
+        requestAnimationFrame(() => {
+          void attachLivePreview(stream);
+        });
       });
     } catch (e) {
       const name = e instanceof DOMException ? e.name : "";
@@ -872,7 +948,7 @@ export function WebcamRecorder({
 
                   <div className="relative min-h-[40%] bg-black">
                     <video
-                      ref={videoRef}
+                      ref={setVideoNode}
                       muted
                       playsInline
                       autoPlay
@@ -978,7 +1054,7 @@ export function WebcamRecorder({
                   )}
                 >
                   <video
-                    ref={videoRef}
+                    ref={setVideoNode}
                     muted
                     playsInline
                     autoPlay
