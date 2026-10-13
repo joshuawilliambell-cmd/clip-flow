@@ -1,9 +1,9 @@
-# Fleet script drafts — review only
+# Fleet product scripts — DRAFT FOR REVIEW ONLY
 
-These plain-language teleprompter scripts are **not** wired into Love's Video Studio.
-Do not publish as official scripts until reviewed and approved.
+These teleprompter-style scripts are **not** wired into Love's Video Studio.
+Do not publish until reviewed and approved.
 
 Placeholders used across scripts:
-`[Customer Name]`, `[Your Name]`
+`[Customer Name]` · `[Your Name]` · `[Your Job Title]` · `[Your Job Duties]`
 
-Optional teammate lines can be added later the same way as the Fleet Hub scripts.
+Optional teammate lines can be added later the same way as Fleet Hub scripts.
