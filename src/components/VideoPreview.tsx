@@ -458,9 +458,9 @@ export const VideoPreview = forwardRef<
   );
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-lg font-semibold tracking-tight text-[var(--ink)] md:text-xl">
+        <h3 className="text-base font-semibold tracking-tight text-[var(--ink)] md:text-lg">
           Video Preview
         </h3>
         <span className="rounded-full border-2 border-[var(--ink)] bg-[var(--yellow)] px-2.5 py-0.5 text-[12px] font-bold text-[var(--ink)]">
