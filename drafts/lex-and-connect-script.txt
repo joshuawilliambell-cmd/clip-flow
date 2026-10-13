@@ -3,11 +3,11 @@ Not wired into Love's Video Studio. Do not publish until approved.
 
 Title: LEX + Love's Connect Portal
 LEX = Love's Express
-Placeholders: [Customer Name], [Your Name], [Your Job Title], [Your Job Duties]
+Placeholders: [Customer Name], [Your Name], [Your Job Title] (job duties only on Team Intro)
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to walk you through two things that work together for your fleet: LEX — short for Love's Express — and the Love's Connect Portal.
+Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title]. I wanted to walk you through two things that work together for your fleet: LEX — short for Love's Express — and the Love's Connect Portal.
 
 LEX is our billing card for Love's. Your drivers use it at Love's Travel Stops and Speedco. It is a Love's card — it is meant for fueling and buying at Love's, not as a general card that works everywhere.
 

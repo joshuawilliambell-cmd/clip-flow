@@ -4,7 +4,7 @@ Title: RFID Cardless Commercial Fueling
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to talk about RFID and cardless commercial fueling at Love's.
+Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title]. I wanted to talk about RFID and cardless commercial fueling at Love's.
 
 RFID stands for radio frequency identification. In plain terms, it lets your trucks fuel at Love's without the driver pulling out a plastic card every time. Tags are simple to install, and they help speed up the fueling process at the island.
 

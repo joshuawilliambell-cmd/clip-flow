@@ -80,7 +80,7 @@ type StudioContextValue = {
   /** Fills [Your Job Title] in the opening self-intro only. */
   speakerTitle: string;
   setSpeakerTitle: (title: string) => void;
-  /** Fills [Your Job Duties] in the opening self-intro only. */
+  /** Fills [Your Job Duties] in Team Intro opening only (omitted on product scripts). */
   speakerDuties: string;
   setSpeakerDuties: (duties: string) => void;
   /** Featured headshot for the team thumbnail (not a PIP teammate). */

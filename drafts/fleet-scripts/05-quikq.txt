@@ -4,7 +4,7 @@ Title: QuikQ
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to explain QuikQ and how it supports your Love's fleet account.
+Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title]. I wanted to explain QuikQ and how it supports your Love's fleet account.
 
 QuikQ is the platform that powers key parts of LEX account setup and day-to-day card management. LEX is short for Love's Express. After your fleet is approved, your team uses the QuikQ carrier tools to get drivers and cards ready and keep the account running smoothly.
 

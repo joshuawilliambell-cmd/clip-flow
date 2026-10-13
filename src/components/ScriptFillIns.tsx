@@ -6,11 +6,13 @@ import { HelpTip } from "@/components/HelpTip";
 import { JobTitleField } from "@/components/JobTitleField";
 import { PanelSteps } from "@/components/PanelStep";
 import { defaultDutiesForTitle } from "@/lib/job-titles";
+import { getScriptTopic } from "@/lib/script-topics";
 import { useStudio } from "@/lib/studio-context";
 
 /** Fill-in blanks for teleprompter placeholders like [Customer Name]. */
 export function ScriptFillIns() {
   const {
+    scriptTopic,
     customerName,
     setCustomerName,
     speakerName,
@@ -26,6 +28,7 @@ export function ScriptFillIns() {
   const photoRef = useRef<HTMLInputElement>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
+  const showJobDuties = getScriptTopic(scriptTopic).isTeamIntro;
 
   const handleSpeakerTitle = (title: string) => {
     const suggested = defaultDutiesForTitle(title);
@@ -33,7 +36,7 @@ export function ScriptFillIns() {
     const dutiesStillDefault =
       !speakerDuties.trim() || speakerDuties.trim() === priorDefault;
     setSpeakerTitle(title);
-    if (dutiesStillDefault && suggested) {
+    if (showJobDuties && dutiesStillDefault && suggested) {
       setSpeakerDuties(suggested);
     }
   };
@@ -84,10 +87,14 @@ export function ScriptFillIns() {
       <PanelSteps
         steps={[
           <>Type the <strong>customer name</strong> and <strong>your name</strong>.</>,
-          <>
-            Choose your <strong>job title</strong> and edit{" "}
-            <strong>job duties</strong> if you want.
-          </>,
+          showJobDuties ? (
+            <>
+              Choose your <strong>job title</strong> and edit{" "}
+              <strong>job duties</strong> if you want.
+            </>
+          ) : (
+            <>Choose your <strong>job title</strong>.</>
+          ),
           <>
             Optional: click <strong>Click Here to Add Photo</strong> for your
             featured thumbnail photo.
@@ -118,7 +125,11 @@ export function ScriptFillIns() {
         </label>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div
+        className={
+          showJobDuties ? "grid gap-3 md:grid-cols-2" : "grid gap-3 md:grid-cols-1"
+        }
+      >
         <div>
           <JobTitleField
             id="speaker-job-title"
@@ -126,16 +137,18 @@ export function ScriptFillIns() {
             onChange={handleSpeakerTitle}
           />
         </div>
-        <label className="block">
-          <span className="field-label">Your Job Duties (For Script)</span>
-          <input
-            value={speakerDuties}
-            onChange={(e) => setSpeakerDuties(e.target.value)}
-            className="field-input"
-            placeholder="Example: fuel programs, pricing, and fleet support"
-            autoComplete="off"
-          />
-        </label>
+        {showJobDuties ? (
+          <label className="block">
+            <span className="field-label">Your Job Duties (For Script)</span>
+            <input
+              value={speakerDuties}
+              onChange={(e) => setSpeakerDuties(e.target.value)}
+              className="field-input"
+              placeholder="Example: fuel programs, pricing, and fleet support"
+              autoComplete="off"
+            />
+          </label>
+        ) : null}
       </div>
 
       <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--panel-soft)] p-3 md:p-4">

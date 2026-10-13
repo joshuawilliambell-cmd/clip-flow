@@ -4,7 +4,7 @@ Title: Love's Fleet V.I.E.W.
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to introduce Love's Fleet V.I.E.W. — our digital fleet maintenance platform.
+Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title]. I wanted to introduce Love's Fleet V.I.E.W. — our digital fleet maintenance platform.
 
 Fleet V.I.E.W. is a cloud-based system that connects shop activity and fleet operations so you can see maintenance work in real time, on the web or on the go. The idea is simple: repair assets faster, understand true cost, and stay ahead of downtime.
 

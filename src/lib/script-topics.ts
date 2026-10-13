@@ -43,8 +43,9 @@ export type ScriptTopic = {
   script: string | null;
 };
 
+/** Product scripts: name + title only — no job duties (Team Intro keeps duties). */
 const OPEN =
-  "Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties].";
+  "Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title].";
 
 export const SCRIPT_TOPICS: ScriptTopic[] = [
   {

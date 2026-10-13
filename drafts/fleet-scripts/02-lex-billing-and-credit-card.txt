@@ -5,7 +5,7 @@ LEX = Love's Express
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to walk you through LEX — short for Love's Express — and the LEX credit card. That is Love's own fleet fuel card for your drivers.
+Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title]. I wanted to walk you through LEX — short for Love's Express — and the LEX credit card. That is Love's own fleet fuel card for your drivers.
 
 LEX is a billing card made for Love's. Your drivers use it at Love's Travel Stops and Speedco. It is not a general all-brand fleet card — it is built for fueling and buying at Love's.
 

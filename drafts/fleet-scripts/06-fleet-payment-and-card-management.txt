@@ -4,7 +4,7 @@ Title: Fleet Payment & Card Management Tools
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to cover Love's fleet payment and card management tools.
+Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title]. I wanted to cover Love's fleet payment and card management tools.
 
 Once your fleet account is set up, you are not stuck with a one-size-fits-all card. You can manage who gets a card, what they are allowed to buy, and where they can fuel. That includes purchase policies, product limits, driver prompts, and fueling network controls — so your policies travel with the driver.
 
