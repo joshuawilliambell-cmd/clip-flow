@@ -47,7 +47,6 @@ await shot("03b-tvc-fuel-card.png", "https://www.lovesfinancial.com/fuel-card-bu
 await shot("13a-freight-factoring.png", "https://www.lovesfinancial.com/fuel-card-bundles", "Freight Factoring");
 await shot("02b-lex-credit-card.png", "https://www.lovesfinancial.com/fuel-card-bundles", "Love’s Express Card");
 await shot("11a-truck-wash.png", "https://www.loves.com/loves-truck-care-and-speedco", "Truck Wash");
-await shot("01c-fleet-payment-networks.png", "https://www.loves.com/locations/ga/commerce/loves-travel-stop-commerce-765", "Accepted Payment Types");
 await shot("08a-fastfill-cng.png", "https://www.loves.com/locations/tx/fort-worth/loves-travel-stop-fort-worth-281", "Fast Fill CNG");
 await shot("06a-card-management.png", "https://www.loves.com/promo/lex-how-to", "Fuel Card Management");
 await shot("05a-quikq.png", "https://www.loves.com/promo/lex-how-to", "QuikQ Portal Login");

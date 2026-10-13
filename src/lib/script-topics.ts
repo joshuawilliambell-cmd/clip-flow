@@ -5,7 +5,6 @@ import { INTRO_SCRIPTS } from "@/lib/intro-script";
 export type ScriptTopicId =
   | "team-intro"
   | "cdl-legal-protection"
-  | "commercial-diesel-bulk-def"
   | "fastfill-cng"
   | "fleet-payment-card-management"
   | "fleet-solutions"
@@ -71,31 +70,6 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
       },
     ],
     script: `${OPEN} I wanted to explain the CDL legal protection program available through Love's fleet solutions — powered with TVC Pro-Driver. This program is built for professional drivers and fleets that need to protect CDLs when tickets and violations happen. Covered support can include moving violations, non-moving violations, and serious traffic violations, plus help with DataQ challenges when records need to be corrected. For covered cases, the program is designed so drivers are not left paying attorney fees out of pocket for those matters, and members get access to a large nationwide network of CDL-focused attorneys. There can also be discounts on network attorney fees for other legal matters outside the core covered list. The business reason is simple: tickets cost money, court time takes drivers off the road, and CDL risk hits the whole fleet. Legal protection helps reduce that disruption. If you want details on coverage for your drivers or how to enroll, reach out anytime and I can walk you through the next step. Thanks again.`,
-  },
-  {
-    id: "commercial-diesel-bulk-def",
-    label: "Commercial Diesel & Bulk DEF",
-    description: "Commercial diesel, bulk DEF, and major fleet payment networks.",
-    isTeamIntro: false,
-    targetSeconds: 90,
-    pips: [
-      {
-        cue: "commercial diesel",
-        image: "/fleet-pip/01a-commercial-diesel.png",
-        label: "Commercial diesel",
-      },
-      {
-        cue: "Bulk DEF",
-        image: "/fleet-pip/01b-bulk-def.png",
-        label: "Bulk DEF",
-      },
-      {
-        cue: "fleet payment networks",
-        image: "/fleet-pip/01c-fleet-payment-networks.png",
-        label: "Fleet payment networks",
-      },
-    ],
-    script: `${OPEN} I wanted to talk with you about commercial diesel and bulk DEF at Love's. Love's Travel Stops are built for commercial trucks. Your drivers can fuel with commercial diesel on the truck islands — not the retail front pumps — and keep rolling with less downtime. Many locations also offer diesel blends, so you can match what your fleet needs on the road. Bulk DEF is available in dedicated DEF lanes at Love's locations across the country. That means your drivers can top off DEF while they fuel, without a separate stop or jug-filling hassle. Retail DEF is also available inside when you need a smaller amount. We work with the major fleet payment networks your company already uses — including networks like Comdata, EFS, TCH, WEX, Voyager, Fleet One, and others, plus LEX, which is short for Love's Express — so settling up at the pump stays simple for your drivers and your back office. If you want help mapping locations on your lanes, comparing fuel programs, or getting your payment methods set up cleanly, reach out anytime and I can walk you through it. Thanks again.`,
   },
   {
     id: "fastfill-cng",

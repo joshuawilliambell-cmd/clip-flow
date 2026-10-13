@@ -1,81 +1,175 @@
 {
-  "note": "DRAFT — PIP cues for fleet topic scripts. Same pattern as teammate name → photo. Not wired into the live studio.",
+  "note": "DRAFT \u2014 PIP cues for fleet topic scripts. Same pattern as teammate name \u2192 photo. Not wired into the live studio.",
   "topics": [
-    {
-      "script": "01-commercial-diesel-and-bulk-def.txt",
-      "pips": [
-        { "cue": "commercial diesel", "image": "01a-commercial-diesel.png", "label": "Commercial diesel" },
-        { "cue": "bulk DEF", "image": "01b-bulk-def.png", "label": "Bulk DEF" },
-        { "cue": "fleet payment networks", "image": "01c-fleet-payment-networks.png", "label": "Fleet payment networks" }
-      ]
-    },
     {
       "script": "02-lex-billing-and-credit-card.txt",
       "pips": [
-        { "cue": "LEX", "image": "02a-lex-billing.png", "label": "LEX billing" },
-        { "cue": "LEX credit card", "image": "02b-lex-credit-card.png", "label": "LEX credit card" },
-        { "cue": "LEX flyer", "image": "02a-lex-flyer-supplement.png", "label": "LEX program flyer" }
+        {
+          "cue": "LEX",
+          "image": "02a-lex-billing.png",
+          "label": "LEX billing"
+        },
+        {
+          "cue": "LEX credit card",
+          "image": "02b-lex-credit-card.png",
+          "label": "LEX credit card"
+        },
+        {
+          "cue": "LEX flyer",
+          "image": "02a-lex-flyer-supplement.png",
+          "label": "LEX program flyer"
+        }
       ]
     },
     {
       "script": "03-loves-fleet-fuel-card.txt",
       "pips": [
-        { "cue": "LEX credit card", "image": "03a-lex-fleet-fuel-card.png", "label": "LEX fleet fuel card" },
-        { "cue": "TVC Fuel Card", "image": "03b-tvc-fuel-card.png", "label": "TVC Fuel Card" }
+        {
+          "cue": "LEX credit card",
+          "image": "03a-lex-fleet-fuel-card.png",
+          "label": "LEX fleet fuel card"
+        },
+        {
+          "cue": "TVC Fuel Card",
+          "image": "03b-tvc-fuel-card.png",
+          "label": "TVC Fuel Card"
+        }
       ]
     },
     {
       "script": "04-loves-connect-portal.txt",
       "pips": [
-        { "cue": "Connect Portal", "image": "04a-connect-portal.png", "label": "Connect Portal" },
-        { "cue": "Fuel Dashboard", "image": "04b-fuel-dashboard.png", "label": "Fuel Dashboard" },
-        { "cue": "Connect flyer", "image": "04a-connect-flyer-supplement.png", "label": "Connect portal flyer" }
+        {
+          "cue": "Connect Portal",
+          "image": "04a-connect-portal.png",
+          "label": "Connect Portal"
+        },
+        {
+          "cue": "Fuel Dashboard",
+          "image": "04b-fuel-dashboard.png",
+          "label": "Fuel Dashboard"
+        },
+        {
+          "cue": "Connect flyer",
+          "image": "04a-connect-flyer-supplement.png",
+          "label": "Connect portal flyer"
+        }
       ]
     },
     {
       "script": "05-quikq.txt",
-      "pips": [{ "cue": "QuikQ", "image": "05a-quikq.png", "label": "QuikQ" }]
+      "pips": [
+        {
+          "cue": "QuikQ",
+          "image": "05a-quikq.png",
+          "label": "QuikQ"
+        }
+      ]
     },
     {
       "script": "06-fleet-payment-and-card-management.txt",
-      "pips": [{ "cue": "card management", "image": "06a-card-management.png", "label": "Card management" }]
+      "pips": [
+        {
+          "cue": "card management",
+          "image": "06a-card-management.png",
+          "label": "Card management"
+        }
+      ]
     },
     {
       "script": "07-rfid-cardless-fueling.txt",
-      "pips": [{ "cue": "RFID", "image": "07a-rfid-cardless.png", "label": "RFID cardless fueling" }]
+      "pips": [
+        {
+          "cue": "RFID",
+          "image": "07a-rfid-cardless.png",
+          "label": "RFID cardless fueling"
+        }
+      ]
     },
     {
       "script": "08-fastfill-cng-class-8.txt",
-      "pips": [{ "cue": "Fast-Fill CNG", "image": "08a-fastfill-cng.png", "label": "Fast-Fill CNG" }]
+      "pips": [
+        {
+          "cue": "Fast-Fill CNG",
+          "image": "08a-fastfill-cng.png",
+          "label": "Fast-Fill CNG"
+        }
+      ]
     },
     {
       "script": "09-fleet-solutions-and-sales-support.txt",
-      "pips": [{ "cue": "Fleet Solutions", "image": "09a-fleet-solutions.png", "label": "Fleet Solutions" }]
+      "pips": [
+        {
+          "cue": "Fleet Solutions",
+          "image": "09a-fleet-solutions.png",
+          "label": "Fleet Solutions"
+        }
+      ]
     },
     {
       "script": "10-loves-truck-care-and-speedco.txt",
       "pips": [
-        { "cue": "Truck Care", "image": "10a-truck-care-speedco.png", "label": "Truck Care & Speedco" },
-        { "cue": "commercial tires", "image": "10b-commercial-tires.png", "label": "Commercial tires" },
-        { "cue": "preventative maintenance", "image": "10c-oil-pm.png", "label": "Oil & PM" },
-        { "cue": "roadside assistance", "image": "10d-roadside-assistance.png", "label": "Roadside assistance" }
+        {
+          "cue": "Truck Care",
+          "image": "10a-truck-care-speedco.png",
+          "label": "Truck Care & Speedco"
+        },
+        {
+          "cue": "commercial tires",
+          "image": "10b-commercial-tires.png",
+          "label": "Commercial tires"
+        },
+        {
+          "cue": "preventative maintenance",
+          "image": "10c-oil-pm.png",
+          "label": "Oil & PM"
+        },
+        {
+          "cue": "roadside assistance",
+          "image": "10d-roadside-assistance.png",
+          "label": "Roadside assistance"
+        }
       ]
     },
     {
       "script": "11-truck-wash.txt",
-      "pips": [{ "cue": "Truck Wash", "image": "11a-truck-wash.png", "label": "Truck Wash" }]
+      "pips": [
+        {
+          "cue": "Truck Wash",
+          "image": "11a-truck-wash.png",
+          "label": "Truck Wash"
+        }
+      ]
     },
     {
       "script": "12-loves-fleet-view.txt",
-      "pips": [{ "cue": "Fleet V.I.E.W.", "image": "12a-fleet-view.png", "label": "Fleet V.I.E.W." }]
+      "pips": [
+        {
+          "cue": "Fleet V.I.E.W.",
+          "image": "12a-fleet-view.png",
+          "label": "Fleet V.I.E.W."
+        }
+      ]
     },
     {
       "script": "13-freight-factoring-loves-financial.txt",
-      "pips": [{ "cue": "freight factoring", "image": "13a-freight-factoring.png", "label": "Freight factoring" }]
+      "pips": [
+        {
+          "cue": "freight factoring",
+          "image": "13a-freight-factoring.png",
+          "label": "Freight factoring"
+        }
+      ]
     },
     {
       "script": "14-cdl-legal-protection-tvc.txt",
-      "pips": [{ "cue": "CDL legal protection", "image": "14a-cdl-legal-protection.png", "label": "CDL legal protection" }]
+      "pips": [
+        {
+          "cue": "CDL legal protection",
+          "image": "14a-cdl-legal-protection.png",
+          "label": "CDL legal protection"
+        }
+      ]
     }
   ]
 }

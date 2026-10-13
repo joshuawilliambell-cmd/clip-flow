@@ -7,9 +7,6 @@ Images are screenshots / crops from Love's public web pages. Not wired into the 
 
 | Script | Cue label (spoken) | Image file | Source page |
 | --- | --- | --- | --- |
-| 01 Commercial diesel & bulk DEF | Commercial diesel | `01a-commercial-diesel.png` | loves.com home / fuel |
-| 01 Commercial diesel & bulk DEF | Bulk DEF | `01b-bulk-def.png` | location amenities / DEF |
-| 01 Commercial diesel & bulk DEF | Fleet payment networks | `01c-fleet-payment-networks.png` | accepted payment types |
 | 02 LEX billing & credit card | LEX | `02a-lex-billing.png` | LEX / Express promo |
 | 02 LEX billing & credit card | LEX credit card | `02b-lex-credit-card.png` | Express card / financial |
 | 03 Fleet fuel card options | LEX credit card | `03a-lex-fleet-fuel-card.png` | lovesfinancial fuel cards |

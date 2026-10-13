@@ -12,21 +12,6 @@ fs.mkdirSync(OUT, { recursive: true });
 /** @type {Array<{ file: string, url: string, wait?: string, scroll?: number, fullPage?: boolean, clipNote?: string }>} */
 const SHOTS = [
   {
-    file: "01a-commercial-diesel.png",
-    url: "https://www.loves.com/",
-    wait: "text=Fleet",
-  },
-  {
-    file: "01b-bulk-def.png",
-    url: "https://www.loves.com/locations/ga/commerce/loves-travel-stop-commerce-765",
-    wait: "text=DEF",
-  },
-  {
-    file: "01c-fleet-payment-networks.png",
-    url: "https://www.loves.com/locations/ga/commerce/loves-travel-stop-commerce-765",
-    wait: "text=Accepted Payment",
-  },
-  {
     file: "02a-lex-billing.png",
     url: "https://www.loves.com/promo/lex-how-to",
     wait: "text=Express",
