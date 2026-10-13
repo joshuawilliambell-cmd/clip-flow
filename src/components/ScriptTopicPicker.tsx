@@ -37,7 +37,7 @@ export function ScriptTopicPicker() {
             introduce teammates with their photos.
           </p>
           <p>
-            Product scripts (LEX, Connect, Truck Care, and more) load a plain
+            Product scripts (LEX, Love&apos;s Connect, Truck Care, and more) load a plain
             language talking track and show Love&apos;s website screenshots as
             corner photos when each topic is named — same idea as teammate
             names cueing teammate photos.

@@ -45,9 +45,9 @@
       "script": "04-loves-connect-portal.txt",
       "pips": [
         {
-          "cue": "Connect Portal",
+          "cue": "Love's Connect",
           "image": "04a-connect-portal.png",
-          "label": "Connect Portal"
+          "label": "Love's Connect"
         },
         {
           "cue": "account activity",

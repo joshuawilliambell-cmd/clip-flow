@@ -142,15 +142,15 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
   },
   {
     id: "connect-portal",
-    label: "Love's Connect Portal",
+    label: "Love's Connect",
     description: "Online portal for Love's fuel data and documents.",
     isTeamIntro: false,
     targetSeconds: 90,
     pips: [
       {
-        cue: "Connect Portal",
+        cue: "Love's Connect",
         image: "/fleet-pip/04a-connect-portal.png",
-        label: "Connect Portal",
+        label: "Love's Connect",
       },
       {
         cue: "account activity",
@@ -163,7 +163,7 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
         label: "Fuel Dashboard",
       },
     ],
-    script: `${OPEN} I wanted to show you what the Love's Connect Portal does for your fleet. Connect is the online portal where you manage and review your Love's account activity. It is a one-stop shop with a secure login and a streamlined invoice process, and it works on computers and phones. Inside Connect, administrators can see monthly fuel performance and fuel goals, review daily fuel transactions, open fleet documents like contracts and invoices, get updates through the message center, and manage who from your company is approved to use the portal. On the Fuel Dashboard you can see gallons purchased, progress toward your fuel goal, account balance, available credit, and today's fuel price. You can make a payment there too. You will also find areas like Document Center, Truck Care Dashboard, Manage Users, and Payments when you need them. In short: when your drivers fuel and service at Love's, Connect is where your office goes to see the data and pull the documents. If you would like a quick walkthrough of Connect for your team, reach out anytime and I can help. Thanks again.`,
+    script: `${OPEN} I wanted to show you what Love's Connect does for your fleet. Love's Connect is the online portal where you manage and review your Love's account activity. It is a one-stop shop with a secure login and a streamlined invoice process, and it works on computers and phones. Inside the portal, administrators can see monthly fuel performance and fuel goals, review daily fuel transactions, open fleet documents like contracts and invoices, get updates through the message center, and manage who from your company is approved to use the portal. On the Fuel Dashboard you can see gallons purchased, progress toward your fuel goal, account balance, available credit, and today's fuel price. You can make a payment there too. You will also find areas like Document Center, Truck Care Dashboard, Manage Users, and Payments when you need them. In short: when your drivers fuel and service at Love's, Love's Connect is where your office goes to see the data and pull the documents. If you would like a quick walkthrough of the portal for your team, reach out anytime and I can help. Thanks again.`,
   },
   {
     id: "fleet-fuel-card",

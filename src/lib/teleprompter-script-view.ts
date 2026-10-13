@@ -65,7 +65,7 @@ export function findScriptCues(
     { label: "Welcome", match: "welcome" },
     { label: "Fleet Hub", match: ["fleet", "hub"] },
     { label: "LEX", match: "lex" },
-    { label: "Connect", match: "connect" },
+    { label: "Love's Connect", match: "connect" },
     { label: "QuikQ", match: "quikq" },
     { label: "RFID", match: "rfid" },
     { label: "CNG", match: "cng" },
