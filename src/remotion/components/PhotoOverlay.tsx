@@ -1,4 +1,10 @@
-import { AbsoluteFill, Img, interpolate, useCurrentFrame } from "remotion";
+import {
+  AbsoluteFill,
+  Img,
+  getRemotionEnvironment,
+  interpolate,
+  useCurrentFrame,
+} from "remotion";
 import {
   getPipLayout,
   VIDEO_TEMPLATE,
@@ -17,7 +23,24 @@ type PhotoOverlayProps = {
   orientation?: VideoOrientation;
   sourceWidth?: number;
   sourceHeight?: number;
+  /** YouTube video id — muted autoplay in preview; poster used while exporting. */
+  youtubeId?: string | null;
 };
+
+function youtubeEmbedSrc(youtubeId: string): string {
+  const params = new URLSearchParams({
+    autoplay: "1",
+    mute: "1",
+    controls: "0",
+    modestbranding: "1",
+    playsinline: "1",
+    rel: "0",
+    loop: "1",
+    playlist: youtubeId,
+    enablejsapi: "1",
+  });
+  return `https://www.youtube.com/embed/${youtubeId}?${params.toString()}`;
+}
 
 export function PhotoOverlay({
   src,
@@ -30,6 +53,7 @@ export function PhotoOverlay({
   orientation = VIDEO_TEMPLATE.defaultOrientation,
   sourceWidth,
   sourceHeight,
+  youtubeId = null,
 }: PhotoOverlayProps) {
   const frame = useCurrentFrame();
   const { fps, fadeInSeconds, fadeOutSeconds, pip } = VIDEO_TEMPLATE;
@@ -52,6 +76,8 @@ export function PhotoOverlay({
   );
 
   const labelLines = [title, department].filter(Boolean).join(" · ");
+  const { isRendering } = getRemotionEnvironment();
+  const playYoutube = Boolean(youtubeId) && !isRendering;
 
   return (
     <AbsoluteFill style={{ opacity, pointerEvents: "none" }}>
@@ -69,16 +95,36 @@ export function PhotoOverlay({
           backgroundColor: "#111",
         }}
       >
-        <Img
-          src={src}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            // Portrait headshot framing — keep faces near upper-center
-            objectPosition: "center 22%",
-          }}
-        />
+        {playYoutube && youtubeId ? (
+          <iframe
+            src={youtubeEmbedSrc(youtubeId)}
+            title={title || name || "PIP video"}
+            width="100%"
+            height="100%"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              border: 0,
+              pointerEvents: "none",
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen={false}
+          />
+        ) : (
+          <Img
+            src={src}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              // Portrait headshot framing — keep faces near upper-center
+              objectPosition: youtubeId ? "center center" : "center 22%",
+            }}
+          />
+        )}
       </div>
 
       {(name || labelLines) && (

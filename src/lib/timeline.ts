@@ -114,8 +114,10 @@ export function autoArrangePhotos(
     const preferred = cueStarts[index] ?? VIDEO_TEMPLATE.defaultPhotoStartSeconds[0];
     let start = Math.max(preferred, previousEnd);
     start = clamp(start, 0, Math.max(0, timelineDuration - MIN));
+    const preferredDur =
+      photo.durationSeconds > 0 ? photo.durationSeconds : defaultDur;
     const duration = clamp(
-      defaultDur,
+      preferredDur,
       MIN,
       Math.max(MIN, timelineDuration - start),
     );

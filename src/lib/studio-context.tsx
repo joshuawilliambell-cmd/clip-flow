@@ -1136,6 +1136,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         department: p.department,
         startSeconds: p.startSeconds,
         durationSeconds: p.durationSeconds,
+        youtubeId: p.youtubeId ?? null,
       })),
       pipSide,
       orientation: videoOrientation,

@@ -108,6 +108,7 @@ export function IntroductionVideo(props: CompositionProps) {
               orientation={orientation}
               sourceWidth={videoWidth}
               sourceHeight={videoHeight}
+              youtubeId={photo.youtubeId}
             />
           </Sequence>
         );

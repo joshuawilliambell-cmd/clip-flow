@@ -20,7 +20,11 @@ export function productPipPhotos(topicId: ScriptTopicId): TeamPhoto[] {
     duties: "",
     department: "",
     startSeconds: 0,
-    durationSeconds: VIDEO_TEMPLATE.defaultPhotoDurationSeconds,
+    // Video PIPs need more screen time than a still headshot.
+    durationSeconds: pip.youtubeId
+      ? Math.max(VIDEO_TEMPLATE.defaultPhotoDurationSeconds, 20)
+      : VIDEO_TEMPLATE.defaultPhotoDurationSeconds,
+    youtubeId: pip.youtubeId ?? null,
   }));
 }
 

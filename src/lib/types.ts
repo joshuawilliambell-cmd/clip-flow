@@ -14,6 +14,8 @@ export type TeamPhoto = {
   department: string;
   startSeconds: number;
   durationSeconds: number;
+  /** Optional YouTube id for a muted PIP video (preview); url is the poster. */
+  youtubeId?: string | null;
 };
 
 export type SourceVideo = {
@@ -46,6 +48,7 @@ export type CompositionProps = {
     department: string;
     startSeconds: number;
     durationSeconds: number;
+    youtubeId?: string | null;
   }>;
   pipSide: PipSide;
   /** Landscape 16:9 or portrait 4:3 — drives canvas size and PIP %. */
