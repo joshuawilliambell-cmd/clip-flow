@@ -747,6 +747,13 @@ export function WebcamRecorder({
             stays near the lens so you can look natural while you read.
           </p>
           <p>
+            <strong>Look toward the camera:</strong> on a computer or laptop,
+            scroll so the script is near the <strong>top of your screen</strong>
+            , close to the webcam. Your eyes follow the words left to right up
+            there — so you look at the camera, not down at the middle of the
+            monitor.
+          </p>
+          <p>
             <strong>Video quality:</strong> pick Standard, High, or Highest
             before you record. High (1080p) is recommended. Teammate photos are
             still pictures, so they often look sharper than moving video — good
@@ -777,14 +784,23 @@ export function WebcamRecorder({
         <strong>Recording Tips → Phone Camera</strong>, then upload the file.
       </div>
 
+      <div className="how-banner mt-3">
+        <strong>Recording tip — look at the camera:</strong> On a computer or
+        laptop, scroll this page so the teleprompter words sit near the{" "}
+        <strong>top of your monitor</strong>, right under your webcam. Your eyes
+        read left to right up there, so you look toward the center of the lens —
+        not down at the middle of the screen. That makes the video feel more
+        natural.
+      </div>
+
       <PanelSteps
         className="mt-4"
         steps={[
           <>
-            Match <strong>{orientationLabel(videoOrientation)}</strong>: on a
-            computer, place this window near the webcam lens; on a phone, hold
-            it upright (portrait 4:3) or sideways (landscape). Frame waist to
-            top of head.
+            Match <strong>{orientationLabel(videoOrientation)}</strong>. On a
+            computer, scroll so the script is near the top of the screen (close
+            to the webcam). On a phone, hold it upright (portrait) or sideways
+            (landscape). Frame waist to top of head.
           </>,
           <>
             Tap <strong>Start Camera</strong> and allow camera + microphone.
@@ -876,10 +892,15 @@ export function WebcamRecorder({
             phase === "preview" ? (
               <div className="how-banner space-y-2">
                 <p>
+                  <strong>Tip:</strong> Scroll so the script words sit near the{" "}
+                  <strong>top of your screen</strong>, close to your webcam.
+                  Reading left to right up there keeps your eyes toward the
+                  camera.
+                </p>
+                <p>
                   <strong>How Follow My Voice works here:</strong> click it and
                   allow the mic. Read the script out loud — the words scroll as
-                  you talk, so you can look near the camera instead of down at a
-                  paper. Do these in order:
+                  you talk. Do these in order:
                 </p>
                 <PanelSteps
                   steps={[
