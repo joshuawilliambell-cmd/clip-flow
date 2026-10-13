@@ -222,17 +222,17 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
   {
     id: "truck-wash",
     label: "Love's Truck Wash",
-    description: "Automated commercial truck wash at select locations.",
+    description: "Commercial truck wash, trailer washouts, and wash add-ons.",
     isTeamIntro: false,
-    targetSeconds: 60,
+    targetSeconds: 80,
     pips: [
       {
         cue: "Truck Wash",
         image: "/fleet-pip/11a-truck-wash.png",
-        label: "Truck Wash",
+        label: "Truck Wash services",
       },
     ],
-    script: `${OPEN} I wanted to tell you about Love's Truck Wash. At select Love's locations, we offer fast, automated truck wash bays built for commercial equipment. Drivers can get a cost-effective clean in minutes and get back on the road without a long delay. A clean truck is not just about looks. It helps with inspections, brand image for your company, and keeping equipment presentable for customers and shippers. Because washes are at select Love's sites, we can help you identify which stops on your lanes offer the service. If truck wash matters for your fleet standards, reach out anytime and I can help map locations or fold wash stops into your Love's plan. Thanks again.`,
+    script: `${OPEN} I wanted to tell you about Love's Truck Wash. At select Love's locations, we offer fast, automated truck wash bays built for commercial equipment. Our best wash does the job in about half the time of our competition, so drivers can get a cost-effective clean and get back on the road without a long delay. We also do trailer washouts when your trailers need a cleanout as well as a wash. Services can include undercarriage rinse, washout bay, tire dressing, engine degreaser, acid wash, and truck wax — so you can match the clean to what the equipment needs. And drivers can charge truck washes to your billing card account, which keeps wash spend on the same Love's billing you already use. A clean truck is not just about looks. It helps with inspections, brand image for your company, and keeping equipment presentable for customers and shippers. Because washes are at select Love's sites, we can help you identify which stops on your lanes offer the service. If truck wash matters for your fleet standards, reach out anytime and I can help map locations or fold wash stops into your Love's plan. Thanks again.`,
   },
   {
     id: "quikq",

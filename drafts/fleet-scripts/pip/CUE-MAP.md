@@ -21,7 +21,7 @@ Images are screenshots / crops from Love's public web pages. Not wired into the 
 | 10 Truck Care & Speedco | Commercial tires | `10b-commercial-tires.png` | commercial truck tires |
 | 10 Truck Care & Speedco | Oil and preventative maintenance | `10c-oil-pm.png` | oil & PM services |
 | 10 Truck Care & Speedco | Roadside assistance | `10d-roadside-assistance.png` | roadside assistance |
-| 11 Truck wash | Truck Wash | `11a-truck-wash.png` | Truck Care wash mention |
+| 11 Truck wash | Truck Wash | `11a-truck-wash.png` | Wash services icons (undercarriage, washout, tire dressing, degreaser, acid wash, wax) |
 | 12 Fleet V.I.E.W. | Fleet V.I.E.W. | `12a-fleet-view.png` | Fleet VIEW page |
 | 12 Fleet V.I.E.W. | Fault codes | `12b-fleet-view-dashboard.png` | Fleet VIEW home / faults & PM |
 | 12 Fleet V.I.E.W. | Repair orders | `12c-fleet-view-analytics.png` | Fleet VIEW analytics / ROs |
