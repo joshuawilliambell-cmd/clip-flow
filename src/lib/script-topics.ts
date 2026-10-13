@@ -231,9 +231,12 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
       {
         cue: "Truck Wash",
         image: "/fleet-pip/11a-truck-wash-exterior.png",
-        label: "Truck Wash video",
-        /** Plays muted in preview PIP; exterior still is the export poster. */
-        youtubeId: "k1JouaUqa_s",
+        label: "Truck Wash exterior",
+      },
+      {
+        cue: "automated truck wash",
+        image: "/fleet-pip/11b-truck-wash-bay.png",
+        label: "Automated wash bay",
       },
       {
         cue: "trailer washouts",

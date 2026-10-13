@@ -127,8 +127,12 @@
         {
           "cue": "Truck Wash",
           "image": "11a-truck-wash-exterior.png",
-          "label": "Truck Wash video",
-          "youtubeId": "k1JouaUqa_s"
+          "label": "Truck Wash exterior"
+        },
+        {
+          "cue": "automated truck wash",
+          "image": "11b-truck-wash-bay.png",
+          "label": "Automated wash bay"
         },
         {
           "cue": "trailer washouts",
