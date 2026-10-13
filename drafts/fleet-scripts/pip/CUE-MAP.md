@@ -22,7 +22,11 @@ Images are screenshots / crops from Love's public web pages. Not wired into the 
 | 10 Truck Care & Speedco | Commercial tires | `10b-commercial-tires.png` | commercial truck tires |
 | 10 Truck Care & Speedco | Oil and preventative maintenance | `10c-oil-pm.png` | oil & PM services |
 | 10 Truck Care & Speedco | Roadside assistance | `10d-roadside-assistance.png` | roadside assistance |
-| 11 Truck wash | Truck Wash | YouTube `k1JouaUqa_s` (muted PIP) · poster `11a-truck-wash.png` | Love's truck wash services video |
+| 11 Truck wash | Truck Wash | `11a-truck-wash-exterior.png` | Love's truck exiting wash |
+| 11 Truck wash | Automated truck wash | `11b-truck-wash-bay.png` | Freightliner in wash bay brushes |
+| 11 Truck wash | Trailer washouts | `11e-trailer-washout.png` | Trailer washout pressure wand |
+| 11 Truck wash | Services can include | `11d-truck-wash-detail.png` | Tech detailing cab |
+| 11 Truck wash | (spare) | `11c-truck-wash-entrance.png` | Wash 1 / Wash 2 entrance |
 | 12 Fleet V.I.E.W. | Fleet V.I.E.W. | `12a-fleet-view.png` | Fleet VIEW page |
 | 12 Fleet V.I.E.W. | Fault codes | `12b-fleet-view-dashboard.png` | Fleet VIEW home / faults & PM |
 | 12 Fleet V.I.E.W. | Repair orders | `12c-fleet-view-analytics.png` | Fleet VIEW analytics / ROs |

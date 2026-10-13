@@ -126,9 +126,23 @@
       "pips": [
         {
           "cue": "Truck Wash",
-          "image": "11a-truck-wash.png",
-          "label": "Truck Wash video",
-          "youtubeId": "k1JouaUqa_s"
+          "image": "11a-truck-wash-exterior.png",
+          "label": "Truck Wash exterior"
+        },
+        {
+          "cue": "automated truck wash",
+          "image": "11b-truck-wash-bay.png",
+          "label": "Automated wash bay"
+        },
+        {
+          "cue": "trailer washouts",
+          "image": "11e-trailer-washout.png",
+          "label": "Trailer washout"
+        },
+        {
+          "cue": "Services can include",
+          "image": "11d-truck-wash-detail.png",
+          "label": "Wash detail"
         }
       ]
     },
