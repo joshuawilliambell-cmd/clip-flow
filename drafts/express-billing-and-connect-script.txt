@@ -2,11 +2,11 @@ DRAFT — FOR REVIEW ONLY
 Not wired into Love's Video Studio. Do not publish until approved.
 
 Title: Love's Express Billing + Love's Connect Portal
-Placeholders: [Customer Name], [Your Name], [Your Job Title], [Your Job Duties]
+Placeholders: [Customer Name], [Your Name]
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to walk you through two things that work together for your fleet: Love's Express Billing and the Love's Connect Portal.
+Hey, [Customer Name], [Your Name] with Love's here. I wanted to walk you through two things that work together for your fleet: Love's Express Billing and the Love's Connect Portal.
 
 Love's Express is our billing card for Love's. Your drivers use it at Love's Travel Stops and Speedco. It is a Love's card — it is meant for fueling and buying at Love's, not as a general card that works everywhere.
 

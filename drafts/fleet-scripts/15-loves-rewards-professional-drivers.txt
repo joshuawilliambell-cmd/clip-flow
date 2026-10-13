@@ -3,11 +3,11 @@ Not wired into Love's Video Studio.
 Source: https://www.loves.com/loves-rewards
 
 Title: Love's Rewards for Professional Drivers
-Placeholders: [Customer Name], [Your Name], [Your Job Title], [Your Job Duties]
+Placeholders: [Customer Name], [Your Name]
 
 ---
 
-Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to take a quick minute and walk you through Love's Rewards for professional drivers.
+Hey, [Customer Name], [Your Name] with Love's here. I wanted to take a quick minute and walk you through Love's Rewards for professional drivers.
 
 Love's Rewards is our loyalty program built for drivers on the road. You download the Love's Rewards app, become a member, and earn points when you fuel and when you buy food, drinks, and in-store merchandise. Every time you scan your barcode at the pump or inside the store, those purchases can add to your points. Then you spend the points just like cash — one hundred points equals one dollar.
 
