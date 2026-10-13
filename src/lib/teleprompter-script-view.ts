@@ -60,13 +60,24 @@ export function findScriptCues(
     }
   }
 
-  // Welcome / Fleet Hub section cues when present
-  const sectionNeedles: Array<{ label: string; match: string }> = [
+  // Welcome / product section cues when present
+  const sectionNeedles: Array<{ label: string; match: string | string[] }> = [
     { label: "Welcome", match: "welcome" },
-    { label: "Fleet Hub", match: "fleet" },
+    { label: "Fleet Hub", match: ["fleet", "hub"] },
+    { label: "Express", match: ["express", "billing"] },
+    { label: "Savings", match: ["transaction", "fees"] },
+    { label: "Security", match: ["rfid", "tags"] },
+    { label: "Reporting", match: ["connect", "portal"] },
   ];
   for (const section of sectionNeedles) {
-    const idx = words.indexOf(section.match);
+    const needle = Array.isArray(section.match)
+      ? section.match
+      : [section.match];
+    const idx = words.findIndex((w, i) => {
+      if (w !== needle[0]) return false;
+      if (needle.length === 1) return true;
+      return needle.every((part, j) => words[i + j] === part);
+    });
     if (idx >= 0) pushUnique(section.label, idx);
   }
 
