@@ -2,6 +2,7 @@ DRAFT — FOR REVIEW ONLY · Not in the live studio
 
 Title: LEX Billing & LEX Credit Card (Love's Fleet Fuel Card)
 LEX = Love's Express
+Includes condensed fleet payment & card management points
 
 ---
 
@@ -11,7 +12,7 @@ LEX is a billing card made for Love's. Your drivers use it at Love's Travel Stop
 
 With LEX, your fleet gets consistent, competitive pricing. There are no application fees, no transaction fees, and no account maintenance fees. Cards and RFID tags are free. You get the fuel cash price on top of already competitive rates, and drivers can also use the card for in-store merchandise and services at Love's. Premium Wi-Fi is included with LEX transactions.
 
-You stay in control. You can set purchase policies, product limits, and driver prompts. RFID and cardless options help cut fueling time and protect against fuel theft.
+You stay in control with fleet payment and card management built in. You can set purchase policies, product limits, driver prompts, and fueling network controls — so your policies travel with the driver. Your office can review transactions, export reports, watch available credit, and see payments as they post, which keeps spend aligned with policy and gives accounting the files they need. RFID and cardless options help cut fueling time and protect against fuel theft.
 
 Even if some of your trucks still use other major fleet payment networks — like Comdata, EFS, TCH, WEX, Voyager, and others — Love's accepts those too. LEX is simply the Love's card program when you want Love's pricing, Love's controls, and Love's reporting in one place.
 

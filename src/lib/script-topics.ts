@@ -6,7 +6,6 @@ export type ScriptTopicId =
   | "team-intro"
   | "cdl-legal-protection"
   | "fastfill-cng"
-  | "fleet-payment-card-management"
   | "fleet-solutions"
   | "freight-factoring"
   | "lex-billing"
@@ -87,21 +86,6 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
     script: `${OPEN} I wanted to mention Fast-Fill CNG for Class 8 trucks at Love's. At select Love's locations, we offer fast-fill compressed natural gas for Class 8 commercial trucks. That matters if your fleet runs CNG power — you need fill speeds and sites that fit a heavy-duty truck, not a light-duty retail setup. CNG availability varies by location, so the important first step is matching your lanes to Love's sites that offer Class 8 fast-fill. From there, we can help your drivers know where to stop and how fueling fits into your broader Love's fuel program. If CNG is part of your fleet strategy, reach out anytime and I can help identify locations and next steps. Thanks again.`,
   },
   {
-    id: "fleet-payment-card-management",
-    label: "Fleet Payment & Card Management",
-    description: "Card rules, limits, reports, and payment visibility.",
-    isTeamIntro: false,
-    targetSeconds: 75,
-    pips: [
-      {
-        cue: "card management",
-        image: "/fleet-pip/06a-card-management.png",
-        label: "Card management",
-      },
-    ],
-    script: `${OPEN} I wanted to cover Love's fleet payment and card management tools. Once your fleet account is set up, you are not stuck with a one-size-fits-all card. You can manage who gets a card, what they are allowed to buy, and where they can fuel. That includes purchase policies, product limits, driver prompts, and fueling network controls — so your policies travel with the driver. Your office can review transactions, export reports, watch available credit, and see payments as they post. That helps you catch issues early, keep spend aligned with policy, and give accounting the files they need. These tools work with LEX — short for Love's Express — and the broader Love's fleet billing setup, so card control and payment visibility stay in one program instead of scattered across spreadsheets. If you want help building card rules for your drivers or cleaning up how payments and reports flow to your back office, reach out anytime and I can help. Thanks again.`,
-  },
-  {
     id: "fleet-solutions",
     label: "Fleet Solutions & Sales Support",
     description: "Fleet Solutions experts and account support.",
@@ -134,9 +118,9 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
   {
     id: "lex-billing",
     label: "LEX Billing & Credit Card",
-    description: "LEX (Love's Express) billing card for Love's locations.",
+    description: "LEX (Love's Express) billing, card controls, and payment visibility.",
     isTeamIntro: false,
-    targetSeconds: 105,
+    targetSeconds: 115,
     pips: [
       {
         cue: "LEX",
@@ -148,8 +132,13 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
         image: "/fleet-pip/02b-lex-credit-card.png",
         label: "LEX credit card",
       },
+      {
+        cue: "purchase policies",
+        image: "/fleet-pip/06a-card-management.png",
+        label: "Card management",
+      },
     ],
-    script: `${OPEN} I wanted to walk you through LEX — short for Love's Express — and the LEX credit card. That is Love's own fleet fuel card for your drivers. LEX is a billing card made for Love's. Your drivers use it at Love's Travel Stops and Speedco. It is not a general all-brand fleet card — it is built for fueling and buying at Love's. With LEX, your fleet gets consistent, competitive pricing. There are no application fees, no transaction fees, and no account maintenance fees. Cards and RFID tags are free. You get the fuel cash price on top of already competitive rates, and drivers can also use the card for in-store merchandise and services at Love's. Premium Wi-Fi is included with LEX transactions. You stay in control. You can set purchase policies, product limits, and driver prompts. RFID and cardless options help cut fueling time and protect against fuel theft. Even if some of your trucks still use other major fleet payment networks — like Comdata, EFS, TCH, WEX, Voyager, and others — Love's accepts those too. LEX is simply the Love's card program when you want Love's pricing, Love's controls, and Love's reporting in one place. If you would like to apply or get a quick walkthrough, reach out anytime and I can help you get set up. Thanks again.`,
+    script: `${OPEN} I wanted to walk you through LEX — short for Love's Express — and the LEX credit card. That is Love's own fleet fuel card for your drivers. LEX is a billing card made for Love's. Your drivers use it at Love's Travel Stops and Speedco. It is not a general all-brand fleet card — it is built for fueling and buying at Love's. With LEX, your fleet gets consistent, competitive pricing. There are no application fees, no transaction fees, and no account maintenance fees. Cards and RFID tags are free. You get the fuel cash price on top of already competitive rates, and drivers can also use the card for in-store merchandise and services at Love's. Premium Wi-Fi is included with LEX transactions. You stay in control with fleet payment and card management built in. You can set purchase policies, product limits, driver prompts, and fueling network controls — so your policies travel with the driver. Your office can review transactions, export reports, watch available credit, and see payments as they post, which keeps spend aligned with policy and gives accounting the files they need. RFID and cardless options help cut fueling time and protect against fuel theft. Even if some of your trucks still use other major fleet payment networks — like Comdata, EFS, TCH, WEX, Voyager, and others — Love's accepts those too. LEX is simply the Love's card program when you want Love's pricing, Love's controls, and Love's reporting in one place. If you would like to apply or get a quick walkthrough, reach out anytime and I can help you get set up. Thanks again.`,
   },
   {
     id: "connect-portal",

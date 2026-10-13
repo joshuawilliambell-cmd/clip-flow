@@ -9,12 +9,12 @@ Images are screenshots / crops from Love's public web pages. Not wired into the 
 | --- | --- | --- | --- |
 | 02 LEX billing & credit card | LEX | `02a-lex-billing.png` | LEX / Express promo |
 | 02 LEX billing & credit card | LEX credit card | `02b-lex-credit-card.png` | Express card / financial |
+| 02 LEX billing & credit card | Purchase policies | `06a-card-management.png` | LEX / Express controls |
 | 03 Fleet fuel card options | LEX credit card | `03a-lex-fleet-fuel-card.png` | lovesfinancial fuel cards |
 | 03 Fleet fuel card options | TVC Fuel Card | `03b-tvc-fuel-card.png` | lovesfinancial fuel cards |
 | 04 Connect Portal | Connect Portal | `04a-connect-portal.png` | Connect / fleet portal |
 | 04 Connect Portal | Fuel Dashboard | `04b-fuel-dashboard.png` | Connect portal dashboard |
 | 05 QuikQ | QuikQ | `05a-quikq.png` | LEX how-to / QuikQ |
-| 06 Payment & card management | Purchase policies | `06a-card-management.png` | LEX / Express controls |
 | 07 RFID cardless fueling | RFID | `07a-rfid-cardless.png` | Express / RFID |
 | 08 Fast-Fill CNG | Fast-Fill CNG | `08a-fastfill-cng.png` | location CNG amenity |
 | 09 Fleet Solutions | Fleet Solutions | `09a-fleet-solutions.png` | fleetsolutions contact |

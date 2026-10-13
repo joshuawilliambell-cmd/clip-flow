@@ -18,6 +18,11 @@
           "cue": "LEX flyer",
           "image": "02a-lex-flyer-supplement.png",
           "label": "LEX program flyer"
+        },
+        {
+          "cue": "purchase policies",
+          "image": "06a-card-management.png",
+          "label": "Card management"
         }
       ]
     },
@@ -63,16 +68,6 @@
           "cue": "QuikQ",
           "image": "05a-quikq.png",
           "label": "QuikQ"
-        }
-      ]
-    },
-    {
-      "script": "06-fleet-payment-and-card-management.txt",
-      "pips": [
-        {
-          "cue": "card management",
-          "image": "06a-card-management.png",
-          "label": "Card management"
         }
       ]
     },
