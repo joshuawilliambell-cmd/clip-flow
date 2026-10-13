@@ -22,7 +22,7 @@ export function productPipPhotos(topicId: ScriptTopicId): TeamPhoto[] {
     startSeconds: 0,
     // Video PIPs need more screen time than a still headshot.
     durationSeconds: pip.youtubeId
-      ? Math.max(VIDEO_TEMPLATE.defaultPhotoDurationSeconds, 20)
+      ? Math.max(VIDEO_TEMPLATE.defaultPhotoDurationSeconds, 28)
       : VIDEO_TEMPLATE.defaultPhotoDurationSeconds,
     youtubeId: pip.youtubeId ?? null,
   }));
