@@ -155,7 +155,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
 
   return (
     <div className="space-y-2">
-      <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-2.5 md:p-3">
+      <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-trim)] p-2.5 md:p-3">
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
@@ -265,7 +265,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
 
       <div
         ref={measure}
-        className="relative overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border)] bg-white/60 p-3"
+        className="relative overflow-x-auto rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--panel-timeline)] p-3"
       >
         <div
           ref={contentRef}

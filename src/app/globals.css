@@ -22,6 +22,9 @@
   --brown: #8a6f1a;
   --panel: #ffffff;
   --panel-soft: #f4f2eb;
+  /* Step 2 Fine-tune vs photo timeline — soft offset within brand palette */
+  --panel-trim: #efe9dc;
+  --panel-timeline: #fff3b8;
   --border: #cfc9b8;
   --border-strong: #141414;
   --track-video: #141414;
