@@ -237,17 +237,22 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
   {
     id: "quikq",
     label: "QuikQ",
-    description: "QuikQ portal for LEX card and transaction management.",
+    description: "QuikQ digital payments, SmartQ RFID, and Zero Fraud Guarantee for Love's fueling.",
     isTeamIntro: false,
-    targetSeconds: 75,
+    targetSeconds: 95,
     pips: [
       {
         cue: "QuikQ",
         image: "/fleet-pip/05a-quikq.png",
-        label: "QuikQ",
+        label: "QuikQ Drive",
+      },
+      {
+        cue: "Zero Fraud Guarantee",
+        image: "/fleet-pip/05b-zero-fraud-guarantee.png",
+        label: "Zero Fraud Guarantee",
       },
     ],
-    script: `${OPEN} I wanted to explain QuikQ and how it supports your Love's fleet account. QuikQ is the platform that powers key parts of LEX account setup and day-to-day card management. LEX is short for Love's Express. After your fleet is approved, your team uses the QuikQ carrier tools to get drivers and cards ready and keep the account running smoothly. In QuikQ, you can manage fuel cards, update employee and security details, run transaction reports, export activity for your back office, and check credit, payments, and history in near real time. If a transaction looks wrong, support tools help you see whether it completed, is still processing, or needs attention. Think of QuikQ as the working system behind the scenes for LEX card and transaction management — so your fleet office can control cards and review spend without chasing paper. If your team needs help logging in, setting up cards, or running the first reports, reach out anytime and I can walk you through it. Thanks again.`,
+    script: `${OPEN} I wanted to explain QuikQ and how it supports secure fueling for your Love's fleet account. QuikQ is a secure payment solutions provider that powers digital fuel payments and fraud protection for fleets fueling at Love's. LEX — short for Love's Express — works with QuikQ tools so your team can manage cards, drivers, and transactions after your fleet account is set up. QuikQ also offers QuikQ Drive — a mobile app designed for modern fleets. Digital payments help reduce the physical risks of card skimming while giving your drivers a faster, more frictionless experience at the Love's pump. Your office can review receipts and recent transaction activity, which keeps Love's fuel spend easier to see and manage. For cardless fueling at Love's, QuikQ's SmartQ RFID authenticates the truck's physical presence at the pump. The pump can authorize before the driver finishes pulling into the lane, and fueling stops automatically if the RFID connection breaks — which helps cut fuel theft at the island. SmartQ RFID is part of QuikQ's Fuel Fraud Protection Program, which includes a Zero Fraud Guarantee that provides financial protection against fraudulent fuel transactions — terms and conditions apply. In short: QuikQ helps your Love's fleet pay securely, manage activity, and protect against fuel fraud. If you want help connecting QuikQ tools to your LEX account, setting up SmartQ RFID for Love's fueling, or walking through digital payments, reach out anytime and I can help. Thanks again.`,
   },
   {
     id: "rfid-cardless",

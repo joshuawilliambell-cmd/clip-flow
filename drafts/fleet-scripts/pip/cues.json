@@ -57,7 +57,12 @@
         {
           "cue": "QuikQ",
           "image": "05a-quikq.png",
-          "label": "QuikQ"
+          "label": "QuikQ Drive"
+        },
+        {
+          "cue": "Zero Fraud Guarantee",
+          "image": "05b-zero-fraud-guarantee.png",
+          "label": "Zero Fraud Guarantee"
         }
       ]
     },

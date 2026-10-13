@@ -13,7 +13,8 @@ Images are screenshots / crops from Love's public web pages. Not wired into the 
 | 04 Love's Connect | Love's Connect | `04a-connect-portal.png` | Love's Connect / fleet portal |
 | 04 Love's Connect | Account activity | `04c-account-activity.png` | Love's Connect home / account activity dashboard |
 | 04 Love's Connect | Fuel Dashboard | `04b-fuel-dashboard.png` | Love's Connect Fuel Dashboard |
-| 05 QuikQ | QuikQ | `05a-quikq.png` | LEX how-to / QuikQ |
+| 05 QuikQ | QuikQ | `05a-quikq.png` | quikq.com QuikQ Drive / digital fueling |
+| 05 QuikQ | Zero Fraud Guarantee | `05b-zero-fraud-guarantee.png` | quikq.com SmartQ RFID Zero Fraud Guarantee |
 | 07 RFID cardless fueling | RFID | `07a-rfid-cardless.png` | Express / RFID |
 | 08 Fast-Fill CNG | Fast-Fill CNG | `08a-fastfill-cng.png` | location CNG amenity |
 | 09 Fleet Solutions | Fleet Solutions | `09a-fleet-solutions.png` | fleetsolutions contact |
