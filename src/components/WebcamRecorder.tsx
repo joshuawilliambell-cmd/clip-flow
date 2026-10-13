@@ -62,7 +62,7 @@ const WEBCAM_QUALITY: Record<
   high: {
     id: "high",
     label: "High",
-    hint: "1080p · sharper (recommended)",
+    hint: "1080p · sharper",
     landscape: { width: 1920, height: 1080 },
     portrait: { width: 1080, height: 1440 },
     videoBitsPerSecond: 6_000_000,
@@ -70,7 +70,7 @@ const WEBCAM_QUALITY: Record<
   max: {
     id: "max",
     label: "Highest",
-    hint: "Best your camera allows",
+    hint: "Best your camera allows (recommended)",
     landscape: { width: 1920, height: 1080 },
     portrait: { width: 1440, height: 1920 },
     videoBitsPerSecond: 10_000_000,
@@ -229,7 +229,7 @@ export function WebcamRecorder({
   const [recordingPaused, setRecordingPaused] = useState(false);
   const [switchingCamera, setSwitchingCamera] = useState(false);
   const [portalReady, setPortalReady] = useState(false);
-  const [quality, setQuality] = useState<WebcamQuality>("high");
+  const [quality, setQuality] = useState<WebcamQuality>("max");
   const [captureSizeLabel, setCaptureSizeLabel] = useState<string | null>(null);
 
   useEffect(() => {
@@ -755,7 +755,7 @@ export function WebcamRecorder({
           </p>
           <p>
             <strong>Video quality:</strong> pick Standard, High, or Highest
-            before you record. High (1080p) is recommended. Teammate photos are
+            before you record. Highest is recommended. Teammate photos are
             still pictures, so they often look sharper than moving video — good
             lighting and Highest quality help close the gap. On a phone, the
             rear camera is usually sharper than selfie.
@@ -823,7 +823,7 @@ export function WebcamRecorder({
             <HelpTip title="Video quality">
               <p>
                 This sets how sharp your webcam or phone recording is.{" "}
-                <strong>High</strong> is recommended for most people.
+                <strong>Highest</strong> is recommended for most people.
               </p>
               <p>
                 Your camera may not support every size — we use the closest it
