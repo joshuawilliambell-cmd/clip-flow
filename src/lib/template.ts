@@ -34,9 +34,9 @@ export const PIP_BY_ORIENTATION = {
     heightPercent: 36,
   },
   portrait: {
-    /** Clear of typical contain letterbox on desktop previews. */
-    paddingTopPercent: 7,
+    paddingTopPercent: 6,
     paddingSidePercent: 5,
+    /** ~292×389 on 1080×1440 — portrait headshot box */
     widthPercent: 27,
     heightPercent: 27,
   },
@@ -204,42 +204,26 @@ export function getContainContentBox(
 export function getPipLayout(
   side: PipSide = VIDEO_TEMPLATE.pip.defaultSide,
   orientation: VideoOrientation = VIDEO_TEMPLATE.defaultOrientation,
-  sourceSize?: SourceSize | null,
+  /** Kept for call-site compat; talking video uses cover so letterbox offset is unused. */
+  _sourceSize?: SourceSize | null,
 ) {
-  const base = PIP_BY_ORIENTATION[orientation];
-  const canvas = ORIENTATION_CANVAS[orientation];
-  const box =
-    sourceSize && sourceSize.width > 0 && sourceSize.height > 0
-      ? getContainContentBox(
-          canvas.width,
-          canvas.height,
-          sourceSize.width,
-          sourceSize.height,
-        )
-      : {
-          leftPercent: 0,
-          topPercent: 0,
-          widthPercent: 100,
-          heightPercent: 100,
-        };
-
-  // Size + padding are relative to the visible video area so a landscape
-  // clip inside a portrait frame does not park the PIP in the black bar.
-  const widthPercent = (base.widthPercent * box.widthPercent) / 100;
-  const heightPercent = (base.heightPercent * box.heightPercent) / 100;
-  const padTop = (base.paddingTopPercent * box.heightPercent) / 100;
-  const padSide = (base.paddingSidePercent * box.widthPercent) / 100;
-  const yPercent = box.topPercent + padTop;
+  const {
+    paddingTopPercent,
+    paddingSidePercent,
+    widthPercent,
+    heightPercent,
+  } = PIP_BY_ORIENTATION[orientation];
+  // Size is always % of the full canvas so portrait PIP stays taller than wide.
   const xPercent =
     side === "left"
-      ? box.leftPercent + padSide
-      : box.leftPercent + box.widthPercent - padSide - widthPercent;
+      ? paddingSidePercent
+      : 100 - paddingSidePercent - widthPercent;
 
   return {
     side,
     orientation,
     xPercent,
-    yPercent,
+    yPercent: paddingTopPercent,
     widthPercent,
     heightPercent,
   };

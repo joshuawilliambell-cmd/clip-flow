@@ -511,7 +511,7 @@ export const VideoPreview = forwardRef<
                   src={video.url}
                   playsInline
                   preload="auto"
-                  className="h-full w-full object-contain bg-black"
+                  className="h-full w-full object-cover bg-black object-center"
                   onLoadedData={() => {
                     setHasFrame(true);
                     const el = videoRef.current;

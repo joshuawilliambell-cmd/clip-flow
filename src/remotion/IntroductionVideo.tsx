@@ -61,7 +61,7 @@ export function IntroductionVideo(props: CompositionProps) {
           <Video
             src={videoSrc}
             trimBefore={trimBefore}
-            objectFit="contain"
+            objectFit="cover"
             style={{
               width: "100%",
               height: "100%",
