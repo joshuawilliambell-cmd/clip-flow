@@ -204,7 +204,7 @@ export function PreviewExportStep({
       <VideoOrientationPicker compact />
 
       {/* Preview (filmstrip) with Fine-tune trim flush underneath. */}
-      <section className="section-card space-y-2 bg-white p-3 md:p-4">
+      <section className="section-card space-y-1.5 bg-white p-2 md:p-3">
         <VideoPreview ref={previewRef} />
         <Timeline
           onRestart={() => previewRef.current?.restart()}

@@ -13,8 +13,8 @@ export function frameAspectClass(
       case "review":
         return "mx-auto aspect-[3/4] max-h-[min(70vh,40rem)] w-full max-w-md";
       default:
-        // Height-driven: full frame + filmstrip stay on screen on desktop.
-        return "mx-auto aspect-[3/4] h-[min(50vh,28rem)] w-auto max-w-full";
+        // Keep preview + Fine-tune controls visible together on desktop.
+        return "mx-auto aspect-[3/4] h-[min(32vh,18rem)] w-auto max-w-full";
     }
   }
   switch (size) {
@@ -24,8 +24,8 @@ export function frameAspectClass(
     case "review":
       return "mx-auto aspect-video w-full max-h-[min(60vh,28rem)]";
     default:
-      // Height-driven cap so Step 2 preview doesn't dominate the viewport.
-      return "mx-auto aspect-video h-[min(48vh,26rem)] w-auto max-w-full";
+      // Keep preview + Fine-tune controls visible together on desktop.
+      return "mx-auto aspect-video h-[min(34vh,20rem)] w-auto max-w-full";
   }
 }
 

@@ -156,7 +156,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
   return (
     <div className="space-y-2">
       <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--ink)] bg-[var(--panel-soft)] p-2.5 md:p-3">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
               Fine-tune trim (±1s)
@@ -173,8 +173,8 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
                 it shows, or the edges to change how long it stays.
               </p>
               <p>
-                Use the two small frames on the right to move team member photos
-                to the <strong>left</strong> or <strong>right</strong> corner.
+                Use <strong>Photo left</strong> / <strong>Photo right</strong>{" "}
+                to move team member photos to that corner.
               </p>
               <p>
                 <strong>Full screen</strong> expands the preview to fill your
@@ -189,9 +189,9 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
               {formatClock(currentTime)} / {formatClock(outputDuration)}
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5">
             {musicEnabled && musicSrc ? (
-              <span className="rounded-xl border-2 border-[var(--ink)] bg-white px-2.5 py-1 text-[12px] font-bold text-[var(--ink)]">
+              <span className="shrink-0 rounded-md border-2 border-[var(--ink)] bg-white px-2 py-1.5 text-[12px] font-bold leading-none text-[var(--ink)]">
                 Music {Math.round(musicVolume * 100)}%
               </span>
             ) : null}
@@ -199,21 +199,21 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
               type="button"
               onClick={onRestart}
               disabled={!onRestart}
-              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
+              className="btn-secondary !min-h-0 h-[34px] shrink-0 !px-2.5 !py-0 text-[12px]"
             >
-              <RotateCcw className="h-4 w-4" /> Restart from beginning
+              <RotateCcw className="h-3.5 w-3.5" /> Restart
             </button>
             <button
               type="button"
               onClick={onFullScreen}
               disabled={!onFullScreen}
-              className="btn-secondary !min-h-0 !px-2.5 !py-1.5 text-[12px]"
+              className="btn-secondary !min-h-0 h-[34px] shrink-0 !px-2.5 !py-0 text-[12px]"
             >
-              <Maximize2 className="h-4 w-4" /> Full screen
+              <Maximize2 className="h-3.5 w-3.5" /> Full screen
             </button>
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              className="btn-secondary !min-h-0 h-[34px] shrink-0 !px-2 !py-0 text-[12px]"
               onClick={() => nudgeTrim("start", 1)}
               disabled={outputDuration <= 3}
               title="Remove 1 second from the beginning"
@@ -222,7 +222,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
             </button>
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              className="btn-secondary !min-h-0 h-[34px] shrink-0 !px-2 !py-0 text-[12px]"
               onClick={() => nudgeTrim("start", -1)}
               disabled={trimStart <= 0}
               title="Put 1 second back at the beginning"
@@ -231,7 +231,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
             </button>
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              className="btn-secondary !min-h-0 h-[34px] shrink-0 !px-2 !py-0 text-[12px]"
               onClick={() => nudgeTrim("end", -1)}
               disabled={outputDuration <= 3}
               title="Remove 1 second from the end"
@@ -240,7 +240,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
             </button>
             <button
               type="button"
-              className="btn-secondary !min-h-0 !px-2 !py-1 text-[12px]"
+              className="btn-secondary !min-h-0 h-[34px] shrink-0 !px-2 !py-0 text-[12px]"
               onClick={() => nudgeTrim("end", 1)}
               disabled={trimEnd >= sourceDuration}
               title="Put 1 second back at the end"
