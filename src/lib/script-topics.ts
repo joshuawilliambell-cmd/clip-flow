@@ -176,6 +176,16 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
         image: "/fleet-pip/12a-fleet-view.png",
         label: "Fleet V.I.E.W.",
       },
+      {
+        cue: "fault codes",
+        image: "/fleet-pip/12b-fleet-view-dashboard.png",
+        label: "Faults & PM dashboard",
+      },
+      {
+        cue: "repair orders",
+        image: "/fleet-pip/12c-fleet-view-analytics.png",
+        label: "Repair order analytics",
+      },
     ],
     script: `${OPEN} I wanted to introduce Love's Fleet V.I.E.W. — our digital fleet maintenance platform. Fleet V.I.E.W. is a cloud-based system that connects shop activity and fleet operations so you can see maintenance work in real time, on the web or on the go. The idea is simple: repair assets faster, understand true cost, and stay ahead of downtime. With Fleet V.I.E.W., your team gets an intuitive repair workflow, parts and inventory tools, and reporting that shows where money is going. It can use AI to help with third-party invoices and fault codes, and it can flag OEM and aftermarket warranty opportunities during repairs so less warranty money is left on the table. You can run digital inspections in the field, turn defects or telematics fault codes into repair orders, and pull odometer, engine hours, and location data to trigger preventative maintenance reminders. It also connects with systems fleets already use — including options like McLeod — so expenses and service alerts can flow into your existing process. Unlike a lot of traditional software, Love's positions Fleet V.I.E.W. with no up-front cost, unlimited users, and modules included — so more of your team can actually use it. If you want a demo or want to see how it would fit your maintenance program, reach out anytime and I can help set that up. Thanks again.`,
   },

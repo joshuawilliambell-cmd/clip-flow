@@ -133,6 +133,16 @@
           "cue": "Fleet V.I.E.W.",
           "image": "12a-fleet-view.png",
           "label": "Fleet V.I.E.W."
+        },
+        {
+          "cue": "fault codes",
+          "image": "12b-fleet-view-dashboard.png",
+          "label": "Faults & PM dashboard"
+        },
+        {
+          "cue": "repair orders",
+          "image": "12c-fleet-view-analytics.png",
+          "label": "Repair order analytics"
         }
       ]
     },
