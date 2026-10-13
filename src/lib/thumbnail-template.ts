@@ -45,8 +45,10 @@ export const THUMBNAIL_TEMPLATE = {
   card: {
     width: 360,
     photoHeight: 400,
-    /** Name + title + optional email */
+    /** Name + title + email */
     bodyHeight: 210,
+    /** Name + title only — used when no member has an email */
+    bodyHeightNoEmail: 148,
     radius: 18,
     gap: 36,
     nameSize: 38,

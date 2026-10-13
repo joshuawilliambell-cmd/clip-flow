@@ -172,9 +172,10 @@ async function drawMemberCard(
   member: ThumbnailMember,
   x: number,
   y: number,
+  bodyHeight: number,
 ) {
   const { colors, card, header } = THUMBNAIL_TEMPLATE;
-  const totalHeight = card.photoHeight + card.bodyHeight;
+  const totalHeight = card.photoHeight + bodyHeight;
 
   // Soft shadow
   ctx.save();
@@ -289,7 +290,11 @@ export async function renderTeamThumbnail(
   const active = members.slice(0, THUMBNAIL_TEMPLATE.maxMembers);
   const count = active.length;
   if (count > 0) {
-    const cardH = card.photoHeight + card.bodyHeight;
+    // Keep every card the same height. Only reserve email space when at least
+    // one person has an email — otherwise shrink the body quietly.
+    const anyEmail = active.some((m) => Boolean(m.email?.trim()));
+    const bodyHeight = anyEmail ? card.bodyHeight : card.bodyHeightNoEmail;
+    const cardH = card.photoHeight + bodyHeight;
     const creamTop = header.barHeight;
     const creamHeight = height - creamTop;
     const totalWidth = count * card.width + (count - 1) * card.gap;
@@ -311,6 +316,7 @@ export async function renderTeamThumbnail(
         member,
         startX + i * (card.width + card.gap),
         cardY,
+        bodyHeight,
       );
     }
   }
