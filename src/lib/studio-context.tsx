@@ -18,9 +18,17 @@ import {
 } from "@/lib/template";
 import {
   clampTeleprompterSpeed,
+  personalizeScript,
   scriptForTeam,
+  suggestedPixelsPerTickForScript,
   suggestedPixelsPerTickForTeamCount,
 } from "@/lib/intro-script";
+import {
+  DEFAULT_SCRIPT_TOPIC,
+  getScriptTopic,
+  type ScriptTopicId,
+} from "@/lib/script-topics";
+import { productPipCount, productPipPhotos } from "@/lib/product-pips";
 import {
   autoArrangePhotos,
   getOutputDuration,
@@ -60,6 +68,9 @@ type StudioContextValue = {
   trimEnd: number;
   photos: TeamPhoto[];
   teamMemberCount: TeamMemberCount;
+  /** Official script topic (Team Intro or a product script). */
+  scriptTopic: ScriptTopicId;
+  setScriptTopic: (topic: ScriptTopicId) => void;
   /** Fills [Customer Name] in the teleprompter script. */
   customerName: string;
   setCustomerName: (name: string) => void;
@@ -177,7 +188,7 @@ type StudioContextValue = {
 };
 
 function revokePhotoUrl(url: string | null) {
-  if (url) URL.revokeObjectURL(url);
+  if (url?.startsWith("blob:")) URL.revokeObjectURL(url);
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -363,6 +374,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [teamMemberCount, setTeamMemberCountState] = useState<TeamMemberCount>(
     VIDEO_TEMPLATE.defaultTeamMemberCount,
   );
+  const [scriptTopic, setScriptTopicState] =
+    useState<ScriptTopicId>(DEFAULT_SCRIPT_TOPIC);
   const [photos, setPhotos] = useState<TeamPhoto[]>(() =>
     Array.from({ length: VIDEO_TEMPLATE.defaultTeamMemberCount }, () =>
       createEmptyTeamPhoto(),
@@ -484,6 +497,68 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [outputDuration],
   );
 
+  const setScriptTopic = useCallback(
+    (topicId: ScriptTopicId) => {
+      const topic = getScriptTopic(topicId);
+      setScriptTopicState(topicId);
+      setActiveTeleprompterScript("");
+      setTeleprompterSpeedOverridden(false);
+
+      if (topic.isTeamIntro) {
+        const count = VIDEO_TEMPLATE.defaultTeamMemberCount;
+        setTeamMemberCountState(count);
+        setPhotos((prev) => {
+          prev.forEach((p) => revokePhotoUrl(p.url));
+          const slots = Array.from({ length: count }, () =>
+            createEmptyTeamPhoto(),
+          );
+          baselineRef.current = slots.map((p) => ({ ...p }));
+          return slots;
+        });
+        setThumbnailMembers(emptyThumbnailMembers(count));
+        setTeleprompterPixelsPerTickState(
+          suggestedPixelsPerTickForTeamCount(count),
+        );
+        return;
+      }
+
+      const pips = productPipPhotos(topicId);
+      const count = productPipCount(topicId); // 0–4 from topic pip list
+      setTeamMemberCountState(count);
+      setPhotos((prev) => {
+        prev.forEach((p) => revokePhotoUrl(p.url));
+        const arranged = autoArrangePhotos(
+          pips,
+          outputDuration,
+          topic.script ?? undefined,
+        );
+        baselineRef.current = arranged.map((p) => ({ ...p }));
+        return arranged;
+      });
+      setThumbnailMembers(emptyThumbnailMembers(count));
+      const personalized = personalizeScript(topic.script ?? "", {
+        customerName,
+        speakerName,
+        speakerTitle,
+        speakerDuties,
+      });
+      setTeleprompterPixelsPerTickState(
+        suggestedPixelsPerTickForScript(
+          personalized,
+          true,
+          topic.targetSeconds,
+        ),
+      );
+    },
+    [
+      outputDuration,
+      customerName,
+      speakerName,
+      speakerTitle,
+      speakerDuties,
+    ],
+  );
+
   const setVideoFromFile = useCallback(
     async (
       file: File,
@@ -531,18 +606,23 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       setIsPlaying(false);
       // Keep Step 1 roster; time photos to when each name is cued in the script.
       setPhotos((prev) => {
-        const script = scriptForTeam(teamMemberCount, {
-          customerName,
-          speakerName,
-          speakerTitle,
-          speakerDuties,
-          people: prev.map((p) => ({
-            name: p.name,
-            title: p.title,
-            pronoun: p.pronoun,
-            duties: p.duties,
-          })),
-        });
+        const topic = getScriptTopic(scriptTopic);
+        const script = scriptForTeam(
+          teamMemberCount,
+          {
+            customerName,
+            speakerName,
+            speakerTitle,
+            speakerDuties,
+            people: prev.map((p) => ({
+              name: p.name,
+              title: p.title,
+              pronoun: p.pronoun,
+              duties: p.duties,
+            })),
+          },
+          topic.isTeamIntro ? undefined : (topic.script ?? undefined),
+        );
         const arranged = autoArrangePhotos(prev, end, script);
         baselineRef.current = arranged.map((p) => ({ ...p }));
         return arranged;
@@ -550,6 +630,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     },
     [
       teamMemberCount,
+      scriptTopic,
       customerName,
       speakerName,
       speakerTitle,
@@ -614,6 +695,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setTrimStart(0);
     setTrimEnd(VIDEO_TEMPLATE.targetDurationSeconds);
     setTeamMemberCountState(VIDEO_TEMPLATE.defaultTeamMemberCount);
+    setScriptTopicState(DEFAULT_SCRIPT_TOPIC);
     setPhotos((prev) => {
       prev.forEach((p) => revokePhotoUrl(p.url));
       const slots = Array.from(
@@ -990,21 +1072,28 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   );
 
   const buildScriptForCues = useCallback(
-    (roster: TeamPhoto[]) =>
-      scriptForTeam(teamMemberCount, {
-        customerName,
-        speakerName,
-        speakerTitle,
-        speakerDuties,
-        people: roster.map((p) => ({
-          name: p.name,
-          title: p.title,
-          pronoun: p.pronoun,
-          duties: p.duties,
-        })),
-      }),
+    (roster: TeamPhoto[]) => {
+      const topic = getScriptTopic(scriptTopic);
+      return scriptForTeam(
+        teamMemberCount,
+        {
+          customerName,
+          speakerName,
+          speakerTitle,
+          speakerDuties,
+          people: roster.map((p) => ({
+            name: p.name,
+            title: p.title,
+            pronoun: p.pronoun,
+            duties: p.duties,
+          })),
+        },
+        topic.isTeamIntro ? undefined : (topic.script ?? undefined),
+      );
+    },
     [
       teamMemberCount,
+      scriptTopic,
       customerName,
       speakerName,
       speakerTitle,
@@ -1083,6 +1172,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       trimEnd,
       photos,
       teamMemberCount,
+      scriptTopic,
+      setScriptTopic,
       customerName,
       setCustomerName,
       speakerName,
@@ -1160,6 +1251,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       trimEnd,
       photos,
       teamMemberCount,
+      scriptTopic,
       customerName,
       speakerName,
       speakerTitle,
@@ -1185,6 +1277,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       projectEpoch,
       thumbnailMembers,
       setTeamMemberCount,
+      setScriptTopic,
       setPhotoOnSlot,
       replaceTeamPhotosFromFiles,
       clearPhotoSlot,

@@ -9,11 +9,14 @@ import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { TeamRosterFields } from "@/components/TeamRosterFields";
 import { ThumbnailCreator } from "@/components/ThumbnailCreator";
 import { ScriptFillIns } from "@/components/ScriptFillIns";
+import { ScriptTopicPicker } from "@/components/ScriptTopicPicker";
+import { ProductPipPreview } from "@/components/ProductPipPreview";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
 import { MicrophoneTest } from "@/components/MicrophoneTest";
 import { PanelSteps } from "@/components/PanelStep";
 import { VideoOrientationPicker } from "@/components/VideoOrientationPicker";
+import { getScriptTopic } from "@/lib/script-topics";
 
 export function VideoUploadStep() {
   const {
@@ -24,7 +27,10 @@ export function VideoUploadStep() {
     replacingVideo,
     setStep,
     teamMemberCount,
+    scriptTopic,
   } = useStudio();
+  const topic = getScriptTopic(scriptTopic);
+  const isTeamIntro = topic.isTeamIntro;
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -93,21 +99,36 @@ export function VideoUploadStep() {
         </HelpTip>
       </div>
 
+      <ScriptTopicPicker />
+
       <ScriptFillIns />
 
-      <TeamSizePicker />
+      {isTeamIntro ? (
+        <>
+          <TeamSizePicker />
 
-      {teamMemberCount === 0 ? (
-        <div className="how-banner">
-          Just me — no teammate corner photos. Your introduction fills the
-          opening of the Fleet Hub script; the optional team thumbnail can still
-          use your featured photo.
-        </div>
+          {teamMemberCount === 0 ? (
+            <div className="how-banner">
+              Just me — no teammate corner photos. Your introduction fills the
+              opening of the Team Intro script; the optional team thumbnail can
+              still use your featured photo.
+            </div>
+          ) : (
+            <TeamRosterFields variant="setup" />
+          )}
+
+          <ThumbnailCreator />
+        </>
       ) : (
-        <TeamRosterFields variant="setup" />
+        <>
+          <ProductPipPreview />
+          <div className="how-banner">
+            Product script selected: corner photos are Love&apos;s topic
+            screenshots timed to cues in the script (same idea as teammate
+            names). Fill in your name blanks below, then practice and record.
+          </div>
+        </>
       )}
-
-      <ThumbnailCreator />
 
       <MicrophoneTest />
 

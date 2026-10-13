@@ -11,6 +11,7 @@ import {
   isScriptUploadFile,
   scriptForTeam,
 } from "@/lib/intro-script";
+import { getScriptTopic } from "@/lib/script-topics";
 import { PanelSteps } from "@/components/PanelStep";
 import { useMicLevel } from "@/hooks/useMicLevel";
 import { useTeleprompterVoiceFollow } from "@/hooks/useTeleprompterVoiceFollow";
@@ -35,6 +36,7 @@ export function Teleprompter({
 }: TeleprompterProps) {
   const {
     teamMemberCount,
+    scriptTopic,
     photos,
     customerName,
     speakerName,
@@ -48,6 +50,7 @@ export function Teleprompter({
   } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const topic = getScriptTopic(scriptTopic);
 
   const rosterKey = photos
     .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
@@ -59,13 +62,20 @@ export function Teleprompter({
     pronoun: p.pronoun,
     duties: p.duties,
   }));
-  const officialScript = scriptForTeam(teamMemberCount, {
-    customerName,
-    speakerName,
-    speakerTitle,
-    speakerDuties,
-    people: rosterPeople,
-  });
+  const officialScript = scriptForTeam(
+    teamMemberCount,
+    {
+      customerName,
+      speakerName,
+      speakerTitle,
+      speakerDuties,
+      people: rosterPeople,
+    },
+    topic.isTeamIntro ? undefined : (topic.script ?? undefined),
+  );
+  const officialLabel = topic.isTeamIntro
+    ? `Team Intro · ${INTRO_SCRIPTS[teamMemberCount].title}`
+    : topic.label;
 
   const [source, setSource] = useState<ScriptSource>("official");
   const [script, setScript] = useState(() => officialScript);
@@ -74,11 +84,20 @@ export function Teleprompter({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Switching official topics always reloads the official script.
+    setSource("official");
+    setScript(officialScript);
+    setUploadName(null);
+    if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by topic/roster/speaker
+  }, [teamMemberCount, scriptTopic, rosterKey, speakerKey, customerName]);
+
+  useEffect(() => {
     if (source !== "official") return;
     setScript(officialScript);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by roster/speaker content
-  }, [teamMemberCount, source, rosterKey, speakerKey, customerName]);
+  }, [teamMemberCount, scriptTopic, source, rosterKey, speakerKey, customerName]);
 
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
@@ -179,7 +198,7 @@ export function Teleprompter({
             </p>
             <p className="text-[12px] font-medium text-[var(--muted)]">
               {source === "official"
-                ? `Official · ${INTRO_SCRIPTS[teamMemberCount].title}`
+                ? `Official · ${officialLabel}`
                 : uploadName
                   ? `Custom · ${uploadName}`
                   : "Custom Script"}
@@ -446,8 +465,7 @@ export function Teleprompter({
               className="text-[12px] font-semibold text-[var(--primary)] underline"
               onClick={useOfficial}
             >
-              Click Here for Official {INTRO_SCRIPTS[teamMemberCount].title}{" "}
-              Script
+              Click Here for Official {topic.label} Script
             </button>
           ) : null}
 

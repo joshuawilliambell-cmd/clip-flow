@@ -146,8 +146,10 @@ export function personalizeScript(
 export function scriptForTeam(
   count: TeamMemberCount,
   peopleOrFillIns: TeamIntroPerson[] | ScriptFillIns = [],
+  topicScript?: string,
 ): string {
-  return personalizeScript(INTRO_SCRIPTS[count].script, peopleOrFillIns);
+  const template = topicScript ?? INTRO_SCRIPTS[count].script;
+  return personalizeScript(template, peopleOrFillIns);
 }
 
 /** @deprecated use INTRO_SCRIPTS / scriptForTeamCount */
@@ -238,13 +240,14 @@ export function estimatedScrollSeconds(
   return Math.max(1, Math.round((ticks * TELEPROMPTER_TICK_MS) / 1000));
 }
 
-/** Default continuous speed paced for ~60s for this script text. */
+/** Default continuous speed paced for a target duration for this script text. */
 export function suggestedPixelsPerTickForScript(
   script: string,
   fontLarge = true,
+  durationSeconds = TARGET_INTRO_SECONDS,
 ): number {
   const distance = estimateScrollDistancePx(script, fontLarge);
-  return idealPixelsPerTickForDistance(distance);
+  return idealPixelsPerTickForDistance(distance, durationSeconds);
 }
 
 /** Default continuous speed for an official team-size script (~60s intro). */

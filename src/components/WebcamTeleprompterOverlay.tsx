@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { scriptForTeam } from "@/lib/intro-script";
+import { getScriptTopic } from "@/lib/script-topics";
 import { ControlTip } from "@/components/ControlTip";
 import { TeleprompterControlBar } from "@/components/TeleprompterControlBar";
 import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
@@ -35,6 +36,7 @@ export function WebcamTeleprompterOverlay({
   const isMobile = forceMobile || isMobileHook;
   const {
     teamMemberCount,
+    scriptTopic,
     photos,
     customerName,
     speakerName,
@@ -47,24 +49,29 @@ export function WebcamTeleprompterOverlay({
     setTeleprompterLineRoomy: setLineRoomy,
   } = useStudio();
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const topic = getScriptTopic(scriptTopic);
 
   const rosterKey = photos
     .map((p) => `${p.name}\0${p.title}\0${p.pronoun}\0${p.duties}`)
     .join("|");
-  const fillKey = `${customerName}\0${speakerName}\0${speakerTitle}\0${speakerDuties}\0${rosterKey}\0${teamMemberCount}`;
+  const fillKey = `${customerName}\0${speakerName}\0${speakerTitle}\0${speakerDuties}\0${rosterKey}\0${teamMemberCount}\0${scriptTopic}`;
 
-  const fallbackScript = scriptForTeam(teamMemberCount, {
-    customerName,
-    speakerName,
-    speakerTitle,
-    speakerDuties,
-    people: photos.map((p) => ({
-      name: p.name,
-      title: p.title,
-      pronoun: p.pronoun,
-      duties: p.duties,
-    })),
-  });
+  const fallbackScript = scriptForTeam(
+    teamMemberCount,
+    {
+      customerName,
+      speakerName,
+      speakerTitle,
+      speakerDuties,
+      people: photos.map((p) => ({
+        name: p.name,
+        title: p.title,
+        pronoun: p.pronoun,
+        duties: p.duties,
+      })),
+    },
+    topic.isTeamIntro ? undefined : (topic.script ?? undefined),
+  );
 
   const script = formatScriptForNaturalReading(
     activeTeleprompterScript.trim() || fallbackScript,

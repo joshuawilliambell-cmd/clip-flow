@@ -297,7 +297,7 @@ export function Timeline({ onRestart, onFullScreen }: TimelineProps = {}) {
 
           <div>
             <div className="mb-1 flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--ink)]">
-              <span>Photo Timeline · Team Photos</span>
+              <span>Photo Timeline · Corner Photos</span>
             </div>
             <div
               className="relative h-16 touch-none rounded-lg bg-black/5"
