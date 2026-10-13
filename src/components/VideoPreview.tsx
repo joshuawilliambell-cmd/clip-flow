@@ -623,7 +623,8 @@ export const VideoPreview = forwardRef<
                           />
                         ) : null}
                       </div>
-                      {(photo.name || labelLines) && (
+                      {/* Name/title bars are for teammate photos — hide under video PIPs. */}
+                      {!photo.youtubeId && (photo.name || labelLines) ? (
                         <div
                           className="absolute box-border"
                           style={{
@@ -669,7 +670,7 @@ export const VideoPreview = forwardRef<
                             </div>
                           ) : null}
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   );
                 })}

@@ -126,7 +126,8 @@ export function PhotoOverlay({
         )}
       </div>
 
-      {(name || labelLines) && (
+      {/* Name/title bars are for teammate photos — hide under video PIPs. */}
+      {!youtubeId && (name || labelLines) ? (
         <div
           style={{
             position: "absolute",
@@ -174,7 +175,7 @@ export function PhotoOverlay({
             </div>
           ) : null}
         </div>
-      )}
+      ) : null}
     </AbsoluteFill>
   );
 }
