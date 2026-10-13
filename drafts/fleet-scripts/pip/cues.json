@@ -27,21 +27,6 @@
       ]
     },
     {
-      "script": "03-loves-fleet-fuel-card.txt",
-      "pips": [
-        {
-          "cue": "LEX credit card",
-          "image": "03a-lex-fleet-fuel-card.png",
-          "label": "LEX fleet fuel card"
-        },
-        {
-          "cue": "TVC Fuel Card",
-          "image": "03b-tvc-fuel-card.png",
-          "label": "TVC Fuel Card"
-        }
-      ]
-    },
-    {
       "script": "04-loves-connect-portal.txt",
       "pips": [
         {

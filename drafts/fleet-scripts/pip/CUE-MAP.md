@@ -10,8 +10,6 @@ Images are screenshots / crops from Love's public web pages. Not wired into the 
 | 02 LEX billing & credit card | LEX | `02a-lex-billing.png` | LEX / Express promo |
 | 02 LEX billing & credit card | LEX credit card | `02b-lex-credit-card.png` | Express card / financial |
 | 02 LEX billing & credit card | Purchase policies | `06a-card-management.png` | LEX / Express controls |
-| 03 Fleet fuel card options | LEX credit card | `03a-lex-fleet-fuel-card.png` | lovesfinancial fuel cards |
-| 03 Fleet fuel card options | TVC Fuel Card | `03b-tvc-fuel-card.png` | lovesfinancial fuel cards |
 | 04 Love's Connect | Love's Connect | `04a-connect-portal.png` | Love's Connect / fleet portal |
 | 04 Love's Connect | Account activity | `04c-account-activity.png` | Love's Connect home / account activity dashboard |
 | 04 Love's Connect | Fuel Dashboard | `04b-fuel-dashboard.png` | Love's Connect Fuel Dashboard |

@@ -42,8 +42,6 @@ async function shot(file, url, locatorText) {
   console.log("full", file);
 }
 
-await shot("03a-lex-fleet-fuel-card.png", "https://www.lovesfinancial.com/fuel-card-bundles", "Love’s Express Card");
-await shot("03b-tvc-fuel-card.png", "https://www.lovesfinancial.com/fuel-card-bundles", "TVC Fuel Card");
 await shot("13a-freight-factoring.png", "https://www.lovesfinancial.com/fuel-card-bundles", "Freight Factoring");
 await shot("02b-lex-credit-card.png", "https://www.lovesfinancial.com/fuel-card-bundles", "Love’s Express Card");
 await shot("11a-truck-wash.png", "https://www.loves.com/loves-truck-care-and-speedco", "Truck Wash");

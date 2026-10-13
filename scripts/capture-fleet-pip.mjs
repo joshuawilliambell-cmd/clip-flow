@@ -22,16 +22,6 @@ const SHOTS = [
     wait: "text=Express",
   },
   {
-    file: "03a-lex-fleet-fuel-card.png",
-    url: "https://www.lovesfinancial.com/fuel-card-bundles",
-    wait: "text=Express Card",
-  },
-  {
-    file: "03b-tvc-fuel-card.png",
-    url: "https://www.lovesfinancial.com/fuel-card-bundles",
-    wait: "text=TVC Fuel Card",
-  },
-  {
     file: "04a-connect-portal.png",
     url: "https://www.loves.com/promo/lex-how-to",
     wait: "text=QuikQ",

@@ -10,7 +10,6 @@ export type ScriptTopicId =
   | "freight-factoring"
   | "lex-billing"
   | "connect-portal"
-  | "fleet-fuel-card"
   | "fleet-view"
   | "truck-care-speedco"
   | "truck-wash"
@@ -164,26 +163,6 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
       },
     ],
     script: `${OPEN} I wanted to show you what Love's Connect does for your fleet. Love's Connect is the online portal where you manage and review your Love's account activity. It is a one-stop shop with a secure login and a streamlined invoice process, and it works on computers and phones. Inside the portal, administrators can see monthly fuel performance and fuel goals, review daily fuel transactions, open fleet documents like contracts and invoices, get updates through the message center, and manage who from your company is approved to use the portal. On the Fuel Dashboard you can see gallons purchased, progress toward your fuel goal, account balance, available credit, and today's fuel price. You can make a payment there too. You will also find areas like Document Center, Truck Care Dashboard, Manage Users, and Payments when you need them. In short: when your drivers fuel and service at Love's, Love's Connect is where your office goes to see the data and pull the documents. If you would like a quick walkthrough of the portal for your team, reach out anytime and I can help. Thanks again.`,
-  },
-  {
-    id: "fleet-fuel-card",
-    label: "Love's Fleet Fuel Card Options",
-    description: "LEX at Love's plus TVC for broader truck-stop coverage.",
-    isTeamIntro: false,
-    targetSeconds: 90,
-    pips: [
-      {
-        cue: "LEX credit card",
-        image: "/fleet-pip/03a-lex-fleet-fuel-card.png",
-        label: "LEX credit card",
-      },
-      {
-        cue: "TVC Fuel Card",
-        image: "/fleet-pip/03b-tvc-fuel-card.png",
-        label: "TVC Fuel Card",
-      },
-    ],
-    script: `${OPEN} I wanted to explain Love's fleet fuel card options in plain terms. If your trucks mostly run Love's, the LEX credit card — short for Love's Express — is your Love's fleet fuel card. Drivers use it at Love's Travel Stops and Speedco. There are no application or transaction fees, and it is accepted at Love's locations nationwide. You get competitive Love's pricing, spending controls, and clean reporting for your Love's activity. If your drivers also fuel outside the Love's network, we can talk about the TVC Fuel Card option. That is a prepaid card with no credit check and no load fees, and it is accepted at a much wider set of major truck stops — tens of thousands of locations — while still fitting into Love's financial solutions for your fleet. Many fleets use LEX for Love's stops and keep other network cards for everywhere else. Either way, the goal is the same: drivers fuel without cash or personal cards, and your company keeps better control of cost and spend. If you want help choosing the right card mix for your routes, reach out anytime and I can walk you through it. Thanks again.`,
   },
   {
     id: "fleet-view",
