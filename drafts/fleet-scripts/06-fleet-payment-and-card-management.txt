@@ -10,6 +10,6 @@ Once your fleet account is set up, you are not stuck with a one-size-fits-all ca
 
 Your office can review transactions, export reports, watch available credit, and see payments as they post. That helps you catch issues early, keep spend aligned with policy, and give accounting the files they need.
 
-These tools work with Love's Express and the broader Love's fleet billing setup, so card control and payment visibility stay in one program instead of scattered across spreadsheets.
+These tools work with LEX — short for Love's Express — and the broader Love's fleet billing setup, so card control and payment visibility stay in one program instead of scattered across spreadsheets.
 
 If you want help building card rules for your drivers or cleaning up how payments and reports flow to your back office, reach out anytime and I can help. Thanks again.

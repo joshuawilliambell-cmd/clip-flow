@@ -6,10 +6,10 @@ Title: QuikQ
 
 Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to explain QuikQ and how it supports your Love's fleet account.
 
-QuikQ is the platform that powers key parts of Love's Express account setup and day-to-day card management. After your fleet is approved, your team uses the QuikQ carrier tools to get drivers and cards ready and keep the account running smoothly.
+QuikQ is the platform that powers key parts of LEX account setup and day-to-day card management. LEX is short for Love's Express. After your fleet is approved, your team uses the QuikQ carrier tools to get drivers and cards ready and keep the account running smoothly.
 
 In QuikQ, you can manage fuel cards, update employee and security details, run transaction reports, export activity for your back office, and check credit, payments, and history in near real time. If a transaction looks wrong, support tools help you see whether it completed, is still processing, or needs attention.
 
-Think of QuikQ as the working system behind the scenes for Express card and transaction management — so your fleet office can control cards and review spend without chasing paper.
+Think of QuikQ as the working system behind the scenes for LEX card and transaction management — so your fleet office can control cards and review spend without chasing paper.
 
 If your team needs help logging in, setting up cards, or running the first reports, reach out anytime and I can walk you through it. Thanks again.
