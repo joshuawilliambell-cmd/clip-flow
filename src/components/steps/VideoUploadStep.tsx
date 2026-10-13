@@ -9,7 +9,6 @@ import { TeamSizePicker } from "@/components/TeamSizePicker";
 import { TeamRosterFields } from "@/components/TeamRosterFields";
 import { ThumbnailCreator } from "@/components/ThumbnailCreator";
 import { ScriptFillIns } from "@/components/ScriptFillIns";
-import { ScriptTopicPicker } from "@/components/ScriptTopicPicker";
 import { WebcamRecorder } from "@/components/WebcamRecorder";
 import { Teleprompter } from "@/components/Teleprompter";
 import { MicrophoneTest } from "@/components/MicrophoneTest";
@@ -94,8 +93,6 @@ export function VideoUploadStep() {
         </HelpTip>
       </div>
 
-      <ScriptTopicPicker />
-
       <ScriptFillIns />
 
       <TeamSizePicker />
@@ -103,7 +100,7 @@ export function VideoUploadStep() {
       {teamMemberCount === 0 ? (
         <div className="how-banner">
           Just me — no teammate corner photos. Your introduction fills the
-          opening of the official script; the optional team thumbnail can still
+          opening of the Fleet Hub script; the optional team thumbnail can still
           use your featured photo.
         </div>
       ) : (

@@ -1,160 +1,55 @@
 import type { TeamMemberCount } from "@/lib/template";
 import { defaultDutiesForTitle } from "@/lib/job-titles";
 
-/** Which official teleprompter script the employee is recording. */
-export type ScriptTopic = "fleet-hub" | "express-billing";
-
-export const SCRIPT_TOPIC_OPTIONS: Array<{
-  id: ScriptTopic;
-  label: string;
-  shortLabel: string;
-  description: string;
-}> = [
-  {
-    id: "fleet-hub",
-    label: "Fleet Hub Welcome",
-    shortLabel: "Fleet Hub",
-    description: "Introduce yourself and your team inside the customer's Fleet Hub.",
-  },
-  {
-    id: "express-billing",
-    label: "Love's Express Billing",
-    shortLabel: "Express Billing",
-    description:
-      "Explain the Love's Express fuel card program in plain language.",
-  },
-];
-
-export const DEFAULT_SCRIPT_TOPIC: ScriptTopic = "fleet-hub";
-
 /** Official Fleet Hub teleprompter scripts by how many teammates you introduce. */
 
 /** Speaker self-intro first — you are not repeated later as a “team member.” */
-const FLEET_HUB_OPENING =
+const OPENING =
   "Hey, [Customer Name], [Your Name] with Love's here. Welcome to your Fleet Hub. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. This is a portal where you can learn all about what Love's can do for your fleet.";
 
 const TEAMMATE_LINE =
   "This is [Team Member Name], and [he/she] is [a/an] [Job Title], and [he/she] can help you with things like [Job Duties]";
 
-/** Shared closer after the support line on every official Fleet Hub script. */
-const FLEET_HUB_CLOSING =
+/** Shared closer after the support line on every official script. */
+const CLOSING =
   "Feel free to look around inside the Fleet Hub and if you have any interest in any other services or products that Love's offers, please don't hesitate to reach out and I can help you explore those. Thanks again.";
 
-function fleetHubWithTeammates(count: 1 | 2 | 3 | 4): string {
+function scriptWithTeammates(count: 1 | 2 | 3 | 4): string {
   if (count === 1) {
-    return `${FLEET_HUB_OPENING} I also wanted to take a quick minute and introduce our team member who will be working with us. ${TEAMMATE_LINE}, and you can reach out to either one of us for support. ${FLEET_HUB_CLOSING}`;
+    return `${OPENING} I also wanted to take a quick minute and introduce our team member who will be working with us. ${TEAMMATE_LINE}, and you can reach out to either one of us for support. ${CLOSING}`;
   }
   const lines = Array.from({ length: count }, () => TEAMMATE_LINE).join(". ");
-  return `${FLEET_HUB_OPENING} I also wanted to take a quick minute and introduce our team members who will be working with us. ${lines}. And you can reach out to any of us for support. ${FLEET_HUB_CLOSING}`;
+  return `${OPENING} I also wanted to take a quick minute and introduce our team members who will be working with us. ${lines}. And you can reach out to any of us for support. ${CLOSING}`;
 }
 
-const FLEET_HUB_SCRIPTS: Record<
+export const INTRO_SCRIPTS: Record<
   TeamMemberCount,
   { title: string; script: string }
 > = {
   0: {
     title: "Just me",
-    script: `${FLEET_HUB_OPENING} Take a look when you have a chance, and you can reach out to me anytime for support. ${FLEET_HUB_CLOSING}`,
+    script: `${OPENING} Take a look when you have a chance, and you can reach out to me anytime for support. ${CLOSING}`,
   },
   1: {
     title: "1 teammate",
-    script: fleetHubWithTeammates(1),
+    script: scriptWithTeammates(1),
   },
   2: {
     title: "2 teammates",
-    script: fleetHubWithTeammates(2),
+    script: scriptWithTeammates(2),
   },
   3: {
     title: "3 teammates",
-    script: fleetHubWithTeammates(3),
+    script: scriptWithTeammates(3),
   },
   4: {
     title: "4 teammates",
-    script: fleetHubWithTeammates(4),
+    script: scriptWithTeammates(4),
   },
 };
 
-/**
- * Love's Express Billing — plain-language pitch a rep can present to a customer.
- * Same fill-in blanks as Fleet Hub; teammate lines still plug in when selected.
- */
-const EXPRESS_OPENING =
-  "Hey, [Customer Name], [Your Name] with Love's here. I am your [Your Job Title], and I can help you with things like [Your Job Duties]. I wanted to take a couple minutes and walk you through Love's Express Billing — our Love's fuel card program for fleets.";
-
-const EXPRESS_BODY =
-  "Love's Express is a billing card your drivers use at Love's. It works at Love's Travel Stops and Speedco, and it is made for your Love's fueling — not a general all-brand fleet card. Your fleet gets consistent, competitive pricing with no transaction fees and fair, simple terms. There are no application fees and no account maintenance fees. Cards and RFID tags are free. You get the fuel cash price on top of already competitive rates, and you can also use it for in-store merchandise and services at Love's. Premium Wi-Fi comes with your Love's Express transactions. You stay in control of spending. You can set purchase policies, product limits, and driver prompts. RFID tags and cardless fueling help cut fueling time and protect against fuel theft. The Love's Connect Portal is where you go to see your Love's fuel usage and activity. From one login you can view fuel, tire, and maintenance invoices, check available credit in real time, pull the documents and reports your back office needs, and connect with systems like McLeod, Prophesy, and TMW.";
-
-const EXPRESS_CLOSING =
-  "If Love's Express sounds like a good fit, reach out anytime and I can help you get set up. Thanks again.";
-
-function expressWithTeammates(count: 1 | 2 | 3 | 4): string {
-  if (count === 1) {
-    return `${EXPRESS_OPENING} ${EXPRESS_BODY} I also wanted to introduce our team member who can help you with this. ${TEAMMATE_LINE}, and you can reach out to either one of us. ${EXPRESS_CLOSING}`;
-  }
-  const lines = Array.from({ length: count }, () => TEAMMATE_LINE).join(". ");
-  return `${EXPRESS_OPENING} ${EXPRESS_BODY} I also wanted to introduce our team members who can help you with this. ${lines}. And you can reach out to any of us. ${EXPRESS_CLOSING}`;
-}
-
-const EXPRESS_BILLING_SCRIPTS: Record<
-  TeamMemberCount,
-  { title: string; script: string }
-> = {
-  0: {
-    title: "Just me",
-    script: `${EXPRESS_OPENING} ${EXPRESS_BODY} ${EXPRESS_CLOSING}`,
-  },
-  1: {
-    title: "1 teammate",
-    script: expressWithTeammates(1),
-  },
-  2: {
-    title: "2 teammates",
-    script: expressWithTeammates(2),
-  },
-  3: {
-    title: "3 teammates",
-    script: expressWithTeammates(3),
-  },
-  4: {
-    title: "4 teammates",
-    script: expressWithTeammates(4),
-  },
-};
-
-const SCRIPTS_BY_TOPIC: Record<
-  ScriptTopic,
-  Record<TeamMemberCount, { title: string; script: string }>
-> = {
-  "fleet-hub": FLEET_HUB_SCRIPTS,
-  "express-billing": EXPRESS_BILLING_SCRIPTS,
-};
-
-/** @deprecated Prefer scriptsForTopic — kept for older call sites. */
-export const INTRO_SCRIPTS = FLEET_HUB_SCRIPTS;
-
-export function scriptsForTopic(topic: ScriptTopic = DEFAULT_SCRIPT_TOPIC) {
-  return SCRIPTS_BY_TOPIC[topic];
-}
-
-export function officialScriptMeta(
-  topic: ScriptTopic,
-  count: TeamMemberCount,
-): { title: string; script: string; topicLabel: string } {
-  const topicMeta =
-    SCRIPT_TOPIC_OPTIONS.find((t) => t.id === topic) ?? SCRIPT_TOPIC_OPTIONS[0];
-  const entry = SCRIPTS_BY_TOPIC[topic][count];
-  return {
-    title: entry.title,
-    script: entry.script,
-    topicLabel: topicMeta.shortLabel,
-  };
-}
-
-export function scriptForTeamCount(
-  count: TeamMemberCount,
-  topic: ScriptTopic = DEFAULT_SCRIPT_TOPIC,
-): string {
-  return SCRIPTS_BY_TOPIC[topic][count].script;
+export function scriptForTeamCount(count: TeamMemberCount): string {
+  return INTRO_SCRIPTS[count].script;
 }
 
 export type TeamIntroPronoun = "he" | "she" | "";
@@ -247,25 +142,19 @@ export function personalizeScript(
   return text;
 }
 
-/** Official script for topic + team size, with fill-ins and roster names. */
+/** Official script for team size, with fill-ins and roster names. */
 export function scriptForTeam(
   count: TeamMemberCount,
   peopleOrFillIns: TeamIntroPerson[] | ScriptFillIns = [],
-  topic: ScriptTopic = DEFAULT_SCRIPT_TOPIC,
 ): string {
-  return personalizeScript(scriptForTeamCount(count, topic), peopleOrFillIns);
+  return personalizeScript(INTRO_SCRIPTS[count].script, peopleOrFillIns);
 }
 
 /** @deprecated use INTRO_SCRIPTS / scriptForTeamCount */
-export const SAMPLE_INTRO_SCRIPT = FLEET_HUB_SCRIPTS[2].script;
+export const SAMPLE_INTRO_SCRIPT = INTRO_SCRIPTS[2].script;
 
-/** Target intro length the teleprompter is paced for (Fleet Hub ~60s). */
+/** Target intro length the teleprompter is paced for. */
 export const TARGET_INTRO_SECONDS = 60;
-
-/** Longer product pitches (Express Billing) need a slower default pace. */
-export function targetSecondsForTopic(topic: ScriptTopic): number {
-  return topic === "express-billing" ? 105 : TARGET_INTRO_SECONDS;
-}
 
 /** Scroll loop interval used by the teleprompter UI. */
 export const TELEPROMPTER_TICK_MS = 40;
@@ -328,7 +217,7 @@ export function estimateScrollDistancePx(
   return Math.max(120, visualLines * linePx + bottomSpacerPx - viewportPx);
 }
 
-/** Ideal px/tick so `distancePx` scrolls in about durationSeconds. */
+/** Ideal px/tick so `distancePx` scrolls in about TARGET_INTRO_SECONDS. */
 export function idealPixelsPerTickForDistance(
   distancePx: number,
   durationSeconds = TARGET_INTRO_SECONDS,
@@ -349,26 +238,20 @@ export function estimatedScrollSeconds(
   return Math.max(1, Math.round((ticks * TELEPROMPTER_TICK_MS) / 1000));
 }
 
-/** Default continuous speed paced for the target duration for this script text. */
+/** Default continuous speed paced for ~60s for this script text. */
 export function suggestedPixelsPerTickForScript(
   script: string,
   fontLarge = true,
-  durationSeconds = TARGET_INTRO_SECONDS,
 ): number {
   const distance = estimateScrollDistancePx(script, fontLarge);
-  return idealPixelsPerTickForDistance(distance, durationSeconds);
+  return idealPixelsPerTickForDistance(distance);
 }
 
-/** Default continuous speed for an official team-size script. */
+/** Default continuous speed for an official team-size script (~60s intro). */
 export function suggestedPixelsPerTickForTeamCount(
   count: TeamMemberCount,
-  topic: ScriptTopic = DEFAULT_SCRIPT_TOPIC,
 ): number {
-  return suggestedPixelsPerTickForScript(
-    scriptForTeamCount(count, topic),
-    true,
-    targetSecondsForTopic(topic),
-  );
+  return suggestedPixelsPerTickForScript(scriptForTeamCount(count));
 }
 
 /** Accept plain-text script uploads. */

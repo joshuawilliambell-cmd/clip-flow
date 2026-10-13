@@ -7,8 +7,8 @@ import { HelpTip } from "@/components/HelpTip";
 import { TeleprompterControlBar } from "@/components/TeleprompterControlBar";
 import { TeleprompterHighlightedScript } from "@/components/TeleprompterHighlightedScript";
 import {
+  INTRO_SCRIPTS,
   isScriptUploadFile,
-  officialScriptMeta,
   scriptForTeam,
 } from "@/lib/intro-script";
 import { PanelSteps } from "@/components/PanelStep";
@@ -35,7 +35,6 @@ export function Teleprompter({
 }: TeleprompterProps) {
   const {
     teamMemberCount,
-    scriptTopic,
     photos,
     customerName,
     speakerName,
@@ -60,18 +59,13 @@ export function Teleprompter({
     pronoun: p.pronoun,
     duties: p.duties,
   }));
-  const officialMeta = officialScriptMeta(scriptTopic, teamMemberCount);
-  const officialScript = scriptForTeam(
-    teamMemberCount,
-    {
-      customerName,
-      speakerName,
-      speakerTitle,
-      speakerDuties,
-      people: rosterPeople,
-    },
-    scriptTopic,
-  );
+  const officialScript = scriptForTeam(teamMemberCount, {
+    customerName,
+    speakerName,
+    speakerTitle,
+    speakerDuties,
+    people: rosterPeople,
+  });
 
   const [source, setSource] = useState<ScriptSource>("official");
   const [script, setScript] = useState(() => officialScript);
@@ -83,8 +77,8 @@ export function Teleprompter({
     if (source !== "official") return;
     setScript(officialScript);
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by roster/speaker/topic content
-  }, [teamMemberCount, scriptTopic, source, rosterKey, speakerKey, customerName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by roster/speaker content
+  }, [teamMemberCount, source, rosterKey, speakerKey, customerName]);
 
   const displayScript =
     source === "official" ? script : customScript.trim() || script;
@@ -185,7 +179,7 @@ export function Teleprompter({
             </p>
             <p className="text-[12px] font-medium text-[var(--muted)]">
               {source === "official"
-                ? `Official · ${officialMeta.topicLabel} · ${officialMeta.title}`
+                ? `Official · ${INTRO_SCRIPTS[teamMemberCount].title}`
                 : uploadName
                   ? `Custom · ${uploadName}`
                   : "Custom Script"}
@@ -452,7 +446,8 @@ export function Teleprompter({
               className="text-[12px] font-semibold text-[var(--primary)] underline"
               onClick={useOfficial}
             >
-              Click Here for Official {officialMeta.topicLabel} Script
+              Click Here for Official {INTRO_SCRIPTS[teamMemberCount].title}{" "}
+              Script
             </button>
           ) : null}
 
