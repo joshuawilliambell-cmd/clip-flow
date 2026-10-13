@@ -153,6 +153,11 @@ export const SCRIPT_TOPICS: ScriptTopic[] = [
         label: "Connect Portal",
       },
       {
+        cue: "account activity",
+        image: "/fleet-pip/04c-account-activity.png",
+        label: "Account activity",
+      },
+      {
         cue: "Fuel Dashboard",
         image: "/fleet-pip/04b-fuel-dashboard.png",
         label: "Fuel Dashboard",

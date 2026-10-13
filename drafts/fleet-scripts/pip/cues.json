@@ -50,6 +50,11 @@
           "label": "Connect Portal"
         },
         {
+          "cue": "account activity",
+          "image": "04c-account-activity.png",
+          "label": "Account activity"
+        },
+        {
           "cue": "Fuel Dashboard",
           "image": "04b-fuel-dashboard.png",
           "label": "Fuel Dashboard"

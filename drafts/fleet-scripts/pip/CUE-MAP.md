@@ -13,6 +13,7 @@ Images are screenshots / crops from Love's public web pages. Not wired into the 
 | 03 Fleet fuel card options | LEX credit card | `03a-lex-fleet-fuel-card.png` | lovesfinancial fuel cards |
 | 03 Fleet fuel card options | TVC Fuel Card | `03b-tvc-fuel-card.png` | lovesfinancial fuel cards |
 | 04 Connect Portal | Connect Portal | `04a-connect-portal.png` | Connect / fleet portal |
+| 04 Connect Portal | Account activity | `04c-account-activity.png` | Connect home / account activity dashboard |
 | 04 Connect Portal | Fuel Dashboard | `04b-fuel-dashboard.png` | Connect portal dashboard |
 | 05 QuikQ | QuikQ | `05a-quikq.png` | LEX how-to / QuikQ |
 | 07 RFID cardless fueling | RFID | `07a-rfid-cardless.png` | Express / RFID |
