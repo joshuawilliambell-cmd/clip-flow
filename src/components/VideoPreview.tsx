@@ -26,6 +26,7 @@ import {
   type QuietAudio,
   type QuietVideoVoice,
 } from "@/lib/quiet-audio";
+import { youtubePipEmbedSrc } from "@/lib/youtube-pip";
 
 export type VideoPreviewHandle = {
   restart: () => void;
@@ -576,12 +577,13 @@ export const VideoPreview = forwardRef<
                   </div>
                 ) : null}
 
-                {/* Team photo PIP overlays */}
+                {/* Team photo / muted YouTube PIP overlays */}
                 {activePhotos.map((photo) => {
                   if (!photo.url) return null;
                   const labelLines = [photo.title, photo.department]
                     .filter(Boolean)
                     .join(" · ");
+                  const playYoutube = Boolean(photo.youtubeId) && isPlaying;
                   return (
                     <div
                       key={photo.id}
@@ -604,8 +606,22 @@ export const VideoPreview = forwardRef<
                         <img
                           src={photo.url}
                           alt={photo.name || "Teammate"}
-                          className="h-full w-full object-cover object-[center_22%]"
+                          className={
+                            photo.youtubeId
+                              ? "absolute inset-0 h-full w-full object-cover object-center"
+                              : "h-full w-full object-cover object-[center_22%]"
+                          }
                         />
+                        {playYoutube && photo.youtubeId ? (
+                          <iframe
+                            key={`${photo.id}-${Math.floor(photo.startSeconds)}-yt`}
+                            src={youtubePipEmbedSrc(photo.youtubeId)}
+                            title={photo.title || photo.name || "PIP video"}
+                            className="absolute inset-0 h-full w-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                          />
+                        ) : null}
                       </div>
                       {(photo.name || labelLines) && (
                         <div

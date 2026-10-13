@@ -11,6 +11,7 @@ import {
   type PipSide,
   type VideoOrientation,
 } from "@/lib/template";
+import { youtubePipEmbedSrc } from "@/lib/youtube-pip";
 
 type PhotoOverlayProps = {
   src: string;
@@ -26,21 +27,6 @@ type PhotoOverlayProps = {
   /** YouTube video id — muted autoplay in preview; poster used while exporting. */
   youtubeId?: string | null;
 };
-
-function youtubeEmbedSrc(youtubeId: string): string {
-  const params = new URLSearchParams({
-    autoplay: "1",
-    mute: "1",
-    controls: "0",
-    modestbranding: "1",
-    playsinline: "1",
-    rel: "0",
-    loop: "1",
-    playlist: youtubeId,
-    enablejsapi: "1",
-  });
-  return `https://www.youtube.com/embed/${youtubeId}?${params.toString()}`;
-}
 
 export function PhotoOverlay({
   src,
@@ -96,23 +82,36 @@ export function PhotoOverlay({
         }}
       >
         {playYoutube && youtubeId ? (
-          <iframe
-            src={youtubeEmbedSrc(youtubeId)}
-            title={title || name || "PIP video"}
-            width="100%"
-            height="100%"
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              border: 0,
-              pointerEvents: "none",
-            }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen={false}
-          />
+          <>
+            <Img
+              src={src}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center center",
+              }}
+            />
+            <iframe
+              src={youtubePipEmbedSrc(youtubeId)}
+              title={title || name || "PIP video"}
+              width="100%"
+              height="100%"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                border: 0,
+                pointerEvents: "none",
+              }}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen={false}
+            />
+          </>
         ) : (
           <Img
             src={src}

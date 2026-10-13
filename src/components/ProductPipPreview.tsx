@@ -4,6 +4,7 @@ import { ImageIcon } from "lucide-react";
 import { HelpTip } from "@/components/HelpTip";
 import { getScriptTopic } from "@/lib/script-topics";
 import { useStudio } from "@/lib/studio-context";
+import { youtubePipEmbedSrc } from "@/lib/youtube-pip";
 
 /** Shows the auto-loaded product PIP screenshots for the selected script. */
 export function ProductPipPreview() {
@@ -47,8 +48,14 @@ export function ProductPipPreview() {
           >
             {photo.youtubeId ? (
               <div className="relative aspect-video w-full bg-black">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photo.url ?? ""}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover object-center"
+                />
                 <iframe
-                  src={`https://www.youtube.com/embed/${photo.youtubeId}?autoplay=1&mute=1&controls=0&modestbranding=1&playsinline=1&rel=0&loop=1&playlist=${photo.youtubeId}`}
+                  src={youtubePipEmbedSrc(photo.youtubeId)}
                   title={photo.title || photo.name || "PIP video"}
                   className="absolute inset-0 h-full w-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
